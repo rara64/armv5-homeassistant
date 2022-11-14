@@ -1,0 +1,36 @@
+name: Build kirkwood-homeassistant
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: '8 1 * * 1'
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for new release of HASS
+        run: |
+          export HASS_RELEASE=$(jq -r 'map(select(.prerelease==false)) | first | .tag_name' <<< $(curl --silent https://api.github.com/repos/home-assistant/core/releases))
+          export KIRKWOOD_RELEASE=$(jq -r '[.results[]|.version][0]' <<< $(curl --silent https://hub.docker.com/v2/repositories/rara64/kirkwood-homeassistant/tags/?page_size=1000))
+          echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
+          echo "KIRKWOOD_RELEASE=$KIRKWOOD_RELEASE" >> $GITHUB_ENV
+          echo "HASS_RELEASE: ${{ env.HASS_RELEASE }}, KIRKWOOD_RELEASE: ${{ env.KIRKWOOD_RELEASE }}"
+      - name: Checkout code
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        uses: docker/setup-qemu-action@v2.1.0
+      - name: Set up Docker Buildx
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        uses: docker/setup-buildx-action@v2.2.1
+      - name: Login to Docker Hub
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Build and push the image
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        run: |
+          docker buildx build --push \
+            --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --label version="${{ env.HASS_RELEASE }}" \
+            --platform linux/arm/v5 --allow security.insecure --no-cache .
