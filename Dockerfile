@@ -43,13 +43,13 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y jq git bluez 
 # Setup Python VENV
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir wheel
+RUN pip install --no-cache-dir pip wheel
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
 
 # Install & build HASS components (--securit=insecure & tmpfs: workaround for spurious network error when fetching crates.io-index)
-RUN --security=insecure mkdir -p /root/.cargo/registry && chmod 777 /root/.cargo/registry && mount -t tmpfs none /root/.cargo/registry && pip install --no-cache-dir --use-deprecated=legacy-resolver -r core/requirements_all.txt
+RUN --security=insecure mkdir -p /root/.cargo/registry && chmod 777 /root/.cargo/registry && mount -t tmpfs none /root/.cargo/registry && export MAKEFLAGS="-j$(nproc)" && pip install --no-cache-dir --use-deprecated=legacy-resolver -r core/requirements_all.txt
 
 # Install HASS core package
 RUN pip install --no-cache-dir homeassistant
