@@ -26,7 +26,7 @@ jobs:
           export PANDAS=$(find ~+ -type f -name 'pandas*')
           export NUMPY=$(find ~+ -type f -name 'numpy*')
           
-          export PANDAS_VERSION=$(echo $PANDAS | cut -f 2 -d '-')
+          export PANDAS_VERSION=$(echo $PANDAS | cut -f 4 -d '-')
           
           export HASS_PANDAS_VERSION=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep "pandas" | cut -d "=" -f3)
           
