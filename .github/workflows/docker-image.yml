@@ -17,41 +17,42 @@ jobs:
           echo "KIRKWOOD_RELEASE=$KIRKWOOD_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: ${{ env.HASS_RELEASE }}, KIRKWOOD_RELEASE: ${{ env.KIRKWOOD_RELEASE }}"
       - name: Get wheels version
+        shell: bash
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
         run: |
           export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/kirkwood-homeassistant-wheels/actions/artifacts))
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           7z x wheels.zip
           
-          export PANDAS=$(find ~+ -type f -name 'pandas*')
-          export PANDAS_VERSION=$(echo $PANDAS | cut -f 4 -d '-')
-          export HASS_PANDAS_VERSION=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep "pandas" | cut -d "=" -f3)
+          export WHEELS_LIST=('PANDAS' 'NUMPY' 'PYNACL' 'CRYPTO' 'ORJSON' 'PILLOW')
           
-          echo "PANDAS_VERSION=$PANDAS_VERSION" >> $GITHUB_ENV
-          echo "HASS_PANDAS_VERSION=$HASS_PANDAS_VERSION" >> $GITHUB_ENV
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find ~+ -type f -iname '${wheel}*' | cut -f 4 -d '-'); done
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep -i "${wheel}=" | cut -d "=" -f3); done
+          
+          export OUTDATED_WHL_VER=$(for wheel in "${WHEELS_LIST[@]}"; do if((${wheel}_WHL_VER != ${wheel}_VER)); then echo '1'; fi; done)
+          echo "OUTDATED_WHL_VER=$OUTDATED_WHL_VER" >> $GITHUB_ENV
       - name: Check if new wheels needed
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION != env.HASS_PANDAS_VERSION }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER == "1" }}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/kirkwood-homeassistant-wheels/dispatches --data '{"event_type": "build_application"}'
       - name: Checkout code
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER == "" }}
         uses: actions/checkout@v3
       - name: Set up QEMU
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER == "" }}
         uses: docker/setup-qemu-action@v2.1.0
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER == "" }}
         uses: docker/setup-buildx-action@v2.2.1
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER == "" }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER == "" }}
         run: |
           export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/kirkwood-homeassistant-wheels/actions/artifacts))
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
-          7z x wheels.zip
 
-          docker buildx build --push --build-arg PANDAS=$(find . -type f -name 'pandas*') --build-arg NUMPY=$(find . -type f -name 'numpy*') \
+          docker buildx build --push --build-arg WHEELS=wheels.zip \
             --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --label version="${{ env.HASS_RELEASE }}" \
             --platform linux/arm/v5 --allow security.insecure --no-cache .
