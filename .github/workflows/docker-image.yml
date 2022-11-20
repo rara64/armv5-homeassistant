@@ -34,9 +34,6 @@ jobs:
           echo "NUMPY=$NUMPY" >> $GITHUB_ENV
           echo "PANDAS_VERSION=$PANDAS_VERSION" >> $GITHUB_ENV
           echo "HASS_PANDAS_VERSION=$HASS_PANDAS_VERSION" >> $GITHUB_ENV
-          echo $PANDAS
-          echo $NUMPY
-          echo $PANDAS_VERSION
       - name: Check if new wheels needed
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION != env.HASS_PANDAS_VERSION }}
         uses: actions/github-script@v6
@@ -64,6 +61,8 @@ jobs:
       - name: Build and push the image
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         run: |
-          docker buildx build --push --build-arg PANDAS=${{ env.PANDAS }} --build-arg NUMPY=${{ env.NUMPY }} \
+          mv ${{ env.PANDAS }} .
+          mv ${{ env.NUMPY }} .
+          docker buildx build --push --build-arg PANDAS=$(find . -type f -name 'pandas*') --build-arg NUMPY=$(find . -type f -name 'numpy*') \
             --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --label version="${{ env.HASS_RELEASE }}" \
             --platform linux/arm/v5 --allow security.insecure --no-cache .
