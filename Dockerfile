@@ -39,7 +39,7 @@ COPY --from=cargo-builder /cargo/target/armv5te-unknown-linux-gnueabi/debian/*.d
 RUN dpkg -i *.deb
 
 # Install packages needed by HASS and components
-RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y jq git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff5 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
+RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y unzip jq git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff5 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
 
 # Setup Python VENV
 RUN python -m venv /opt/venv
@@ -48,6 +48,7 @@ RUN pip install --no-cache-dir pip wheel
 
 # Install prebuilt wheels from kirkwood-homeassistant-wheels repo
 COPY $WHEELS /wheels
+RUN unzip /wheels/wheels.zip -d /wheels
 RUN pip install $(find /wheels -type f -iname 'numpy*')
 RUN pip install $(find /wheels -type f -iname 'pandas*')
 RUN pip install $(find /wheels -type f -iname 'pynacl*')
