@@ -61,6 +61,6 @@ jobs:
       - name: Build and push the image
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         run: |
-          docker buildx build --push --build-arg PANDAS=${{ env.PANDAS }} NUMPY=${{ env.NUMPY }} \
+          docker buildx build --push --build-arg PANDAS=${{ env.PANDAS }} --build-arg NUMPY=${{ env.NUMPY }} \
             --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --label version="${{ env.HASS_RELEASE }}" \
             --platform linux/arm/v5 --allow security.insecure --no-cache .
