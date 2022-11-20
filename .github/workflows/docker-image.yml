@@ -34,6 +34,9 @@ jobs:
           echo "NUMPY=$NUMPY" >> $GITHUB_ENV
           echo "PANDAS_VERSION=$PANDAS_VERSION" >> $GITHUB_ENV
           echo "HASS_PANDAS_VERSION=$HASS_PANDAS_VERSION" >> $GITHUB_ENV
+          echo $PANDAS
+          echo $NUMPY
+          echo $HASS_PANDAS_VERSION
       - name: Check if new wheels needed
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION != env.HASS_PANDAS_VERSION }}
         uses: actions/github-script@v6
