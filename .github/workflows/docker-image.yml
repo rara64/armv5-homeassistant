@@ -16,7 +16,7 @@ jobs:
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "KIRKWOOD_RELEASE=$KIRKWOOD_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: ${{ env.HASS_RELEASE }}, KIRKWOOD_RELEASE: ${{ env.KIRKWOOD_RELEASE }}"
-      - name: Get wheels from repo
+      - name: Get wheels version
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
         run: |
           export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/kirkwood-homeassistant-wheels/actions/artifacts))
@@ -24,14 +24,9 @@ jobs:
           7z x wheels.zip
           
           export PANDAS=$(find ~+ -type f -name 'pandas*')
-          export NUMPY=$(find ~+ -type f -name 'numpy*')
-          
           export PANDAS_VERSION=$(echo $PANDAS | cut -f 4 -d '-')
-          
           export HASS_PANDAS_VERSION=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep "pandas" | cut -d "=" -f3)
           
-          echo "PANDAS=$PANDAS" >> $GITHUB_ENV
-          echo "NUMPY=$NUMPY" >> $GITHUB_ENV
           echo "PANDAS_VERSION=$PANDAS_VERSION" >> $GITHUB_ENV
           echo "HASS_PANDAS_VERSION=$HASS_PANDAS_VERSION" >> $GITHUB_ENV
       - name: Check if new wheels needed
@@ -61,8 +56,10 @@ jobs:
       - name: Build and push the image
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         run: |
-          mv ${{ env.PANDAS }} .
-          mv ${{ env.NUMPY }} .
+          export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/kirkwood-homeassistant-wheels/actions/artifacts))
+          wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
+          7z x wheels.zip
+
           docker buildx build --push --build-arg PANDAS=$(find . -type f -name 'pandas*') --build-arg NUMPY=$(find . -type f -name 'numpy*') \
             --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --label version="${{ env.HASS_RELEASE }}" \
             --platform linux/arm/v5 --allow security.insecure --no-cache .
