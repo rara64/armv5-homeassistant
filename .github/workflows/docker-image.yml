@@ -31,16 +31,8 @@ jobs:
           echo "HASS_PANDAS_VERSION=$HASS_PANDAS_VERSION" >> $GITHUB_ENV
       - name: Check if new wheels needed
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION != env.HASS_PANDAS_VERSION }}
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.WHEELS_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-            owner: 'rara64',
-            repo: 'kirkwood-homeassist-wheels',
-            workflow_id: 'docker-image.yml',
-            ref: 'main'
-            })
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/kirkwood-homeassistant-wheels/dispatches --data '{"event_type": "build_application"}'
       - name: Checkout code
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         uses: actions/checkout@v3
