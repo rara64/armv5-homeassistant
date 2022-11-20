@@ -50,8 +50,8 @@ RUN pip install --no-cache-dir pip wheel
 # Install prebuilt wheels from kirkwood-homeassistant-wheels repo
 COPY $PANDAS /
 COPY $NUMPY /
-RUN pip install $(find / -type f -name 'pandas*')
 RUN pip install $(find / -type f -name 'numpy*')
+RUN pip install $(find / -type f -name 'pandas*')
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
