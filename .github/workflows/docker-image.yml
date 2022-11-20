@@ -26,8 +26,8 @@ jobs:
           
           export WHEELS_LIST=('PANDAS' 'NUMPY' 'PYNACL' 'CRYPTO' 'ORJSON' 'PILLOW')
           
-          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find ~+ -type f -iname '${wheel}*' | cut -f 4 -d '-'); done
-          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep -i "${wheel}=" | cut -d "=" -f3); done
+          for wheel in "${WHEELS_LIST[@]}"; do export {wheel}_WHL_VER=$(find ~+ -type f -iname '{wheel}*' | cut -f 4 -d '-'); done
+          for wheel in "${WHEELS_LIST[@]}"; do export {wheel}_VER=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep -i "{wheel}=" | cut -d "=" -f3); done
           
           export OUTDATED_WHL_VER=$(for wheel in "${WHEELS_LIST[@]}"; do if((${wheel}_WHL_VER != ${wheel}_VER)); then echo '1'; fi; done)
           echo "OUTDATED_WHL_VER=$OUTDATED_WHL_VER" >> $GITHUB_ENV
