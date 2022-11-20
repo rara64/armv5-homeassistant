@@ -16,20 +16,50 @@ jobs:
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "KIRKWOOD_RELEASE=$KIRKWOOD_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: ${{ env.HASS_RELEASE }}, KIRKWOOD_RELEASE: ${{ env.KIRKWOOD_RELEASE }}"
-      - name: Checkout code
+      - name: Get wheels from repo
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        run: |
+          export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/kirkwood-homeassistant-wheels/actions/artifacts))
+          wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
+          7z x wheels.zip
+          
+          export PANDAS=$(find wheels/ -type f -name 'pandas*')
+          export NUMPY=$(find wheels/ -type f -name 'numpy*')
+          
+          export PANDAS_VERSION=$(echo $PANDAS | cut -f 2 -d '-')
+          
+          export HASS_PANDAS_VERSION=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep "pandas" | cut -d "=" -f3)
+          
+          echo "PANDAS=$PANDAS" >> $GITHUB_ENV
+          echo "NUMPY=$NUMPY" >> $GITHUB_ENV
+          echo "PANDAS_VERSION=$PANDAS_VERSION" >> $GITHUB_ENV
+          echo "HASS_PANDAS_VERSION=$HASS_PANDAS_VERSION" >> $GITHUB_ENV
+      - name: Check if new wheels needed
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION != env.HASS_PANDAS_VERSION }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.WHEELS_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+            owner: 'rara64',
+            repo: 'kirkwood-homeassist-wheels',
+            workflow_id: 'docker-image.yml',
+            ref: 'main'
+            })
+      - name: Checkout code
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         uses: actions/checkout@v3
       - name: Set up QEMU
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         uses: docker/setup-qemu-action@v2.1.0
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         uses: docker/setup-buildx-action@v2.2.1
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.PANDAS_VERSION == env.HASS_PANDAS_VERSION }}
         run: |
           docker buildx build --push \
             --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --label version="${{ env.HASS_RELEASE }}" \
