@@ -23,8 +23,8 @@ jobs:
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           7z x wheels.zip
           
-          export PANDAS=$(find / -type f -name 'pandas*')
-          export NUMPY=$(find / -type f -name 'numpy*')
+          export PANDAS=$(find ~+ -type f -name 'pandas*')
+          export NUMPY=$(find ~+ -type f -name 'numpy*')
           
           export PANDAS_VERSION=$(echo $PANDAS | cut -f 2 -d '-')
           
