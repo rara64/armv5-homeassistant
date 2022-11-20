@@ -28,8 +28,7 @@ Cargo, a package manager for Rust.\n\
 RUN cargo deb --target armv5te-unknown-linux-gnueabi -- --features=vendored-openssl
 
 FROM --platform=linux/arm/v5 python:3.10-bullseye AS hass-builder
-ARG PANDAS
-ARG NUMPY
+ARG WHEELS
 
 # Setup environment for Rust compilation
 RUN cp /etc/apt/sources.list /etc/apt/tmp
@@ -48,10 +47,13 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir pip wheel
 
 # Install prebuilt wheels from kirkwood-homeassistant-wheels repo
-COPY $PANDAS /
-COPY $NUMPY /
-RUN pip install $(find / -type f -name 'numpy*')
-RUN pip install $(find / -type f -name 'pandas*')
+COPY $WHEELS /wheels
+RUN pip install $(find /wheels -type f -iname 'numpy*')
+RUN pip install $(find /wheels -type f -iname 'pandas*')
+RUN pip install $(find /wheels -type f -iname 'pynacl*')
+RUN pip install $(find /wheels -type f -iname 'crypto*')
+RUN pip install $(find /wheels -type f -iname 'orjson*')
+RUN pip install $(find /wheels -type f -iname 'pillow*')
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
