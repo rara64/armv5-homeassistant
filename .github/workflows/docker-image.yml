@@ -24,7 +24,7 @@ jobs:
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           7z x wheels.zip
           
-          export WHEELS_LIST=('PANDAS' 'NUMPY' 'PYNACL' 'CRYPTO' 'ORJSON' 'PILLOW')
+          export WHEELS_LIST=('PANDAS' 'NUMPY' 'PYNACL' 'CRYPTO' 'ORJSON')
           
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find ~+ -type f -iname '${wheel}*' | cut -f 4 -d '-'); done
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep -i "${wheel}=" | cut -d "=" -f3); done
