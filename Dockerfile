@@ -54,7 +54,6 @@ RUN pip install $(find /wheels -type f -iname 'pandas*')
 RUN pip install $(find /wheels -type f -iname 'pynacl*')
 RUN pip install $(find /wheels -type f -iname 'crypto*')
 RUN pip install $(find /wheels -type f -iname 'orjson*')
-RUN pip install $(find /wheels -type f -iname 'pillow*')
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
