@@ -11,7 +11,7 @@ Example:
 
 I'm running this image on my modded NSA325 NAS with an external SSD as a boot drive along with an OpenMediaVault installation. Running OS on an external SSD/HDD is CERTAINLY RECOMMENDED for a good experience. I hadn't had much luck with a USB 3.0 thumb drive - to put it short, performance was lacking. I'm running Docker from docker.io debian package on my device. Despite device limitations (512MB of RAM and single-core Marvell 88F6282 clocked at 1.6GHz), it runs well once everything is up and running. I have a bunch of automations, a few integrations and active data logging with a mobile app connected.
 
-A new image should be automatically built and pushed to docker hub every week if there's a new release of Home Assistant available. Although if you want you can still download the Dockerfile from this repo and built the image on your PC using the following command:
+A new image should be automatically built and pushed to docker hub every week if there's a new release of Home Assistant available. Although if you want you can still download the `Dockerfile.local` file from this repo and build the image on your PC using the following command:
 > docker buildx build --platform=linux/arm/v5 --load --allow security.insecure .
 
 ## About the project
