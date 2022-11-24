@@ -39,7 +39,7 @@ jobs:
           echo $PYNACL_WHL_VER
           echo $ORJSON_VER
           echo $ORJSON_WHL_VER
-          echo $(find . -type f -iname 'pandas*' | cut -f 4 -d '-')
+          echo $(find . -type f -iname 'pandas*')
       - name: Check if new wheels needed
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER != '' }}
         run: |
