@@ -23,9 +23,9 @@ RUN pip install --no-cache-dir pip wheel
 # Install prebuilt wheels from rara64/kirkwood-homeassistant-wheels repo
 COPY $WHEELS /wheels
 RUN unzip /wheels/wheels.zip -d /wheels
-RUN pip install $(find /wheels -type f -iname 'numpy*')
+# RUN pip install $(find /wheels -type f -iname 'numpy*')
 RUN pip install $(find /wheels -type f -iname 'pandas*')
-# RUN pip install $(find /wheels -type f -iname 'pynacl*')
+RUN pip install $(find /wheels -type f -iname 'pynacl*')
 # RUN pip install $(find /wheels -type f -iname 'crypto*')
 RUN pip install $(find /wheels -type f -iname 'orjson*')
 
