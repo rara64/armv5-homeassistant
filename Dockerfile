@@ -21,8 +21,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir pip wheel
 
 # Install prebuilt wheels from rara64/kirkwood-homeassistant-wheels repo
-COPY $WHEELS /wheels
-RUN unzip /wheels/wheels.zip
+COPY $WHEELS .
+RUN unzip wheels.zip
 # RUN pip install $(find /wheels -type f -iname 'numpy*')
 RUN pip install $(find . -type f -iname 'pandas*') --no-deps
 RUN pip install $(find . -type f -iname 'pynacl*') --no-deps
