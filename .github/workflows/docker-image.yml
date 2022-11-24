@@ -31,6 +31,7 @@ jobs:
           
           export OUTDATED_WHL_VER=$(for wheel in "${WHEELS_LIST[@]}"; do if [ ${wheel}_WHL_VER != ${wheel}_VER ]; then echo '1'; break; fi; done)
           echo "OUTDATED_WHL_VER=$OUTDATED_WHL_VER" >> $GITHUB_ENV
+          echo $OUTDATED_WHL_VER
       - name: Check if new wheels needed
         if: ${{ env.HASS_RELEASE != env.KIRKWOOD_RELEASE && env.OUTDATED_WHL_VER != ' ' }}
         run: |
