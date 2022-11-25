@@ -62,5 +62,5 @@ jobs:
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
 
           docker buildx build --push --build-arg WHEELS=wheels.zip \
-            --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --label version="${{ env.HASS_RELEASE }}" \
+            --tag rara64/kirkwood-homeassistant:${{ env.HASS_RELEASE }} --tag rara64/kirkwood-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
             --platform linux/arm/v5 --allow security.insecure --no-cache .
