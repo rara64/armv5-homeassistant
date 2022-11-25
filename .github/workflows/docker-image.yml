@@ -1,6 +1,8 @@
 name: Build kirkwood-homeassistant
 
 on: 
+  schedule:
+    - cron: '32 1 * * MON'
   workflow_dispatch:
   repository_dispatch:
     types: Build kirkwood-homeassistant
