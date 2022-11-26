@@ -14,7 +14,7 @@ jobs:
       - name: Check for new release of HASS
         run: |
           export HASS_RELEASE=$(jq -r 'map(select(.prerelease==false)) | first | .tag_name' <<< $(curl --silent https://api.github.com/repos/home-assistant/core/releases))
-          export KIRKWOOD_RELEASE=$(jq -r '[.results[]|.version][0]' <<< $(curl --silent https://hub.docker.com/v2/repositories/rara64/kirkwood-homeassistant/tags/?page_size=1000))
+          export KIRKWOOD_RELEASE=$(jq -r '[.results[] | select(.name!="latest")][0].name' <<< $(curl --silent https://hub.docker.com/v2/repositories/rara64/kirkwood-homeassistant/tags/?page_size=1000))
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "KIRKWOOD_RELEASE=$KIRKWOOD_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: $HASS_RELEASE , KIRKWOOD_RELEASE: $KIRKWOOD_RELEASE"
