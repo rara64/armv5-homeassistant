@@ -6,7 +6,7 @@ Image allows you to run Home Assistant on ARMv5 platform and is mainly build for
 Everything that runs [bodhi's debian](https://forum.doozan.com/read.php?2,12096) for these boxes should run this image but you will need to recompile bodhi's kernel to include support for memory cgroup since Docker needs it for Linux images. All components from [requirements_all.txt file in the Home Assistant Core repo](https://github.com/home-assistant/core/blob/dev/requirements_all.txt) are preinstalled which greatly improves the experience on old Kirkwood boxes. In case I missed something, please open an issue and I'll do my best.
 
 Use a similar command as the one provided in Home Assistant install guide to run the image:
-> docker run -d --name homeassistant --privileged --restart=unless-stopped -e TZ=MY_TIME_ZONE -v PATH_TO_YOUR_CONFIG:/config --network=host rara64/armv5-homeassistant
+> docker run -d --name homeassistant --privileged --restart unless-stopped -e TZ MY_TIME_ZONE -v PATH_TO_YOUR_CONFIG:/config --network host rara64/armv5-homeassistant
 
 A new image should be automatically built and pushed to Docker Hub every week if there is a new release of Home Assistant available. Nevertheless, you can still download the `Dockerfile.local` file from this repo and build the image on your PC using the following command:
 > docker buildx build --platform=linux/arm/v5 --load --allow security.insecure .
