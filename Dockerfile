@@ -20,7 +20,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir pip wheel
 
-# Install prebuilt wheels from rara64/armv5te-homeassistant-wheels repo
+# Install prebuilt wheels from rara64/armv5-homeassistant-wheels repo
 COPY $WHEELS .
 RUN unzip wheels.zip -d wheels
 
