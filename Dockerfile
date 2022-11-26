@@ -44,7 +44,7 @@ RUN --security=insecure mkdir -p /root/.cargo/registry && chmod 777 /root/.cargo
 RUN pip install --no-cache-dir homeassistant
 
 # Cleanup
-RUN pip cache purge && rm -rf core && rm -rf wheels
+RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip
 
 FROM --platform=linux/arm/v5 python:3.10-slim-bullseye AS runner
 
