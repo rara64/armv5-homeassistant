@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir pip wheel
 
 # Install prebuilt wheels from rara64/kirkwood-homeassistant-wheels repo
 COPY $WHEELS .
-RUN unzip wheels.zip
+RUN unzip wheels.zip -d wheels
 
 # RUN pip install $(find /wheels -type f -iname 'numpy*')
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') \
@@ -44,7 +44,7 @@ RUN --security=insecure mkdir -p /root/.cargo/registry && chmod 777 /root/.cargo
 RUN pip install --no-cache-dir homeassistant
 
 # Cleanup
-RUN pip cache purge && rm -rf core
+RUN pip cache purge && rm -rf core && rm -rf wheels
 
 FROM --platform=linux/arm/v5 python:3.10-slim-bullseye AS runner
 
