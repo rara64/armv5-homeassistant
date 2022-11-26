@@ -11,7 +11,7 @@ Use a similar command as the one provided in Home Assistant install guide to run
 A new image should be automatically built and pushed to Docker Hub every week if there is a new release of Home Assistant available. Nevertheless, you can still download the `Dockerfile.local` file from this repo and build the image on your PC using the following command:
 > docker buildx build --platform=linux/arm/v5 --load --allow security.insecure .
 
-## My usecase
+## My use case
 
 This image currently runs on my modded NSA325 NAS alongside OpenMediaVault install. Running OS on an external SSD/HDD is certainly recommended for a good experience. I hadn't had much luck with a USB 3.0 thumb drive - to put it short, performance was lacking. I installed docker from docker.io debian package. 
 
