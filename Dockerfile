@@ -21,14 +21,15 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir pip wheel
 
-# Install prebuilt wheels from rara64/armv5-homeassistant-wheels repo
+# Extract prebuilt wheels from rara64/armv5-homeassistant-wheels repo
 COPY $WHEELS .
 RUN unzip wheels.zip -d wheels
 
-# Install prebuilt wheels from rara64/armv5-homeassistant-wheels-batch2 repo
+# Extract prebuilt wheels from rara64/armv5-homeassistant-wheels-batch2 repo
 COPY $WHEELS2 .
 RUN unzip wheels2.zip -d wheels
 
+# Install prebuilt wheels from both wheels repos
 RUN pip install $(find /wheels -type f -iname 'numpy*')
 # RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') \
 # && VERSION=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -i "numpy=" | cut -d "=" -f3) \
