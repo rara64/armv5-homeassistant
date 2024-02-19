@@ -1,6 +1,7 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 python:3.12-bullseye AS hass-builder
 ARG WHEELS
+ARG WHEELS2
 
 # Setup environment for Rust compilation
 RUN cp /etc/apt/sources.list /etc/apt/tmp
@@ -24,14 +25,18 @@ RUN pip install --no-cache-dir pip wheel
 COPY $WHEELS .
 RUN unzip wheels.zip -d wheels
 
-# RUN pip install $(find /wheels -type f -iname 'numpy*')
+# Install prebuilt wheels from rara64/armv5-homeassistant-wheels-batch2 repo
+COPY $WHEELS2 .
+RUN unzip wheels2.zip -d wheels
+
+RUN pip install $(find /wheels -type f -iname 'numpy*')
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') \
 && VERSION=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -i "numpy=" | cut -d "=" -f3) \
 && pip install --no-cache-dir numpy==$VERSION
 
 RUN pip install --no-cache-dir $(find . -type f -iname 'pandas*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'pynacl*')
-# RUN pip install $(find /wheels -type f -iname 'crypto*')
+RUN pip install $(find /wheels -type f -iname 'crypto*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'orjson*')
 
 # Clone latest release of HASS
