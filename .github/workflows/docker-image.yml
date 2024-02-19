@@ -18,7 +18,7 @@ jobs:
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "ARMV5_RELEASE=$ARMV5_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: $HASS_RELEASE , ARMV5_RELEASE: $ARMV5_RELEASE"
-      - name: Get wheels version
+      - name: Get wheels version (batch 1)
         shell: bash
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
@@ -63,6 +63,9 @@ jobs:
           export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant-wheels/actions/artifacts))
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
 
-          docker buildx build --push --build-arg WHEELS=wheels.zip \
+          export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant-wheels-batch2/actions/artifacts))
+          wget -O wheels2.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
+
+          docker buildx build --push --build-arg WHEELS=wheels.zip WHEELS2=wheels2.zip\
             --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
             --platform linux/arm/v5 --allow security.insecure --no-cache .
