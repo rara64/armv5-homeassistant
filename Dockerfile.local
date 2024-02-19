@@ -27,7 +27,7 @@ Cargo, a package manager for Rust.\n\
 """' >> Cargo.toml
 RUN cargo deb --target armv5te-unknown-linux-gnueabi -- --features=vendored-openssl
 
-FROM --platform=linux/arm/v5 python:3.10-bullseye AS hass-builder
+FROM --platform=linux/arm/v5 python:3.12-bullseye AS hass-builder
 
 # Setup environment for Rust compilation
 RUN cp /etc/apt/sources.list /etc/apt/tmp
@@ -57,7 +57,7 @@ RUN pip install --no-cache-dir homeassistant
 # Cleanup
 RUN pip cache purge && rm -rf core
 
-FROM --platform=linux/arm/v5 python:3.10-slim-bullseye AS runner
+FROM --platform=linux/arm/v5 python:3.12-slim-bullseye AS runner
 
 # Install packages needed by HASS and components
 RUN cp /etc/apt/sources.list /etc/apt/tmp
