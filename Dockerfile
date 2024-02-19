@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 python:3.10-bullseye AS hass-builder
+FROM --platform=linux/arm/v5 python:3.12-bullseye AS hass-builder
 ARG WHEELS
 
 # Setup environment for Rust compilation
@@ -46,7 +46,7 @@ RUN pip install --no-cache-dir homeassistant
 # Cleanup
 RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip
 
-FROM --platform=linux/arm/v5 python:3.10-slim-bullseye AS runner
+FROM --platform=linux/arm/v5 python:3.12-slim-bullseye AS runner
 
 # Install packages needed by HASS and components
 RUN cp /etc/apt/sources.list /etc/apt/tmp
