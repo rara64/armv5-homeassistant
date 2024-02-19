@@ -1,5 +1,9 @@
 name: Build armv5-homeassistant
 
+concurrency: 
+  group: my-workflow-${{ github.ref }}
+  cancel-in-progress: true
+
 on: 
   schedule:
     - cron: '32 1 * * MON'
