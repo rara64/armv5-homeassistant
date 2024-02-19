@@ -18,13 +18,17 @@ jobs:
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "ARMV5_RELEASE=$ARMV5_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: $HASS_RELEASE , ARMV5_RELEASE: $ARMV5_RELEASE"
-      - name: Get wheels version (batch 1)
+      - name: Get wheels version from both batches
         shell: bash
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
           export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant-wheels/actions/artifacts))
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           7z x wheels.zip
+
+          export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant-wheels-batch2/actions/artifacts))
+          wget -O wheels2.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
+          7z x wheels2.zip
           
           export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON')
           
@@ -41,10 +45,27 @@ jobs:
           echo $PYNACL_WHL_VER
           echo $ORJSON_VER
           echo $ORJSON_WHL_VER
-      - name: Check if new wheels needed
+
+          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY')
+          
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find . -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-'); done
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep -i "${wheel}=" | cut -d "=" -f3); done
+          
+          export OUTDATED_WHL2_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
+          echo "OUTDATED_WHL2_VER=$OUTDATED_WHL2_VER" >> $GITHUB_ENV
+          
+          echo $NUMPY_VER
+          echo $NUMPY_WHL_VER
+          echo $CRYPTOGRAPHY_VER
+          echo $CRYPTOGRAPHY_WHL_VER
+      - name: Check if new wheels needed from batch 1
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER != '' }}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant-wheels/dispatches --data '{"event_type": "Build wheels"}'
+      - name: Check if new wheels needed from batch 2
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL2_VER != '' }}
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant-wheels-batch2/dispatches --data '{"event_type": "Build wheels"}'  
       - name: Checkout code
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' }}
         uses: actions/checkout@v3
