@@ -4,7 +4,7 @@ ARG WHEELS
 ARG WHEELS2
 
 # Setup environment for Rust compilation
-RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget unzip jq rustc build-essential cmake python3.12 python3.12-venv python3.12-dev autoconf pkg-config libxml2 libxslt-dev --no-install-recommends
+RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget unzip jq rustc build-essential cmake python3.12 python3.12-venv python3.12-dev autoconf pkg-config libxml2 libxslt-dev ffmpeg --no-install-recommends
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -36,6 +36,9 @@ RUN pip install --no-cache-dir $(find . -type f -iname 'pandas*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'pynacl*')
 RUN pip install $(find /wheels -type f -iname 'crypto*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'orjson*')
+
+# temporary for testing
+RUN pip install ha-av
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
