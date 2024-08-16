@@ -49,14 +49,12 @@ RUN pip install --no-cache-dir homeassistant
 # Cleanup
 RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip && rm wheels2.zip
 
-FROM --platform=linux/arm/v5 python:3.12-slim-bullseye AS runner
+FROM --platform=linux/arm/v5 debian:sid AS runner
 
 # Install packages needed by HASS and components
-RUN cp /etc/apt/sources.list /etc/apt/tmp
-RUN echo "deb http://deb.debian.org/debian testing main contrib non-free" >> /etc/apt/sources.list
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y build-essential cmake --no-install-recommends
-RUN mv /etc/apt/tmp /etc/apt/sources.list
-RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff5 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
+RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff5 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
+RUN apt clean && apt autoclean
 
 # Copy Python VENV from hass-builder to runner
 RUN mkdir /config
