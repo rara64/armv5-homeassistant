@@ -38,7 +38,7 @@ RUN pip install $(find /wheels -type f -iname 'crypto*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'orjson*')
 
 # temporary for testing
-RUN pip install ha-av lxml
+RUN CFLAGS="-Wincompatible-pointer-types" pip install ha-av lxml
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
