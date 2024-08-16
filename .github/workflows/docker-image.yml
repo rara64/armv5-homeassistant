@@ -91,7 +91,7 @@ jobs:
           export LINK=$(jq -r '[.artifacts[]|.archive_download_url][0]' <<< $(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant-wheels-batch2/actions/artifacts))
           wget -O wheels2.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
 
-          docker buildx build --build-arg WHEELS=wheels.zip --build-arg WHEELS2=wheels2.zip --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest .
+          docker buildx build --load --build-arg WHEELS=wheels.zip --build-arg WHEELS2=wheels2.zip --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest .
 
           docker save -o test.tar test:latest
       - name: Upload wheels
