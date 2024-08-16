@@ -1,23 +1,20 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 python:3.12-bullseye AS hass-builder
+FROM --platform=linux/arm/v5 debian:sid AS hass-builder
 ARG WHEELS
 ARG WHEELS2
 
 # Setup environment for Rust compilation
-RUN cp /etc/apt/sources.list /etc/apt/tmp
-RUN echo "deb http://deb.debian.org/debian experimental main contrib non-free" >> /etc/apt/sources.list
-RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y unzip jq rustc build-essential cmake --no-install-recommends
-RUN mv /etc/apt/tmp /etc/apt/sources.list
+RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y unzip jq rustc build-essential cmake python3.12 python3.12-venv python3.12-dev autoconf pkg-config --no-install-recommends
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 RUN dpkg -i *.deb
 
 # Install packages needed by HASS and components
-RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff5 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
+RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff5 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
 
 # Setup Python VENV
-RUN python -m venv /opt/venv
+RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir pip wheel
 
