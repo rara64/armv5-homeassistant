@@ -6,7 +6,7 @@ ARG WHEELS2
 # Setup environment for Rust compilation
 #RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" >> /etc/apt/sources.list
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget unzip jq rustc build-essential cmake python3.12 python3.12-venv python3.12-dev autoconf pkg-config --no-install-recommends
-RUN apt install libavfilter8 libavformat59 libjack-jackd2-0 libicu-dev
+RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
 RUN apt install libxml2 libxslt-dev ffmpeg
 
 # Install latest cargo from rara64/armv5te-cargo repo
