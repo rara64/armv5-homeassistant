@@ -20,7 +20,6 @@ RUN mkdir ffmpeg && cd ffmpeg && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libpostproc56_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswresample4_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswscale6_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/libs/libsdl2/libsdl2-2.0-0_2.30.8+dfsg-1_armel.deb && \
     dpkg -i *.deb && cd .. && rm -rf ffmpeg
 
 # Install latest cargo from rara64/armv5te-cargo repo
