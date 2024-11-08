@@ -12,7 +12,7 @@ RUN apt install -y libxml2 libxslt-dev xz-utils
 # Get ffmpeg compatible with ha-av
 RUN wget https://www.ffmpeg.org/releases/ffmpeg-6.0.1.tar.gz
 RUN tar -xf ffmpeg-6.0.1.tar.gz
-RUN cd ffmpeg-6.0.1 && ./configure && make -j$(nproc) && make install
+RUN cd ffmpeg-6.0.1 && ./configure && make -j$(nproc) && make install && cd .. && rm -rf ffmpeg-6.0.1 && rm ffmpeg-6.0.1.tar.gz
 RUN ffmpeg -version
 
 # Install latest cargo from rara64/armv5te-cargo repo
