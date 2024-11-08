@@ -19,6 +19,7 @@ RUN mkdir ffmpeg && cd ffmpeg && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libpostproc56_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswresample4_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswscale6_5.1.6-0+deb12u1_armel.deb && \
+    dpkg -i *.deb && rm -rf *.deb &&\
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/ffmpeg_5.1.6-0+deb12u1_armel.deb && \
     dpkg -i *.deb && cd .. && rm -rf ffmpeg && ffmpeg -version
 
