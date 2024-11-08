@@ -10,10 +10,16 @@ RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoco
 RUN apt install -y libxml2 libxslt-dev xz-utils
 
 # Get ffmpeg compatible with ha-av
-RUN wget https://www.ffmpeg.org/releases/ffmpeg-6.0.1.tar.gz
-RUN tar -xf ffmpeg-6.0.1.tar.gz
-RUN cd ffmpeg-6.0.1 && ./configure --arch=armel --target-os=linux --cross-prefix=arm-linux-gnueabi- --disable-static --enable-shared --cpu=armv5te && make -j$(nproc) && make install && cd .. && rm -rf ffmpeg-6.0.1 && rm ffmpeg-6.0.1.tar.gz
-RUN ffmpeg -version
+RUN mkdir ffmpeg && cd ffmpeg && curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/ffmpeg_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavcodec-dev_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavdevice-dev_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavfilter-dev_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavformat-dev_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavutil-dev_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libpostproc-dev_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswresample-dev_5.1.6-0+deb12u1_armel.deb && \
+    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswscale-dev_5.1.6-0+deb12u1_armel.deb && \
+    dpkg -i *.deb || apt-get install -f -y && cd .. && rm -rf ffmpeg
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
