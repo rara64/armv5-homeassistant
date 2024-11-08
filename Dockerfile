@@ -10,7 +10,7 @@ RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoco
 RUN apt install -y libxml2 libxslt-dev xz-utils
 
 # Get ffmpeg compatible with ha-av
-RUN wget https://www.johnvansickle.com/ffmpeg/old-releases/ffmpeg-6.0.1-armel-static.tar.xz
+RUN wget https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-6.0.1-armel-static.tar.xz
 RUN tar -xf ffmpeg-6.0.1-armel-static.tar.xz
 RUN cd ffmpeg-6.0.1-armel-static && mv ffmpeg ffprobe /usr/local/bin/ && cd .. && rm -rf ffmpeg-6.0.1-armel-static.tar.xz && rm -rf ffmpeg-6.0.1-armel-static
 
