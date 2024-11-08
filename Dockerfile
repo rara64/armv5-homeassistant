@@ -7,7 +7,12 @@ ARG WHEELS2
 #RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" >> /etc/apt/sources.list
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget unzip jq rustc build-essential cmake python3.12 python3.12-venv python3.12-dev autoconf pkg-config --no-install-recommends
 RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata libudev-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
-RUN apt install -y libxml2 libxslt-dev ffmpeg
+RUN apt install -y libxml2 libxslt-dev xz-utils
+
+# Get ffmpeg compatible with ha-av
+RUN wget https://www.johnvansickle.com/ffmpeg/old-releases/ffmpeg-6.0.1-armel-static.tar.xz
+RUN tar -xf ffmpeg-6.0.1-armel-static.tar.xz
+RUN cd ffmpeg-6.0.1-armel-static && mv ffmpeg ffprobe /usr/local/bin/ && cd .. && rm -rf ffmpeg-6.0.1-armel-static.tar.xz && rm -rf ffmpeg-6.0.1-armel-static
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
