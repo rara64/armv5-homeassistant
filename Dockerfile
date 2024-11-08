@@ -11,7 +11,6 @@ RUN apt install -y libxml2 libxslt-dev xz-utils
 
 # Get ffmpeg compatible with ha-av
 RUN mkdir ffmpeg && cd ffmpeg && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/ffmpeg_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavcodec59_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavdevice59_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavfilter8_5.1.6-0+deb12u1_armel.deb && \
@@ -20,6 +19,7 @@ RUN mkdir ffmpeg && cd ffmpeg && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libpostproc56_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswresample4_5.1.6-0+deb12u1_armel.deb && \
     curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswscale6_5.1.6-0+deb12u1_armel.deb && \
+        curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/ffmpeg_5.1.6-0+deb12u1_armel.deb && \
     dpkg -i *.deb && cd .. && rm -rf ffmpeg && ffmpeg -version
 
 # Install latest cargo from rara64/armv5te-cargo repo
