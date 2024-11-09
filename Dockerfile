@@ -8,7 +8,7 @@ ARG WHEELS2
 RUN apt update && apt install -y ffmpeg && ffmpeg -version
 RUN echo "deb http://deb.debian.org/debian sid main contrib non-free" > /etc/apt/sources.list
 RUN apt-get install -y -f
-RUN apt remove -y --purge python3.1
+RUN apt remove -y --purge python3.11
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget unzip jq rustc build-essential cmake autoconf pkg-config python3.12 python3.12-venv python3.12-dev --no-install-recommends
 RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata libudev-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
 RUN apt install -y libxml2 libxslt-dev
