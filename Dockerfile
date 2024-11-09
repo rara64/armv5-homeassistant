@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 debian:sid AS hass-builder
+FROM --platform=linux/arm/v5 debian:bookworm AS hass-builder
 ARG WHEELS
 ARG WHEELS2
 
@@ -7,21 +7,7 @@ ARG WHEELS2
 #RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" >> /etc/apt/sources.list
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget unzip jq rustc build-essential cmake python3.12 python3.12-venv python3.12-dev autoconf pkg-config --no-install-recommends
 RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata libudev-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
-RUN apt install -y libxml2 libxslt-dev xz-utils ffmpeg libavcodec59 libavdevice59 libavfilter8 libavformat59 libavutil57 libpostproc56 libswresample4 libswscale6
-
-# Get ffmpeg compatible with ha-av
-RUN mkdir ffmpeg && cd ffmpeg && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavcodec59_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavdevice59_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavfilter8_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavformat59_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libavutil57_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libpostproc56_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswresample4_5.1.6-0+deb12u1_armel.deb && \
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/libswscale6_5.1.6-0+deb12u1_armel.deb && \
-    dpkg -i *.deb && rm -rf *.deb &&\
-    curl -O http://ftp.us.debian.org/debian/pool/main/f/ffmpeg/ffmpeg_5.1.6-0+deb12u1_armel.deb && \
-    dpkg -i *.deb && cd .. && rm -rf ffmpeg && ffmpeg -version
+RUN apt install -y libxml2 libxslt-dev ffmpeg
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
