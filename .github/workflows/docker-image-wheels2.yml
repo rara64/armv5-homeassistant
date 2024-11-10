@@ -1,18 +1,48 @@
-name: Docker Image CI
+name: Build 2nd batch of wheels
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
+  repository_dispatch:
+    types: Build 2nd batch of wheels
+  workflow_dispatch:
+  
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Get version for wheels
+        shell: bash
+        run: |
+          export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
+          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY' 'UV')
+           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
+          for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and load the image
+        run: |
+          docker buildx build --load --tag wheels --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg CRYPTOGRAPHY_VER=${{ env.CRYPTOGRAPHY_VER }} --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+      - name: Copy wheels from the image
+        shell: bash
+        run: |
+          docker create --name wheels wheels
+          mkdir wheels
+          docker cp wheels:./root/.cache/pip/wheels wheels
+          
+          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY' 'UV')
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
+          for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels2
+          path: |
+            ${{ env.NUMPY }}
+            ${{ env.CRYPTOGRAPHY }}
+            ${{ env.UV }}
+      - name: Dispatch armv5-homeassistant build
+        run: |
+          curl -XPOST -u "${{ secrets.USERNAME }}:${{ secrets.TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant"}'
