@@ -23,4 +23,4 @@ jobs:
         run: |
           docker buildx build --push \
             --tag rara64/armv5-debian-base:latest --label version="1.0.0" \
-            --platform linux/arm/v5 -f "Dockerfile.base" --allow security.insecure --no-cache
+            --platform linux/arm/v5 -f Dockerfile.base --allow security.insecure --no-cache
