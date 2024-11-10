@@ -1,25 +1,11 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 debian:bookworm AS hass-builder
+FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS hass-builder
 ARG WHEELS
 ARG WHEELS2
-
-# Setup environment for Rust compilation
-#RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" >> /etc/apt/sources.list
-RUN apt update && apt install -y ffmpeg && ffmpeg -version
-RUN echo "deb http://deb.debian.org/debian sid main contrib non-free" > /etc/apt/sources.list
-RUN apt-get install -y -f
-RUN apt remove -y --purge python3.11
-RUN ffmpeg -version
-RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget unzip jq rustc build-essential cmake autoconf pkg-config python3.12 python3.12-venv python3.12-dev --no-install-recommends
-RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata libudev-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
-RUN apt install -y libxml2 libxslt-dev
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 RUN dpkg -i *.deb
-
-# Install packages needed by HASS and components
-RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata libudev-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
 
 # Setup Python VENV
 RUN python3.12 -m venv /opt/venv
@@ -45,9 +31,6 @@ RUN pip install --no-cache-dir $(find . -type f -iname 'pynacl*')
 RUN pip install $(find /wheels -type f -iname 'crypto*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'orjson*')
 
-# temporary for testing
-RUN pip install ha-av lxml
-
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
 
@@ -60,12 +43,7 @@ RUN pip install --no-cache-dir homeassistant
 # Cleanup
 RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip && rm wheels2.zip
 
-FROM --platform=linux/arm/v5 debian:sid AS runner
-
-# Install packages needed by HASS and components
-RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y build-essential cmake curl wget python3.12 python3.12-venv python3.12-dev autoconf pkg-config --no-install-recommends
-RUN apt install -y git bluez libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata libudev-dev libpcap-dev libturbojpeg0 libyaml-dev libxml2 --no-install-recommends
-RUN apt clean && apt autoclean
+FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS runner
 
 # Copy Python VENV from hass-builder to runner
 RUN mkdir /config
