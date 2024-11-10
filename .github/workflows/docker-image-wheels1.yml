@@ -45,4 +45,4 @@ jobs:
             ${{ env.ORJSON }}
       - name: Dispatch armv5-homeassistant-wheels-batch2 build
         run: |
-          curl -XPOST -u "${{ secrets.USERNAME }}:${{ secrets.TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 1st batch of wheels"}'
+          curl -XPOST -u "${{ secrets.USERNAME }}:${{ secrets.TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 2nd batch of wheels"}'
