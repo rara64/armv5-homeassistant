@@ -2,7 +2,6 @@
 FROM --platform=linux/arm/v5 debian:trixie
 ARG NUMPY_VER
 ARG CRYPTOGRAPHY_VER
-ARG UV_VER
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget jq
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
