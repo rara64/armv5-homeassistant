@@ -23,7 +23,13 @@ RUN unzip boxcar.zip && \
 RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs && cargo build --release
 
+# Set up swap for uv build
+RUN fallocate -l 8G /swapfile && \
+    chmod 600 /swapfile && \
+    mkswap /swapfile && \
+    swapon /swapfile
+
 # Build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
 RUN pip install setuptools wheel build
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && export CARGO_BUILD_JOBS=2 && python -m build --wheel .
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && python -m build --wheel .
