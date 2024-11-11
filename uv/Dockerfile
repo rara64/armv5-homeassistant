@@ -10,17 +10,20 @@ RUN dpkg -i *.deb
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Replace atomic64 with atomic32 in Cargo.toml and src files inside boxcar crate
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip
 RUN unzip uv.zip && \
     mv uv-$UV_VER uv && \
     rm uv.zip 
+
+# Replace atomic64 with atomic32 inside boxcar crate
 RUN wget -O boxcar.zip https://github.com/ibraheemdev/boxcar/archive/refs/tags/v$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml).zip
 RUN unzip boxcar.zip && \
     mv boxcar-$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml) boxcar && \
     rm boxcar.zip
 RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs && cargo build --release
+
+# Build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
 RUN pip install setuptools wheel build
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && python -m build --wheel .
