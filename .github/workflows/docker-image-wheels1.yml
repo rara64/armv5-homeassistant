@@ -24,7 +24,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - name: Build and load the image
         run: |
-          docker buildx build --load --tag wheels -f Dockerfile.wheels1 --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+          docker buildx build --load --tag wheels -f wheels1/Dockerfile --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Copy wheels from the image
         shell: bash
         run: |
