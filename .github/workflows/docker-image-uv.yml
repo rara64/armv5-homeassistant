@@ -24,7 +24,10 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - name: Build and load the image
         run: |
-          fallocate -l 8G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
           docker buildx build --load --tag wheels -f uv/Dockerfile --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Copy wheels from the image
         shell: bash
