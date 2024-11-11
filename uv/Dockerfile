@@ -21,7 +21,7 @@ RUN unzip boxcar.zip && \
     mv boxcar-$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml) boxcar && \
     rm boxcar.zip
 RUN cd boxcar && \
-    sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs && cargo build --release
+    sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
 
 # Set up swap for uv build
 RUN fallocate -l 8G /swapfile && \
