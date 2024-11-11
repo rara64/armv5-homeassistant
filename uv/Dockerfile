@@ -26,4 +26,4 @@ RUN cd boxcar && \
 # Build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
 RUN pip install setuptools wheel build
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=2 -C lto=off" python -m build --wheel .
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C lto=off -C linker=arm-linux-gnueabi-gcc" python -m build --wheel .
