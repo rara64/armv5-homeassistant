@@ -25,5 +25,11 @@ RUN cd boxcar && \
 
 # Build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
-RUN pip install setuptools wheel build
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C lto=off -C linker=arm-linux-gnueabi-gcc" python -m build --wheel . --target armv5te-unknown-linux-gnueabi
+
+RUN pip install setuptools wheel build maturin
+
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && cargo zigbuild --bin uv --bin uvx --target armv5te-unknown-linux-gnueabi --release
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && maturin build --release --strip --target armv5te-unknown-linux-gnueabi -o /
+
+#RUN pip install setuptools wheel build
+#RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C lto=off -C linker=arm-linux-gnueabi-gcc" python -m build --wheel . --target 
