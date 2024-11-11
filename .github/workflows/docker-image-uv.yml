@@ -28,7 +28,7 @@ jobs:
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
-          docker buildx build --load --tag wheels -f uv/Dockerfile --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+          docker buildx build --load --tag wheels -f uv/Dockerfile --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache --memory-swap=8g  .
       - name: Copy wheels from the image
         shell: bash
         run: |
