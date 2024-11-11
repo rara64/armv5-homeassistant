@@ -12,14 +12,8 @@ RUN dpkg -i *.deb
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# temp for testing
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && export RUSTFLAGS="--cfg=force_disable_atomic64" && pip install \
-uv==$UV_VER \
---config-settings=setup-args="-Dallow-noblas=true" --no-deps
-
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && export RUSTFLAGS="--cfg=force_disable_atomic64" && pip install \
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 numpy==$NUMPY_VER \
 cryptography==$CRYPTOGRAPHY_VER \
-uv==$UV_VER \
 --config-settings=setup-args="-Dallow-noblas=true" --no-deps
 
