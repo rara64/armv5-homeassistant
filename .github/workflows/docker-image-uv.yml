@@ -1,0 +1,43 @@
+name: Build uv wheel
+
+on:
+  repository_dispatch:
+    types: Build uv wheel
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version for wheels
+        shell: bash
+        run: |
+          export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
+          export WHEELS_LIST=('UV')
+           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
+          for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and load the image
+        run: |
+          docker buildx build --load --tag wheels -f uv/Dockerfile --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+      - name: Copy wheels from the image
+        shell: bash
+        run: |
+          docker create --name wheels wheels
+          mkdir wheels
+          docker cp wheels:./root/.cache/pip/wheels wheels
+          
+          export WHEELS_LIST=('UV')
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
+          for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: uv
+          path: |
+            ${{ env.UV }
