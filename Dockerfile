@@ -2,6 +2,7 @@
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS hass-builder
 ARG WHEELS
 ARG WHEELS2
+ARG CV
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -12,13 +13,17 @@ RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir pip wheel
 
-# Extract prebuilt wheels from rara64/armv5-homeassistant-wheels repo
+# Extract prebuilt wheels from `Build 1st batch of wheels` job
 COPY $WHEELS .
 RUN unzip wheels.zip -d wheels
 
-# Extract prebuilt wheels from rara64/armv5-homeassistant-wheels-batch2 repo
+# Extract prebuilt wheels from `Build 2nd batch of wheels` job
 COPY $WHEELS2 .
 RUN unzip wheels2.zip -d wheels
+
+# Extract prebuilt cv wheel from `Build uv wheel` job
+COPY $CV .
+RUN unzip cv.zip -d wheels
 
 # Install prebuilt wheels from both wheels repos
 RUN pip install $(find /wheels -type f -iname 'numpy*')
