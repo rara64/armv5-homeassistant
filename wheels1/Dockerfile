@@ -5,6 +5,7 @@ ARG PANDAS_VER
 ARG PYNACL_VER
 # ARG CRYPTOGRAPHY_VER
 ARG ORJSON_VER
+ARG MATURIN
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget jq
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -13,6 +14,9 @@ RUN dpkg -i *.deb
 
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+
+COPY $MATURIN .
+RUN unzip uv.zip && pip install $(find /uv -type f -iname 'maturin*')
 
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 # numpy==$NUMPY_VER \
