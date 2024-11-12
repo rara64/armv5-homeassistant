@@ -30,7 +30,7 @@ jobs:
         run: |
           docker create --name wheels wheels
           mkdir wheels
-          docker cp wheels:/wheels wheels
+          docker cp wheels:./wheels wheels
           
           export WHEELS_LIST=('UV')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
