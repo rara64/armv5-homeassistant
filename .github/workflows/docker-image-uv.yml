@@ -32,11 +32,13 @@ jobs:
           mkdir wheels
           docker cp wheels:./wheels wheels
           
-          export WHEELS_LIST=('UV')
+          export WHEELS_LIST=('UV' 'MATURIN')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: uv
-          path: ${{ env.UV }}
+          path: |
+            ${{ env.UV }}
+            ${{ env.MATURIN }}
