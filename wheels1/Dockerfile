@@ -1,9 +1,8 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 debian:trixie
-# ARG NUMPY_VER
+
 ARG PANDAS_VER
 ARG PYNACL_VER
-# ARG CRYPTOGRAPHY_VER
 ARG ORJSON_VER
 ARG MATURIN
 
@@ -19,9 +18,6 @@ COPY $MATURIN .
 RUN unzip uv.zip && pip install $(find /uv -type f -iname 'maturin*')
 
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
-# numpy==$NUMPY_VER \
 pynacl==$PYNACL_VER \
-# cryptography==$CRYPTOGRAPHY_VER \
-orjson==$ORJSON_VER --no-deps
-
-RUN pip install pandas==$PANDAS_VER --no-deps
+orjson==$ORJSON_VER --no-deps \
+pandas==$PANDAS_VER --no-deps
