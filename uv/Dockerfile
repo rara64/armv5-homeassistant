@@ -26,7 +26,7 @@ RUN cd boxcar && \
 # Build & install maturin wheel
 RUN pip install --extra-index-url https://www.piwheels.org/simple maturin
 RUN mkdir /wheels
-RUN mv /root/.cache/pip/wheels/$(find . -type f -name "*.whl" | grep -i "maturin") /wheels/$(find . -type f -name "*.whl" | grep -i "maturin")
+RUN WHEEL_PATH=$(find /root/.cache/pip/wheels -type f -name "*.whl" | grep -i "maturin") && mv "$WHEEL_PATH" /wheels/
 
 # Patch & build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
