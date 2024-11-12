@@ -26,7 +26,8 @@ RUN cd boxcar && \
 # Build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
 
-RUN pip install setuptools wheel build maturin
+RUN pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir setuptools wheel build maturin
+RUN cargo install cargo-zigbuild
 
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && cargo zigbuild --bin uv --bin uvx --target armv5te-unknown-linux-gnueabi --release
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && maturin build --release --strip --target armv5te-unknown-linux-gnueabi -o /
