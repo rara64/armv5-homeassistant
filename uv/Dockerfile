@@ -26,4 +26,5 @@ RUN cd boxcar && \
 # Patch & build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
 RUN pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir setuptools wheel build maturin
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release-no-lto --target armv5te-unknown-linux-gnueabi --manylinux off -o /
+RUN mkdir /wheels
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release-no-lto --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
