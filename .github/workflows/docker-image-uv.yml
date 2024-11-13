@@ -43,6 +43,5 @@ jobs:
             ${{ env.UV }}
             ${{ env.MATURIN }}
       - name: Dispatch armv5-homeassistant
-        shell: bash
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant"}'
