@@ -34,44 +34,66 @@ jobs:
           wget -O wheels2.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           7z x wheels2.zip
 
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "uv") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels3") | .archive_download_url' | head -n 1)
           wget -O uv.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
-          7z x uv.zip
+          7z x wheels3.zip
+
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
+          wget -O uv.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
+          7z x wheels4.zip
           
-          export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON' 'NUMPY' 'CRYPTOGRAPHY' 'UV')
+          # GET CURRENT WHEEL VERSIONS
+
+          export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'ZEROCONF')
           
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find . -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-'); done
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
 
+          export WHEELS_LIST_REQ=('ELEVENLABS' 'ANTHROPIC')
+          for wheel in "${WHEELS_LIST_REQ[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
+
+          # FIND WHICH WHEELS ARE OUTDATED
+          # WHEELS1
+          
           export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON')
           
           export OUTDATED_WHL_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
           echo "OUTDATED_WHL_VER=$OUTDATED_WHL_VER" >> $GITHUB_ENV
-          
-          echo $OUTDATED_WHL_VER
-          echo $PANDAS_VER
-          echo $PANDAS_WHL_VER
-          echo $PYNACL_VER
-          echo $PYNACL_WHL_VER
-          echo $ORJSON_VER
-          echo $ORJSON_WHL_VER
+
+          # WHEELS2
 
           export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY')
           
           export OUTDATED_WHL2_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
           echo "OUTDATED_WHL2_VER=$OUTDATED_WHL2_VER" >> $GITHUB_ENV
 
+          # WHEELS3
+          
           export WHEELS_LIST=('UV')
           
-          export OUTDATED_UV_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
-          echo "OUTDATED_UV_VER=$OUTDATED_UV_VER" >> $GITHUB_ENV
+          export OUTDATED_WHL3_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
+          echo "OUTDATED_WHL3_VER=$OUTDATED_WHL3_VER" >> $GITHUB_ENV
+
+          # WHEELS4
           
-          echo $UV_VER
-          echo $UV_WHL_VER
-          echo $NUMPY_VER
-          echo $NUMPY_WHL_VER
-          echo $CRYPTOGRAPHY_VER
-          echo $CRYPTOGRAPHY_WHL_VER
+          export WHEELS_LIST=('ELEVENLABS' 'ANTHROPIC' 'ZEROCONF')
+          
+          export OUTDATED_WHL4_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
+          echo "OUTDATED_WHL4_VER=$OUTDATED_WHL4_VER" >> $GITHUB_ENV
+
+          # SHOW WHEEL VERSIONS FOR DEBUGGING
+          
+          echo "PANDAS==$PANDAS_VER , expected PANDAS==$PANDAS_WHL_VER"
+          echo "PYNACL==$PYNACL_VER , expected PYNACL==$PYNACL_WHL_VER"
+          echo "ORJSON==$ORJSON_VER , expected ORJSON==$ORJSON_WHL_VER"
+          echo "UV==$UV_VER , expected UV==$UV_WHL_VER"
+          echo "NUMPY==$NUMPY_VER , expected NUMPY==$NUMPY_WHL_VER"
+          echo "CRYPTOGRAPHY==$CRYPTOGRAPHY_VER , expected CRYPTOGRAPHY==$CRYPTOGRAPHY_WHL_VER"
+          echo "ELEVENLABS==$ELEVENLABS_VER , expected ELEVENLABS==$ELEVENLABS_WHL_VER"
+          echo "ANTHROPIC==$ANTHROPIC_VER , expected ANTHROPIC==$ANTHROPIC_WHL_VER"
+          echo "ZEROCONF==$ZEROCONF_VER , expected ZEROCONF==$ZEROCONF_WHL_VER"
+
+          #
       - name: Check if new wheels needed from batch 1
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER != '' }}
         run: |
@@ -80,24 +102,28 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER != '' }}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 2nd batch of wheels"}'  
-      - name: Check if new wheel for UV needed
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_UV_VER != '' }}
+      - name: Check if new wheels needed from batch 3
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER != '' }}
         run: |
-          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build uv wheel"}'  
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 3rd batch of wheels"}'  
+      - name: Check if new wheels needed from batch 4
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER != '' }}
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 4th batch of wheels"}'  
       - name: Checkout code
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_UV_VER == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         uses: actions/checkout@v3
       - name: Set up QEMU
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_UV_VER == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         uses: docker/setup-qemu-action@v2.1.0
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_UV_VER == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         uses: docker/setup-buildx-action@v2.2.1
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_UV_VER == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_UV_VER == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels") | .archive_download_url' | head -n 1)
           wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
@@ -112,7 +138,7 @@ jobs:
 
           docker save -o test.tar test:latest
       - name: Upload wheels
-        if: ${{  env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_UV_VER == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         uses: actions/upload-artifact@v3
         with:
           name: test
