@@ -2,7 +2,7 @@
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS hass-builder
 ARG WHEELS
 ARG WHEELS2
-ARG CV
+ARG UV
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -22,8 +22,8 @@ COPY $WHEELS2 .
 RUN unzip wheels2.zip -d wheels
 
 # Extract prebuilt cv wheel from `Build uv wheel` job
-COPY $CV .
-RUN unzip cv.zip -d wheels
+COPY $UV .
+RUN unzip uv.zip -d wheels
 
 # Install prebuilt wheels from both wheels repos
 RUN pip install $(find /wheels -type f -iname 'numpy*')
