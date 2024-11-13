@@ -25,9 +25,13 @@ jobs:
       - name: Build and load the image
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
-          wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
+          wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo "wheels4_needed=1" >> $GITHUB_ENV && exit 0
           
           docker buildx build --load --tag wheels -f wheels1/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+      - name: Build missing wheels4 if needed
+        if: ${{ always() &&  env.wheels4_needed == 1 }}
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 4th batch of wheels"}'  
       - name: Copy wheels from the image
         shell: bash
         run: |
