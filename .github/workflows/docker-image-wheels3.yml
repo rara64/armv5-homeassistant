@@ -13,11 +13,9 @@ jobs:
         shell: bash
         run: |
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
-          export WHEELS_LIST=('ZEROCONF' 'TOKENIZERS')
+          export WHEELS_LIST=('ZEROCONF' 'ANTHROPIC' 'ELEVENLABS')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
-          export PYDANTIC_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "pydantic-core=" | awk -F'=' '{print $NF}' | tr -d '\n')"
-          echo "PYDANTIC_VER=$PYDANTIC_VER" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up QEMU
@@ -29,7 +27,7 @@ jobs:
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "uv") | .archive_download_url' | head -n 1)
           wget -O uv.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           
-          docker buildx build --load --tag wheels -f wheels3/Dockerfile --build-arg MATURIN=uv.zip --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg TOKENIZERS_VER=${{ env.TOKENIZERS_VER }} --build-arg PYDANTIC_VER=${{ env.PYDANTIC_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+          docker buildx build --load --tag wheels -f wheels3/Dockerfile --build-arg MATURIN=uv.zip --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Copy wheels from the image
         shell: bash
         run: |
@@ -37,7 +35,7 @@ jobs:
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
           
-          export WHEELS_LIST=('ZEROCONF' 'TOKENIZERS' 'PYDANTIC')
+          export WHEELS_LIST=('ZEROCONF' 'ANTHROPIC' 'ELEVENLABS')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
       - name: Upload wheels
@@ -46,8 +44,8 @@ jobs:
           name: wheels3
           path: |
             ${{ env.ZEROCONF }}
-            ${{ env.TOKENIZERS }}
-            ${{ env.PYDANTIC }}
+            ${{ env.ANTHROPIC }}
+            ${{ env.ELEVENLABS }}
       - name: Dispatch armv5-homeassistant
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant"}'
