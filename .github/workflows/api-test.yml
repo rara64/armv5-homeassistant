@@ -9,7 +9,9 @@ jobs:
     steps:
       - name: Dispatch workflow
         run: |
-         curl -X GET \
-         -u "${{ secrets.USERNAME }}:${{ secrets.TOKEN }}" \
-         -H "Accept: application/vnd.github.v3+json" \
-         "https://api.github.com/repos/rara64/armv5-homeassistant/actions/workflows"
+          curl -X POST \
+          -u "${{ secrets.USERNAME }}:${{ secrets.TOKEN }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Content-Type: application/json" \
+          --data '{"event_type": "Build 1st batch of wheels"}' \
+          "https://api.github.com/repos/rara64/armv5-homeassistant/dispatches"
