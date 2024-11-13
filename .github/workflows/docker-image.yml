@@ -36,7 +36,7 @@ jobs:
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels3") | .archive_download_url' | head -n 1)
           wget -O wheels3.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels3 download failed'
-          7z x wheels3.zip || echo 'wheels3 extract failed'
+          7z x wheels3.zip -o wheels3 || echo 'wheels3 extract failed'
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels4 download failed'
@@ -68,10 +68,18 @@ jobs:
           echo "OUTDATED_WHL2_VER=$OUTDATED_WHL2_VER" >> $GITHUB_ENV
 
           # WHEELS3
+
+          read -r ELEVENLABS_WHL_VER ANTHROPIC_WHL_VER ZEROCONF_WHL_VER < wheels3/wheel3ver.txt || { ELEVENLABS_WHL_VER=0; ANTHROPIC_WHL_VER=0; ZEROCONF_WHL_VER=0; }
+
+          export OUTDATED_WHL3_VER=''
           
-          export WHEELS_LIST=('ELEVENLABS' 'ANTHROPIC' 'ZEROCONF')
+          for wheel in 'ELEVENLABS' 'ANTHROPIC' 'ZEROCONF'; do
+            if [ "${!wheel_WHL_VER}" != "${!wheel_VER}" ]; then
+              OUTDATED_WHL3_VER=1
+              break
+            fi
+          done
           
-          export OUTDATED_WHL3_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
           echo "OUTDATED_WHL3_VER=$OUTDATED_WHL3_VER" >> $GITHUB_ENV
 
           # WHEELS4
