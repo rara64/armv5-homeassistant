@@ -3,7 +3,7 @@ FROM --platform=linux/arm/v5 debian:trixie
 
 ARG ZEROCONF_VER
 ARG TOKENIZERS_VER
-ARG PYDANTIC-CORE_VER
+ARG PYDANTIC_VER
 ARG MATURIN
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget jq
@@ -20,5 +20,5 @@ RUN unzip uv.zip && pip install $(find . -type f -iname 'maturin*')
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 zeroconf==$ZEROCONF_VER \
 tokenizers==$TOKENIZERS_VER \
-pydantic-core==$PYDANTIC-CORE_VER --no-deps
+pydantic-core==$PYDANTIC_VER --no-deps
 
