@@ -28,7 +28,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - name: Build and load the image
         run: |
-           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
 
           if [ -z "$LINK" ]; then
             echo "WHEELS_NEEDED=1" >> $GITHUB_ENV
