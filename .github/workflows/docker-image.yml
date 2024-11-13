@@ -69,7 +69,13 @@ jobs:
 
           # WHEELS3
 
-          read -r ELEVENLABS_WHL_VER ANTHROPIC_WHL_VER ZEROCONF_WHL_VER < wheels3/wheel3ver.txt || { ELEVENLABS_WHL_VER=0; ANTHROPIC_WHL_VER=0; ZEROCONF_WHL_VER=0; }
+          if [ -f wheels3/wheel3ver.txt ]; then
+            read -r ELEVENLABS_WHL_VER ANTHROPIC_WHL_VER ZEROCONF_WHL_VER < wheels3/wheel3ver.txt
+          else
+            ELEVENLABS_WHL_VER=0
+            ANTHROPIC_WHL_VER=0
+            ZEROCONF_WHL_VER=0
+          fi
 
           export OUTDATED_WHL3_VER=''
           
