@@ -1,0 +1,15 @@
+name: API test
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch workflow
+        run: |
+         curl -X GET \
+         -u "${{ secrets.USERNAME }}:${{ secrets.TOKEN }}" \
+         -H "Accept: application/vnd.github.v3+json" \
+         "https://api.github.com/repos/rara64/armv5-homeassistant/actions/workflows"
