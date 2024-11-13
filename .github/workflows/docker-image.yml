@@ -97,15 +97,16 @@ jobs:
 
           # SHOW WHEEL VERSIONS FOR DEBUGGING
           
-          echo "PANDAS==$PANDAS_VER , expected PANDAS==$PANDAS_WHL_VER"
-          echo "PYNACL==$PYNACL_VER , expected PYNACL==$PYNACL_WHL_VER"
-          echo "ORJSON==$ORJSON_VER , expected ORJSON==$ORJSON_WHL_VER"
-          echo "UV==$UV_VER , expected UV==$UV_WHL_VER"
-          echo "NUMPY==$NUMPY_VER , expected NUMPY==$NUMPY_WHL_VER"
-          echo "CRYPTOGRAPHY==$CRYPTOGRAPHY_VER , expected CRYPTOGRAPHY==$CRYPTOGRAPHY_WHL_VER"
-          echo "ELEVENLABS==$ELEVENLABS_VER , expected ELEVENLABS==$ELEVENLABS_WHL_VER"
-          echo "ANTHROPIC==$ANTHROPIC_VER , expected ANTHROPIC==$ANTHROPIC_WHL_VER"
-          echo "ZEROCONF==$ZEROCONF_VER , expected ZEROCONF==$ZEROCONF_WHL_VER"
+          echo "PANDAS==$PANDAS_WHL_VER , expected PANDAS==$PANDAS_VER"
+          echo "PYNACL==$PYNACL_WHL_VER , expected PYNACL==$PYNACL_VER"
+          echo "ORJSON==$ORJSON_WHL_VER , expected ORJSON==$ORJSON_VER"
+          echo "UV==$UV_WHL_VER , expected UV==$UV_VER"
+          echo "NUMPY==$NUMPY_WHL_VER , expected NUMPY==$NUMPY_VER"
+          echo "CRYPTOGRAPHY==$CRYPTOGRAPHY_WHL_VER , expected CRYPTOGRAPHY==$CRYPTOGRAPHY_VER"
+          echo "ELEVENLABS==$ELEVENLABS_WHL_VER , expected ELEVENLABS==$ELEVENLABS_VER"
+          echo "ANTHROPIC==$ANTHROPIC_WHL_VER , expected ANTHROPIC==$ANTHROPIC_VER"
+          echo "ZEROCONF==$ZEROCONF_WHL_VER , expected ZEROCONF==$ZEROCONF_VER"
+
 
           #
       - name: Check if new wheels needed from batch 1
