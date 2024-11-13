@@ -16,7 +16,7 @@ jobs:
           export WHEELS_LIST=('ZEROCONF' 'TOKENIZERS')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
-          export PYDANTIC_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "pydantic-core=" | awk -F'=' '{print $NF}' | tr -d '\n')
+          export PYDANTIC_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "pydantic-core=" | awk -F'=' '{print $NF}' | tr -d '\n')"
           echo "PYDANTIC_VER=$PYDANTIC_VER" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
