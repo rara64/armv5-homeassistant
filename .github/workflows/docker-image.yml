@@ -79,8 +79,8 @@ jobs:
 
           export OUTDATED_WHL3_VER=''
           
-          for wheel in 'ELEVENLABS' 'ANTHROPIC' 'ZEROCONF'; do
-            if [ "${!wheel_WHL_VER}" != "${!wheel_VER}" ]; then
+          for wheel in 'ELEVENLABS' 'ANTHROPIC' 'ZEROCONF'; do wh=${wheel}_WHL_VER; w=${wheel}_VER;
+            if [ ${!wh} != ${!w} ]; then
               OUTDATED_WHL3_VER=1
               break
             fi
