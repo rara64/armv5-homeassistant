@@ -2,7 +2,7 @@ name: Build 1st batch of wheels
 
 on:
   repository_dispatch:
-    types: [Build 1st batch of wheels]
+    types: Build 1st batch of wheels
   workflow_dispatch:
   
 jobs:
