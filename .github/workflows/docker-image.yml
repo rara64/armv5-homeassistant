@@ -27,20 +27,20 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels") | .archive_download_url' | head -n 1)
-          wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
-          7z x wheels.zip
+          wget -O wheels.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels download failed'
+          7z x wheels.zip || echo 'wheels extract failed'
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels2") | .archive_download_url' | head -n 1)
-          wget -O wheels2.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
-          7z x wheels2.zip
+          wget -O wheels2.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels2 download failed'
+          7z x wheels2.zip || echo 'wheels2 extract failed'
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels3") | .archive_download_url' | head -n 1)
-          wget -O wheels3.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
-          7z x wheels3.zip
+          wget -O wheels3.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels3 download failed'
+          7z x wheels3.zip || echo 'wheels3 extract failed'
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
-          wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
-          7z x wheels4.zip
+          wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels4 download failed'
+          7z x wheels4.zip || echo 'wheels4 extract failed'
           
           # GET CURRENT WHEEL VERSIONS
 
