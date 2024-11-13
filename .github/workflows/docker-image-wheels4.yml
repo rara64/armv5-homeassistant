@@ -1,8 +1,8 @@
-name: Build uv wheel
+name: Build 4th batch of wheels
 
 on:
   repository_dispatch:
-    types: Build uv wheel
+    types: Build 4th batch of wheels
   workflow_dispatch:
   
 jobs:
