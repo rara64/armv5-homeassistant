@@ -14,7 +14,7 @@ RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY $MATURIN .
-RUN unzip uv.zip && pip install $(find . -type f -iname 'maturin*')
+RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 numpy==$NUMPY_VER \
