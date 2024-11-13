@@ -39,7 +39,7 @@ jobs:
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
           
-          export WHEELS_LIST=('ZEROCONF' 'JITER' 'PYDANTIC' 'TOKENIZERS' 'PYYAML' ')
+          export WHEELS_LIST=('ZEROCONF' 'JITER' 'PYDANTIC' 'TOKENIZERS' 'PYYAML')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
       - name: Upload wheels
