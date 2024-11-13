@@ -30,7 +30,7 @@ RUN unzip wheels3.zip -d wheels
 COPY $WHEELS4 .
 RUN unzip wheels4.zip -d wheels
 
-# Install prebuilt wheels from both wheels repos
+# Install prebuilt wheels from wheel jobs
 RUN pip install $(find /wheels -type f -iname 'numpy*')
 RUN pip install $(find /wheels -type f -iname 'uv*')
 RUN pip install $(find /wheels -type f -iname 'maturin*')
