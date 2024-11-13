@@ -18,9 +18,9 @@ COPY $MATURIN .
 RUN unzip uv.zip && pip install $(find . -type f -iname 'maturin*')
 
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
-zeroconf==$ZEROCONF_VER --no-deps
-
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 anthropic==$ANTHROPIC_VER \
 elevenlabs==$ELEVENLABS_VER
+
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
+zeroconf==$ZEROCONF_VER --no-deps
 
