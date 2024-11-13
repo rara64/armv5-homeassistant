@@ -42,6 +42,8 @@ jobs:
           export WHEELS_LIST=('ZEROCONF' 'JITER' 'PYDANTIC' 'TOKENIZERS' 'PYYAML')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
+
+          echo "$ELEVENLABS_VER $ANTHROPIC_VER $ZEROCONF_VER" >> wheels3ver.txt
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
@@ -52,6 +54,7 @@ jobs:
             ${{ env.PYDANTIC }}
             ${{ env.TOKENIZERS }}
             ${{ env.PYYAML }}
+            ./wheels3ver.txt
       - name: Dispatch armv5-homeassistant
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant"}'
