@@ -2,7 +2,8 @@
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS hass-builder
 ARG WHEELS
 ARG WHEELS2
-ARG UV
+ARG WHEELS3
+ARG WHEELS4
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -21,22 +22,27 @@ RUN unzip wheels.zip -d wheels
 COPY $WHEELS2 .
 RUN unzip wheels2.zip -d wheels
 
-# Extract prebuilt cv wheel from `Build uv wheel` job
-COPY $UV .
-RUN unzip uv.zip -d wheels
+# Extract prebuilt wheels from `Build 3rd batch of wheels` job
+COPY $WHEELS3 .
+RUN unzip wheels3.zip -d wheels
+
+# Extract prebuilt wheels from `Build 4th batch of wheels` job
+COPY $WHEELS4 .
+RUN unzip wheels4.zip -d wheels
 
 # Install prebuilt wheels from both wheels repos
 RUN pip install $(find /wheels -type f -iname 'numpy*')
 RUN pip install $(find /wheels -type f -iname 'uv*')
 RUN pip install $(find /wheels -type f -iname 'maturin*')
-# RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') \
-# && VERSION=$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -i "numpy=" | cut -d "=" -f3) \
-# && pip install --no-cache-dir numpy==$VERSION
-
 RUN pip install --no-cache-dir $(find . -type f -iname 'pandas*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'pynacl*')
 RUN pip install $(find /wheels -type f -iname 'crypto*')
 RUN pip install --no-cache-dir $(find . -type f -iname 'orjson*')
+RUN pip install $(find /wheels -type f -iname 'zeroconf*')
+RUN pip install $(find /wheels -type f -iname 'PyYAML*')
+RUN pip install $(find /wheels -type f -iname 'jiter*')
+RUN pip install $(find /wheels -type f -iname 'tokenizers*')
+RUN pip install $(find /wheels -type f -iname 'pydantic-core*')
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
