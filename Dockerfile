@@ -63,7 +63,7 @@ ARG GO2RTC
 RUN mkdir /config
 
 # Install go2rtc binary
-RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/${GO2RTC}/go2rtc_linux_arm" \
+RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
     && chmod +x /bin/go2rtc
 
 COPY --from=hass-builder /opt/venv /opt/venv
