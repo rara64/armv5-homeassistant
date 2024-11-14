@@ -67,6 +67,8 @@ RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/
     && chmod +x /bin/go2rtc
 
 COPY --from=hass-builder /opt/venv /opt/venv
+RUN ldconfig
+
 ENV PATH="/opt/venv/bin:$PATH"
 
 CMD ["hass","-v","-c","/config"]
