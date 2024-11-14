@@ -36,7 +36,7 @@ jobs:
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels3") | .archive_download_url' | head -n 1)
           wget -O wheels3.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels3 download failed'
-          7z x wheels3.zip o wheels3 || echo 'wheels3 extract failed'
+          7z x wheels3.zip -o"wheels3" || echo 'wheels3 extract failed'
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'wheels4 download failed'
