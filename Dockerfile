@@ -4,7 +4,6 @@ ARG WHEELS
 ARG WHEELS2
 ARG WHEELS3
 ARG WHEELS4
-ARG GO2RTC
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -58,6 +57,7 @@ RUN pip install --no-cache-dir homeassistant
 RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
 
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS runner
+ARG GO2RTC
 
 # Copy Python VENV from hass-builder to runner
 RUN mkdir /config
