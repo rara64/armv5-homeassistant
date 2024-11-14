@@ -116,3 +116,5 @@ RUN git clone --branch release/5.1 --depth 1 https://github.com/FFmpeg/FFmpeg.gi
 
 RUN rm -rf ~/ffmpeg-libraries
 RUN rm -rf ~/FFmpeg
+
+RUN ldconfig
