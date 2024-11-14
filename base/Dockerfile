@@ -69,7 +69,7 @@ RUN git clone -b release-3.0.4 https://github.com/sekrit-twc/zimg.git ~/ffmpeg-l
 
 RUN ldconfig
 
-RUN git clone --branch release/5.0 --depth 1 https://github.com/FFmpeg/FFmpeg.git ~/FFmpeg \
+RUN git clone --branch release/5.1 --depth 1 https://github.com/FFmpeg/FFmpeg.git ~/FFmpeg \
   && cd ~/FFmpeg \
   && ./configure \
     --extra-cflags="-I/usr/local/include -mfloat-abi=soft -Wincompatible-pointer-types -Wno-incompatible-pointer-types" \
