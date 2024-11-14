@@ -69,8 +69,7 @@ jobs:
 
           # WHEELS3
 
-          ls 
-          ls wheels3
+          read ELEVENLABS_WHL_VER ANTHROPIC_WHL_VER ZEROCONF_WHL_VER < <(awk '{print $1, $2, $3}' ./wheels3/wheel3ver.txt)
           
           if [ -e ./wheels3/wheel3ver.txt ]; then
             read ELEVENLABS_WHL_VER ANTHROPIC_WHL_VER ZEROCONF_WHL_VER < <(awk '{print $1, $2, $3}' ./wheels3/wheel3ver.txt)
