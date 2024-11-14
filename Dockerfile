@@ -4,6 +4,7 @@ ARG WHEELS
 ARG WHEELS2
 ARG WHEELS3
 ARG WHEELS4
+ARG GO2RTC
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -60,6 +61,11 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS runner
 
 # Copy Python VENV from hass-builder to runner
 RUN mkdir /config
+
+# Install go2rtc binary
+RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/${GO2RTC}/go2rtc_linux_arm" \
+    && chmod +x /bin/go2rtc
+
 COPY --from=hass-builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
