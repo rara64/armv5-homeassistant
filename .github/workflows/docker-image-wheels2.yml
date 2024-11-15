@@ -13,7 +13,7 @@ jobs:
         shell: bash
         run: |
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
-          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY')
+          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY' 'HA-AV')
            for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
       - name: Checkout
@@ -34,7 +34,7 @@ jobs:
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           echo "WHEELS_NEEDED=0" >> $GITHUB_ENV
           
-          docker buildx build --load --tag wheels -f wheels2/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg CRYPTOGRAPHY_VER=${{ env.CRYPTOGRAPHY_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+          docker buildx build --load --tag wheels -f wheels2/Dockerfile --build-arg HAAV_VER=${ env.HA-AV_VER }} --build-arg MATURIN=wheels4.zip --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg CRYPTOGRAPHY_VER=${{ env.CRYPTOGRAPHY_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Build missing wheels4 if needed
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
@@ -47,7 +47,7 @@ jobs:
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
           
-          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY')
+          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY' 'HA-AV')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
       - name: Upload wheels
@@ -58,6 +58,7 @@ jobs:
           path: |
             ${{ env.NUMPY }}
             ${{ env.CRYPTOGRAPHY }}
+            ${{ env.HA-AV }}
       - name: Dispatch armv5-homeassistant
         if: ${{ env.WHEELS_NEEDED == '0' }}
         run: |
