@@ -43,6 +43,7 @@ RUN pip install $(find /wheels -type f -iname 'PyYAML*')
 RUN pip install $(find /wheels -type f -iname 'jiter*')
 RUN pip install $(find /wheels -type f -iname 'tokenizers*')
 RUN pip install $(find /wheels -type f -iname 'pydantic_core*')
+RUN pip install $(find /wheels -type f -iname 'ha-av*')
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
