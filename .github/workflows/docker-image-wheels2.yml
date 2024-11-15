@@ -54,7 +54,7 @@ jobs:
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
 
-          export $HAAV=$(find . -type f -name "*.whl" | grep -i "ha-av")
+          export $HAAV=$(find . -type f -name "*.whl" | grep -i "ha_av")
           echo "HAAV=$HAAV" >> $GITHUB_ENV
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
