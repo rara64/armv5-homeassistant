@@ -52,7 +52,7 @@ jobs:
           export WHEELS_LIST_REQ=('ELEVENLABS' 'ANTHROPIC')
           for wheel in "${WHEELS_LIST_REQ[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
 
-          export HAAV_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "ha-av=" | awk -F'=' '{print $NF}' | tr -d '\n')"
+          export HAAV_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "ha-av" | awk -F'=' '{print $NF}' | tr -d '\n')"
           export HAAV_WHL_VER="$(find . -type f -name "*.whl" | grep -i "HA_AV" | cut -f 2 -d '-' || echo '0')"
                     
           # FIND WHICH WHEELS ARE OUTDATED
