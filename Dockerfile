@@ -1,9 +1,10 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS hass-builder
+FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 ARG WHEELS
 ARG WHEELS2
 ARG WHEELS3
 ARG WHEELS4
+ARG GO2RTC
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -46,31 +47,25 @@ RUN pip install $(find /wheels -type f -iname 'pydantic_core*')
 RUN pip install $(find /wheels -type f -iname 'ha_av*')
 
 # Clone latest release of HASS
-RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
+RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    git clone -b $TAG https://github.com/home-assistant/core
 
-# Install & build HASS components (--securit=insecure & tmpfs: workaround for spurious network error when fetching crates.io-index)
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install --no-cache-dir -r core/requirements_all.txt
+# Install & build HASS components (--securit=insecure & tmpfs: workaround for spurious network error)
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && \
+    pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
+    umount /root/.cargo
 
 # Install HASS core package
 RUN pip install --no-cache-dir homeassistant
-
-# Cleanup
-RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
-
-FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS runner
-ARG GO2RTC
-
-# Copy Python VENV from hass-builder to runner
-RUN mkdir /config
 
 # Install go2rtc binary
 RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
     && chmod +x /bin/go2rtc
 
-COPY --from=hass-builder /opt/venv /opt/venv
+# Cleanup
+RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip && rm -rf /root/.cargo/registry
 
 RUN ldconfig && apt clean
-
-ENV PATH="/opt/venv/bin:$PATH"
+RUN mkdir /config
 
 CMD ["hass","-v","-c","/config"]
