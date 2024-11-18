@@ -22,7 +22,10 @@ COPY $WHEELS3 .
 COPY $WHEELS4 .
 
 # Install prebuilt wheels from wheel jobs
-RUN unzip *.zip -d wheels && \ 
+RUN unzip wheels.zip -d wheels && \ 
+    unzip wheels2.zip -d wheels && \
+    unzip wheels3.zip -d wheels && \
+    unzip wheels4.zip -d wheels && \
     find /wheels -type f -iname '*.whl' -exec pip install --no-cache-dir {} + && \
     rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
 
