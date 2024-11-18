@@ -23,19 +23,7 @@ COPY $WHEELS4 .
 
 # Install prebuilt wheels from wheel jobs
 RUN unzip *.zip -d wheels && \ 
-    pip install $(find /wheels -type f -iname 'numpy*') && \
-    pip install $(find /wheels -type f -iname 'uv*') && \
-    pip install $(find /wheels -type f -iname 'maturin*') && \
-    pip install $(find . -type f -iname 'pandas*') && \
-    pip install $(find . -type f -iname 'pynacl*') && \
-    pip install $(find /wheels -type f -iname 'crypto*') && \
-    pip install $(find . -type f -iname 'orjson*') && \
-    pip install $(find /wheels -type f -iname 'zeroconf*') && \
-    pip install $(find /wheels -type f -iname 'PyYAML*') && \
-    pip install $(find /wheels -type f -iname 'jiter*') && \
-    pip install $(find /wheels -type f -iname 'tokenizers*') && \
-    pip install $(find /wheels -type f -iname 'pydantic_core*') && \
-    pip install $(find /wheels -type f -iname 'ha_av*') && \
+    find /wheels -type f -iname '*.whl' -exec pip install --no-cache-dir {} + && \
     rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
 
 # Clone latest release of HASS
@@ -53,6 +41,6 @@ RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount
 RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
     && chmod +x /bin/go2rtc
 
-RUN ldconfig && mkdir /config
+RUN ldconfig && rm -rf /tmp/* && mkdir /config
 
 CMD ["hass","-v","-c","/config"]
