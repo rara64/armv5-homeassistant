@@ -22,7 +22,7 @@ COPY $WHEELS3 .
 COPY $WHEELS4 .
 
 # Install prebuilt wheels from wheel jobs
-RUN unzip wheels.zip -d wheels && \ 
+RUN unzip wheels.zip -d wheels && \
     unzip wheels2.zip -d wheels && \
     unzip wheels3.zip -d wheels && \
     unzip wheels4.zip -d wheels && \
