@@ -7,44 +7,36 @@ ARG WHEELS4
 ARG GO2RTC
 
 # Install latest cargo from rara64/armv5te-cargo repo
-RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
-RUN dpkg -i *.deb
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && \
+    dpkg -i *.deb && rm -f *.deb && apt clean
 
 # Setup Python VENV
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir pip wheel
 
-# Extract prebuilt wheels from `Build 1st batch of wheels` job
+# Copy prebuilt wheels from other workflows
 COPY $WHEELS .
-RUN unzip wheels.zip -d wheels
-
-# Extract prebuilt wheels from `Build 2nd batch of wheels` job
 COPY $WHEELS2 .
-RUN unzip wheels2.zip -d wheels
-
-# Extract prebuilt wheels from `Build 3rd batch of wheels` job
 COPY $WHEELS3 .
-RUN unzip wheels3.zip -d wheels
-
-# Extract prebuilt wheels from `Build 4th batch of wheels` job
 COPY $WHEELS4 .
-RUN unzip wheels4.zip -d wheels
 
 # Install prebuilt wheels from wheel jobs
-RUN pip install $(find /wheels -type f -iname 'numpy*')
-RUN pip install $(find /wheels -type f -iname 'uv*')
-RUN pip install $(find /wheels -type f -iname 'maturin*')
-RUN pip install --no-cache-dir $(find . -type f -iname 'pandas*')
-RUN pip install --no-cache-dir $(find . -type f -iname 'pynacl*')
-RUN pip install $(find /wheels -type f -iname 'crypto*')
-RUN pip install --no-cache-dir $(find . -type f -iname 'orjson*')
-RUN pip install $(find /wheels -type f -iname 'zeroconf*')
-RUN pip install $(find /wheels -type f -iname 'PyYAML*')
-RUN pip install $(find /wheels -type f -iname 'jiter*')
-RUN pip install $(find /wheels -type f -iname 'tokenizers*')
-RUN pip install $(find /wheels -type f -iname 'pydantic_core*')
-RUN pip install $(find /wheels -type f -iname 'ha_av*')
+RUN unzip *.zip -d wheels && \ 
+    pip install $(find /wheels -type f -iname 'numpy*') && \
+    pip install $(find /wheels -type f -iname 'uv*') && \
+    pip install $(find /wheels -type f -iname 'maturin*') && \
+    pip install $(find . -type f -iname 'pandas*') && \
+    pip install $(find . -type f -iname 'pynacl*') && \
+    pip install $(find /wheels -type f -iname 'crypto*') && \
+    pip install $(find . -type f -iname 'orjson*') && \
+    pip install $(find /wheels -type f -iname 'zeroconf*') && \
+    pip install $(find /wheels -type f -iname 'PyYAML*') && \
+    pip install $(find /wheels -type f -iname 'jiter*') && \
+    pip install $(find /wheels -type f -iname 'tokenizers*') && \
+    pip install $(find /wheels -type f -iname 'pydantic_core*') && \
+    pip install $(find /wheels -type f -iname 'ha_av*') && \
+    rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
@@ -53,19 +45,14 @@ RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/release
 # Install & build HASS components (--securit=insecure & tmpfs: workaround for spurious network error)
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && \
     pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
-    umount /root/.cargo
-
-# Install HASS core package
-RUN pip install --no-cache-dir homeassistant
+    umount /root/.cargo && rm -rf /root/.cargo && \
+    pip install --no-cache-dir homeassistant && \
+    pip cache purge && rm -rf core
 
 # Install go2rtc binary
 RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
     && chmod +x /bin/go2rtc
 
-# Cleanup
-RUN pip cache purge && rm -rf core && rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip && rm -rf /root/.cargo/registry
-
-RUN ldconfig && apt clean
-RUN mkdir /config
+RUN ldconfig && mkdir /config
 
 CMD ["hass","-v","-c","/config"]
