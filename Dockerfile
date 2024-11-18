@@ -41,6 +41,6 @@ RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount
 RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
     && chmod +x /bin/go2rtc
 
-RUN ldconfig && rm -rf /tmp/* && mkdir /config
+RUN ldconfig && mkdir /config
 
 CMD ["hass","-v","-c","/config"]
