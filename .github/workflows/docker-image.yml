@@ -13,7 +13,7 @@ on:
   
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu 24
     steps:
       - name: Check for new release of HASS
         run: |
@@ -163,7 +163,7 @@ jobs:
           docker save -o test.tar test:latest
       - name: Upload wheels
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test
           path: |
