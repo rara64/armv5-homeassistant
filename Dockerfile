@@ -38,7 +38,7 @@ RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount
     pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
     umount /root/.cargo && rm -rf /root/.cargo && \
     pip install --no-cache-dir homeassistant && \
-    pip cache purge && rm -rf core
+    pip cache purge && rm -rf core && rm -rf /tmp/*
 
 # Install go2rtc binary
 RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
