@@ -29,12 +29,10 @@ RUN unzip wheels.zip -d wheels && \
     find /wheels -type f -iname '*.whl' -exec pip install --no-cache-dir {} + && \
     rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
 
-# Clone latest release of HASS
-RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    git clone -b $TAG https://github.com/home-assistant/core
-
-# Install & build HASS components (--securit=insecure & tmpfs: workaround for spurious network error)
+# Clone, Install & Build HASS (--securit=insecure & tmpfs: workaround for spurious network error)
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && \
+    TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    git clone -b $TAG https://github.com/home-assistant/core && \
     pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
     umount /root/.cargo && rm -rf /root/.cargo && \
     pip install --no-cache-dir homeassistant && \
