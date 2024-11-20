@@ -33,10 +33,11 @@ RUN unzip wheels.zip -d wheels && \
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     git clone --depth 1 -b $TAG https://github.com/home-assistant/core
 
-RUN pip install -v --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
-    rm -rf /root/.cargo && \
-    pip install --no-cache-dir homeassistant && \
-    pip cache purge && rm -rf core && rm -rf /tmp/*
+RUN pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
+    rm -rf /root/.cargo && rm -rf core && rm -rf /tmp/*
+
+RUN pip install --no-cache-dir homeassistant && \
+    pip cache purge
 
 # Install go2rtc binary
 RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
