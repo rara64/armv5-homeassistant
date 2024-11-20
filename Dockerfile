@@ -33,7 +33,7 @@ RUN unzip wheels.zip -d wheels && \
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     git clone --depth 1 -b $TAG https://github.com/home-assistant/core
 
-RUN pip install --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
+RUN pip install -v --extra-index-url https://www.piwheels.org/simple --no-cache-dir -r core/requirements_all.txt && \
     rm -rf /root/.cargo && \
     pip install --no-cache-dir homeassistant && \
     pip cache purge && rm -rf core && rm -rf /tmp/*
