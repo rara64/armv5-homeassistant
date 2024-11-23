@@ -6,8 +6,6 @@ ARG WHEELS3
 ARG WHEELS4
 ARG GO2RTC
 
-RUN ifconfig
-
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && \
     dpkg -i *.deb && rm -f *.deb && apt clean
