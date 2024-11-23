@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 debian:trixie
+FROM --platform=linux/arm/v5 debian:trixie as builder
 
 # Setup environment for Rust, ffmpeg, HASS and HASS components
 
@@ -114,7 +114,9 @@ RUN git clone --branch release/5.1 --depth 1 https://github.com/FFmpeg/FFmpeg.gi
   && make -j$(nproc) \
   && make install
 
-RUN rm -rf ~/ffmpeg-libraries
-RUN rm -rf ~/FFmpeg
+FROM --platform=linux/arm/v5 debian:trixie as base
+
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /usr/local/lib /usr/local/lib
 
 RUN ldconfig
