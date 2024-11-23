@@ -22,5 +22,5 @@ jobs:
       - name: Build and push the image
         run: |
           docker buildx build --push \
-            --tag rara64/armv5-debian-base:latest --label version="1.0.1" \
+            --tag rara64/armv5-debian-base:latest --label version="1.0.2" \
             --platform linux/arm/v5 -f base/Dockerfile --allow security.insecure --no-cache .
