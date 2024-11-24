@@ -12,7 +12,7 @@ RUN dpkg -i *.deb
 # Setup Python VENV
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir pip wheel
+RUN pip install --no-cache-dir wheel
 
 # Copy prebuilt wheels from other workflows
 COPY $WHEELS .
