@@ -1,19 +1,18 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
+FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS hass-builder
 ARG WHEELS
 ARG WHEELS2
 ARG WHEELS3
 ARG WHEELS4
-ARG GO2RTC
 
 # Install latest cargo from rara64/armv5te-cargo repo
-RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && \
-    dpkg -i *.deb && rm -f *.deb && apt clean
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
+RUN dpkg -i *.deb
 
 # Setup Python VENV
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir wheel
+RUN pip install --no-cache-dir pip wheel
 
 # Copy prebuilt wheels from other workflows
 COPY $WHEELS .
@@ -29,20 +28,32 @@ RUN unzip wheels.zip -d wheels && \
     find /wheels -type f -iname '*.whl' -exec pip install --no-cache-dir {} + && \
     rm -rf wheels && rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
 
-# Clone, Install & Build HASS (--securit=insecure & tmpfs: workaround for spurious network error)
-RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    git clone --depth 1 -b $TAG https://github.com/home-assistant/core && \
-    pip cache purge && CARGO_INCREMENTAL=0 && \
-    pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple --no-cache-dir --use-deprecated=legacy-resolver -r core/requirements_all.txt && \
-    rm -rf /root/.cargo && rm -rf core && rm -rf /tmp/*
+# Clone latest release of HASS
+RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
 
-RUN pip install --no-cache-dir homeassistant && \
-    pip cache purge
+# Install & build HASS components (--securit=insecure & tmpfs: workaround for spurious network error when fetching crates.io-index)
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install --no-cache-dir -r core/requirements_all.txt
+
+# Install HASS core package
+RUN pip install --no-cache-dir homeassistant
+
+# Cleanup
+RUN pip cache purge
+
+FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest AS runner
+ARG GO2RTC
+
+# Copy Python VENV from hass-builder to runner
+RUN mkdir /config
 
 # Install go2rtc binary
 RUN curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
     && chmod +x /bin/go2rtc
 
-RUN ldconfig && mkdir /config
+COPY --from=hass-builder /opt/venv /opt/venv
+
+RUN ldconfig && apt clean
+
+ENV PATH="/opt/venv/bin:$PATH"
 
 CMD ["hass","-v","-c","/config"]
