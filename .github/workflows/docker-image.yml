@@ -142,6 +142,7 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Run Docker on tmpfs
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         uses: JonasAlfredsson/docker-on-tmpfs@v1
         with:
           tmpfs_size: 5
