@@ -145,8 +145,8 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
         uses: JonasAlfredsson/docker-on-tmpfs@v1
         with:
-          tmpfs_size: 5
-          swap_size: 4
+          tmpfs_size: 8
+          swap_size: 2
           swap_location: '/mnt/swapfile'
       - name: Build and push the image
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_WHL_VER == '' && env.OUTDATED_WHL2_VER == '' && env.OUTDATED_WHL3_VER == '' && env.OUTDATED_WHL4_VER == '' }}
