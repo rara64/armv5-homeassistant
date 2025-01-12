@@ -46,42 +46,41 @@ jobs:
 
           export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'ZEROCONF')
           
-          # for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find . -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-' || echo '0'); done
+          export WHEELS_LIST_REQ=('ELEVENLABS' 'ANTHROPIC')
+
+          extract_version() {
+            local input_string="$1"
+            echo "$input_string" | grep -oE "[0-9]+(\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*"
+          }
 
           for wheel in "${WHEELS_LIST[@]}"; do
             version=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${HASS_RELEASE}/homeassistant/package_constraints.txt" | \
-              grep -m 1 -i "${wheel}" | \
-              awk -F'=' '{print $NF}' | \
-              xargs -I {} bash -c 'extract_version() { 
-                local input_string="$1"; 
-                echo "$input_string" | grep -oP "[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*"; 
-              }; extract_version "$@"' _ {})
-            declare "${wheel}_VER=${version:-0}"
+              grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            version=$(extract_version "$version")
+            if [ -z "$version" ]; then
+              version="0"
+            fi
+            eval "${wheel}_VER=\"$version\""
           done
 
-          WHEELS_LIST_REQ=('ELEVENLABS' 'ANTHROPIC')
           for wheel in "${WHEELS_LIST_REQ[@]}"; do
             version=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${HASS_RELEASE}/requirements_all.txt" | \
-              grep -m 1 -i "${wheel}" | \
-              awk -F'=' '{print $NF}' | \
-              xargs -I {} bash -c 'extract_version() { 
-                local input_string="$1"; 
-                echo "$input_string" | grep -oP "[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*"; 
-              }; extract_version "$@"' _ {})
-            declare "${wheel}_VER=${version:-0}"
+              grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            version=$(extract_version "$version")
+            if [ -z "$version" ]; then
+              version="0"
+            fi
+            eval "${wheel}_VER=\"$version\""
           done
 
           HAAV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${HASS_RELEASE}/homeassistant/package_constraints.txt" | \
-            grep -m 1 -i "ha-av" | \
-            awk -F'=' '{print $NF}' | \
-            xargs -I {} bash -c 'extract_version() { 
-              local input_string="$1"; 
-              echo "$input_string" | grep -oP "[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*"; 
-            }; extract_version "$@"' _ {})
-          HAAV_VER="${HAAV_VER:-0}"
+            grep -m 1 -i "ha-av" | awk -F'=' '{print $NF}' | tr -d '\n')
+          HAAV_VER=$(extract_version "$HAAV_VER")
+          if [ -z "$HAAV_VER" ]; then
+            HAAV_VER="0"
+          fi
 
           # FIND WHICH WHEELS ARE OUTDATED
-          
           # WHEELS1
           
           export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON')
