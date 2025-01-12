@@ -57,7 +57,7 @@ jobs:
           for wheel in "${WHEELS_LIST[@]}"; do
             temp_ver=$(while IFS= read -r line; do
               extract_version "$line"
-            done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n'))
+            done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | awk -F'=' '{print $NF}' | grep -m 1 -i "${wheel}" | tr -d '\n')) # awk before grep
             export ${wheel}_VER=${temp_ver:-"0"}
           done
 
@@ -65,13 +65,13 @@ jobs:
           for wheel in "${WHEELS_LIST_REQ[@]}"; do
             temp_ver=$(while IFS= read -r line; do
               extract_version "$line"
-            done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n'))
+            done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt" | awk -F'=' '{print $NF}' | grep -m 1 -i "${wheel}" | tr -d '\n')) # awk before grep
             export ${wheel}_VER=${temp_ver:-"0"}
           done
 
           temp_ver=$(while IFS= read -r line; do
             extract_version "$line"
-          done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "ha-av" | awk -F'=' '{print $NF}' | tr -d '\n'))
+          done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | awk -F'=' '{print $NF}' | grep -m 1 -i "ha-av" | tr -d '\n')) # awk before grep
           export HAAV_VER=${temp_ver:-"0"}
                     
           # FIND WHICH WHEELS ARE OUTDATED
