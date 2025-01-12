@@ -57,7 +57,7 @@ jobs:
             export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt" | grep -m 1 -i "${wheel}==" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
           
-          export HAAV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "ha-av" | awk -F'=' '{print $NF}' | tr -d '\n')
+          export HAAV_VER=$(curl -s https://pypi.org/pypi/ha-av/json | jq -r '.info.version')
           export HAAV_WHL_VER=$(find . -type f -name "*.whl" | grep -i "HA_AV" | cut -f 2 -d '-' || echo '0')
 
           # FIND WHICH WHEELS ARE OUTDATED
