@@ -48,22 +48,16 @@ jobs:
           
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find . -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-' || echo '0'); done
           
-          extract_version() {
-            local input_string=$1
-            local version=$(echo "$input_string" | grep -oP '[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*')
-            echo "$version"
-          }
-          
           for wheel in "${WHEELS_LIST[@]}"; do 
-            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n' | xargs -I {} extract_version {})
+            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n' | grep -oP '[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*')
           done
 
           export WHEELS_LIST_REQ=('ELEVENLABS' 'ANTHROPIC')
           for wheel in "${WHEELS_LIST_REQ[@]}"; do 
-            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n' | xargs -I {} extract_version {})
+            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n' | grep -oP '[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*')
           done
           
-          export HAAV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "ha-av" | awk -F'=' '{print $NF}' | tr -d '\n' | xargs -I {} extract_version {})
+          export HAAV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "ha-av" | awk -F'=' '{print $NF}' | tr -d '\n' | grep -oP '[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*')
           export HAAV_WHL_VER=$(find . -type f -name "*.whl" | grep -i "HA_AV" | cut -f 2 -d '-' || echo '0')
 
           # FIND WHICH WHEELS ARE OUTDATED
