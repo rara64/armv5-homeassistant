@@ -14,7 +14,9 @@ jobs:
         run: |
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
           export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON')
-          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_VER="$(curl --silent https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt | grep -m 1 -i "${wheel}=" | awk -F'=' '{print $NF}' | tr -d '\n')"; done
+          for wheel in "${WHEELS_LIST[@]}"; do 
+            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+          done
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
       - name: Checkout
         uses: actions/checkout@v3
