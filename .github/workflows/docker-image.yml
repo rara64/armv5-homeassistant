@@ -72,14 +72,14 @@ jobs:
           
           export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON')
           
-          export OUTDATED_WHL_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
+          export OUTDATED_WHL_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [[ "${!wh}" != "${!w}" ]]; then echo '1'; break; fi; done)
           echo "OUTDATED_WHL_VER=$OUTDATED_WHL_VER" >> $GITHUB_ENV
 
           # WHEELS2
 
           export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY' 'HAAV')
                     
-          export OUTDATED_WHL2_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
+          export OUTDATED_WHL2_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [[ "${!wh}" != "${!w}" ]]; then echo '1'; break; fi; done)
           echo "OUTDATED_WHL2_VER=$OUTDATED_WHL2_VER" >> $GITHUB_ENV
 
           # WHEELS3
@@ -95,7 +95,7 @@ jobs:
           export OUTDATED_WHL3_VER=''
           
           for wheel in 'ELEVENLABS' 'ANTHROPIC' 'ZEROCONF'; do wh=${wheel}_WHL_VER; w=${wheel}_VER;
-            if [ ${!wh} != ${!w} ]; then
+            if [[ "${!wh}" != "${!w}" ]]; then
               OUTDATED_WHL3_VER=1
               break
             fi
@@ -107,7 +107,7 @@ jobs:
           
           export WHEELS_LIST=('UV')
           
-          export OUTDATED_WHL4_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [ ${!wh} != ${!w} ]; then echo '1'; break; fi; done)
+          export OUTDATED_WHL4_VER=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [[ "${!wh}" != "${!w}" ]]; then echo '1'; break; fi; done)
           echo "OUTDATED_WHL4_VER=$OUTDATED_WHL4_VER" >> $GITHUB_ENV
 
           # SHOW WHEEL VERSIONS FOR DEBUGGING
