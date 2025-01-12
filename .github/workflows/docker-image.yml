@@ -46,33 +46,20 @@ jobs:
 
           export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'ZEROCONF')
           
-          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find . -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-' || echo '0'); done
+          # for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find . -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-' || echo '0'); done
                 
-          extract_version() {
-            local input_string=$1
-            local version=$(echo "$input_string" | grep -oP '[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*')
-            echo "$version"
-          }
-
-          for wheel in "${WHEELS_LIST[@]}"; do
-            temp_ver=$(while IFS= read -r line; do
-              extract_version "$line"
-            done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | awk -F'=' '{print $NF}' | grep -m 1 -i "${wheel}" | tr -d '\n')) # awk before grep
-            export ${wheel}_VER=${temp_ver:-"0"}
+          for wheel in "${WHEELS_LIST[@]}"; do 
+            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n' | xargs -I {} bash -c 'extract_version() { local input_string=$1; local version=$(echo "$input_string" | grep -oP "[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*"); echo "$version"; }; extract_version "$@"' _ {})
+            export ${wheel}_VER=${!${wheel}_VER:-"0"} # SET DEFAULT TO 0 IF EMPTY
           done
 
           export WHEELS_LIST_REQ=('ELEVENLABS' 'ANTHROPIC')
-          for wheel in "${WHEELS_LIST_REQ[@]}"; do
-            temp_ver=$(while IFS= read -r line; do
-              extract_version "$line"
-            done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt" | awk -F'=' '{print $NF}' | grep -m 1 -i "${wheel}" | tr -d '\n')) # awk before grep
-            export ${wheel}_VER=${temp_ver:-"0"}
+          for wheel in "${WHEELS_LIST_REQ[@]}"; do 
+            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/requirements_all.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n' | xargs -I {} bash -c 'extract_version() { local input_string=$1; local version=$(echo "$input_string" | grep -oP "[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*"); echo "$version"; }; extract_version "$@"' _ {})
+            export ${wheel}_VER=${!${wheel}_VER:-"0"} # SET DEFAULT TO 0 IF EMPTY
           done
 
-          temp_ver=$(while IFS= read -r line; do
-            extract_version "$line"
-          done < <(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | awk -F'=' '{print $NF}' | grep -m 1 -i "ha-av" | tr -d '\n')) # awk before grep
-          export HAAV_VER=${temp_ver:-"0"}
+          export HAAV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "ha-av" | awk -F'=' '{print $NF}' | tr -d '\n' | xargs -I {} bash -c 'extract_version() { local input_string=$1; local version=$(echo "$input_string" | grep -oP "[0-9](\.[0-9]+)*([-][a-z]+[0-9]+)?(\.[0-9]+)*"); echo "$version"; }; extract_version "$@"' _ {})
                     
           # FIND WHICH WHEELS ARE OUTDATED
           
