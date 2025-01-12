@@ -17,7 +17,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
-ENV RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc"
+ENV RUSTFLAGS="-C opt-level=1 -C debuginfo=0 -C lto -C panic=abort -C linker=arm-linux-gnueabi-gcc"
 
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 anthropic==$ANTHROPIC_VER \
