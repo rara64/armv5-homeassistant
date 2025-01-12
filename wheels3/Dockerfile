@@ -19,10 +19,10 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc"
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -vv \
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 anthropic==$ANTHROPIC_VER \
 elevenlabs==$ELEVENLABS_VER
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -vv \
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
 zeroconf==$ZEROCONF_VER --no-deps
 
