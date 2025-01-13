@@ -19,7 +19,7 @@ RUN pip install --upgrade pip
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install --no-cache-dir $(find . -type f -iname 'maturin*')
 
-ENV RUSTFLAGS="-C codegen-units=1 -C lto=off"
+#ENV RUSTFLAGS="-C codegen-units=1 -C lto=off"
 
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install --no-cache-dir \
 anthropic==$ANTHROPIC_VER \
