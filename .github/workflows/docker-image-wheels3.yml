@@ -48,7 +48,7 @@ jobs:
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           echo "WHEELS_NEEDED=0" >> $GITHUB_ENV
           
-          docker buildx build --load --tag wheels -f wheels3/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache --memory="8G" --memory-swap="16G" .
+          docker buildx build --load --tag wheels -f wheels3/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache --memory="10G" --memory-swap="16G" .
       - name: Build missing wheels4 if needed
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
