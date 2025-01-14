@@ -21,10 +21,10 @@ RUN unzip wheels4.zip && pip install --no-cache-dir $(find . -type f -iname 'mat
 
 #ENV RUSTFLAGS="-C codegen-units=1 -C lto=off"
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install --no-cache-dir \
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && CARGO_BUILD_JOBS=2 pip install --no-cache-dir \
 anthropic==$ANTHROPIC_VER \
 elevenlabs==$ELEVENLABS_VER
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install --no-cache-dir \
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && CARGO_BUILD_JOBS=2 pip install --no-cache-dir \
 zeroconf==$ZEROCONF_VER --no-deps
 
