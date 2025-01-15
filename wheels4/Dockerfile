@@ -28,9 +28,11 @@ RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
 
 # Build & install maturin wheel
-RUN pip install -v maturin
+#RUN pip install -v maturin
 RUN mkdir /wheels
-RUN WHEEL_PATH=$(find /root/.cache/pip/wheels -type f -name "*.whl" | grep -i "maturin") && mv "$WHEEL_PATH" /wheels/
+RUN git clone --depth 1 https://github.com/PyO3/maturin.git /maturin
+RUN cd maturin && RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
+#RUN WHEEL_PATH=$(find /root/.cache/pip/wheels -type f -name "*.whl" | grep -i "maturin") && mv "$WHEEL_PATH" /wheels/
 
 # Patch & build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
