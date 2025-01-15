@@ -31,7 +31,7 @@ RUN cd boxcar && \
 #RUN pip install -v maturin
 RUN mkdir /wheels
 RUN git clone --depth 1 https://github.com/PyO3/maturin.git /maturin
-RUN cd /maturin && cargo build --release && mv /maturin/target/release/maturin /usr/local/bin/maturin
+RUN cd /maturin && SOURCE_DATE_EPOCH=1600000000 cargo build --release && mv /maturin/target/release/maturin /usr/local/bin/maturin
 #RUN WHEEL_PATH=$(find /root/.cache/pip/wheels -type f -name "*.whl" | grep -i "maturin") && mv "$WHEEL_PATH" /wheels/
 
 # Patch & build uv wheel
