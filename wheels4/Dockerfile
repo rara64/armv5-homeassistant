@@ -10,10 +10,6 @@ RUN dpkg -i *.deb
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN mkdir -p /root/.cargo && \
-    echo '[fetch]' > /root/.cargo/config.toml && \
-    echo 'git-fetch-with-cli = true' >> /root/.cargo/config.toml
-
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip
 RUN unzip uv.zip && \
     mv uv-$UV_VER uv && \
@@ -29,7 +25,6 @@ RUN cd boxcar && \
 
 # Build & install maturin wheel
 #RUN pip install -v maturin
-ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 RUN mkdir /wheels
 RUN git clone --depth 1 https://github.com/PyO3/maturin.git /maturin
 RUN cd /maturin && cargo build --release && mv /maturin/target/release/maturin /usr/local/bin/maturin
