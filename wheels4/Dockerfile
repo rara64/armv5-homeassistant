@@ -37,4 +37,4 @@ RUN cd /maturin && cargo build --release && mv /maturin/target/release/maturin /
 # Patch & build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
 RUN cd uv && sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = \"off\"/" Cargo.toml
-RUN cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
+RUN cd uv && SOURCE_DATE_EPOCH=1600000000 RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
