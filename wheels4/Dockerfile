@@ -24,7 +24,7 @@ RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
 
 # Build & install maturin wheel
-RUN pip install --extra-index-url https://www.piwheels.org/simple maturin
+RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple maturin
 RUN mkdir /wheels
 RUN WHEEL_PATH=$(find /root/.cache/pip/wheels -type f -name "*.whl" | grep -i "maturin") && mv "$WHEEL_PATH" /wheels/
 
