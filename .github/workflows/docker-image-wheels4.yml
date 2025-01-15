@@ -17,7 +17,13 @@ jobs:
           for wheel in "${WHEELS_LIST[@]}"; do 
             export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
-          for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
+          for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done  
+      - name: Run Docker on tmpfs
+        uses: JonasAlfredsson/docker-on-tmpfs@v1
+        with:
+          tmpfs_size: 2
+          swap_size: 2
+          swap_location: '/mnt/swapfile'
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up QEMU
