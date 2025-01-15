@@ -10,6 +10,10 @@ RUN dpkg -i *.deb
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+RUN mkdir -p /root/.cargo && \
+    echo '[fetch]' > /root/.cargo/config.toml && \
+    echo 'git-fetch-with-cli = true' >> /root/.cargo/config.toml
+
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip
 RUN unzip uv.zip && \
     mv uv-$UV_VER uv && \
