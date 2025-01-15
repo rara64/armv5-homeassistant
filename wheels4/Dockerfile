@@ -30,4 +30,5 @@ RUN WHEEL_PATH=$(find /root/.cache/pip/wheels -type f -name "*.whl" | grep -i "m
 
 # Patch & build uv wheel
 RUN cd uv && sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release-no-lto --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
+RUN cd uv && sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = \"off\"/" Cargo.toml
+RUN cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
