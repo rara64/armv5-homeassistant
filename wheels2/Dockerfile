@@ -15,7 +15,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install --no-cache-dir $(find . -type f -iname 'maturin*')
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-RUN pip install \
+RUN pip install -v \
 numpy==$NUMPY_VER \
 ha-av==$HAAV_VER \
 cryptography==$CRYPTOGRAPHY_VER \
