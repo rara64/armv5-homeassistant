@@ -19,5 +19,5 @@ RUN pip install -v \
 numpy==$NUMPY_VER \
 ha-av==$HAAV_VER \
 cryptography==$CRYPTOGRAPHY_VER \
---config-settings=setup-args="-Dallow-noblas=true" --no-deps
+--config-settings=setup-args="-Dallow-noblas=true"
 
