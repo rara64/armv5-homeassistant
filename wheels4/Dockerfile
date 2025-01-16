@@ -24,16 +24,15 @@ RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
 
 #ENV CARGO_BUILD_LOCKED=true
-RUN echo '#!/bin/sh' > /usr/bin/cargo && \
+RUN mv /usr/bin/cargo /usr/bin/cargo-bin && \
+    echo '#!/bin/sh' > /usr/bin/cargo && \
     echo 'set -e' >> /usr/bin/cargo && \
     echo 'echo "Using custom Cargo wrapper!"' >> /usr/bin/cargo && \
     echo 'RANDOM_CARGO_HOME=$(mktemp -d)' >> /usr/bin/cargo && \
     echo 'export CARGO_HOME=$RANDOM_CARGO_HOME' >> /usr/bin/cargo && \
     echo '/usr/bin/cargo-bin "$@"' >> /usr/bin/cargo && \
     echo 'rm -rf $RANDOM_CARGO_HOME' >> /usr/bin/cargo && \
-    chmod +x /usr/bin/cargo && \
-    mv /usr/bin/cargo /usr/bin/cargo-bin && \
-    mv /usr/bin/cargo-wrapper/cargo /usr/bin/cargo
+    chmod +x /usr/bin/cargo
 
 # Build & install maturin wheel
 RUN pip install -v maturin
