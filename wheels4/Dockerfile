@@ -24,7 +24,8 @@ RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
 
 #ENV CARGO_BUILD_LOCKED=true
-RUN echo '#!/bin/sh' > /usr/bin/cargo-wrapper && \
+RUN --security=insecure \
+    echo '#!/bin/sh' > /usr/bin/cargo-wrapper && \
     echo 'set -e' >> /usr/bin/cargo-wrapper && \
     echo 'if [ -z "$CARGO_WRAPPER_DIR" ]; then' >> /usr/bin/cargo-wrapper && \
     echo '  CARGO_WRAPPER_DIR=$(mktemp -d)' >> /usr/bin/cargo-wrapper && \
