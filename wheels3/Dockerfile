@@ -23,7 +23,7 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
 RUN pip install -v \
 anthropic==$ANTHROPIC_VER \
-elevenlabs==$ELEVENLABS_VER
+elevenlabs==$ELEVENLABS_VER --no-deps
 
 RUN pip install -v \
 zeroconf==$ZEROCONF_VER --no-deps
