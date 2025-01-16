@@ -29,6 +29,7 @@ RUN echo '#!/bin/sh' > /usr/bin/cargo-wrapper && \
     echo 'if [ -z "$CARGO_WRAPPER_DIR" ]; then' >> /usr/bin/cargo-wrapper && \
     echo '  CARGO_WRAPPER_DIR=$(mktemp -d)' >> /usr/bin/cargo-wrapper && \
     echo '  export CARGO_WRAPPER_DIR' >> /usr/bin/cargo-wrapper && \
+    echo '  mkdir -p "$CARGO_WRAPPER_DIR/cargo_home"' >> /usr/bin/cargo-wrapper && \
     echo '  mount -t tmpfs none "$CARGO_WRAPPER_DIR/cargo_home"' >> /usr/bin/cargo-wrapper && \
     echo '  trap "umount $CARGO_WRAPPER_DIR/cargo_home; rm -rf $CARGO_WRAPPER_DIR" EXIT' >> /usr/bin/cargo-wrapper && \
     echo 'fi' >> /usr/bin/cargo-wrapper && \
