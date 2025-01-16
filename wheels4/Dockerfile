@@ -29,14 +29,12 @@ ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git
 RUN --security=insecure mkdir -p /root/.tmpfs && chmod 777 /root/.tmpfs && mount -t tmpfs none /root/.tmpfs
 RUN echo '#!/bin/sh' > /usr/bin/cargo-wrapper && \
     echo 'set -e' >> /usr/bin/cargo-wrapper && \
-    echo 'if [ -z "$CARGO_WRAPPER_DIR" ]; then' >> /usr/bin/cargo-wrapper && \
-    echo '  CARGO_WRAPPER_DIR="/root/.tmpfs/$(mktemp -u)"' >> /usr/bin/cargo-wrapper && \
-    echo '  mkdir -p "$CARGO_WRAPPER_DIR"' >> /usr/bin/cargo-wrapper && \
-    echo '  export CARGO_WRAPPER_DIR' >> /usr/bin/cargo-wrapper && \
-    echo '  trap "rm -rf $CARGO_WRAPPER_DIR" EXIT' >> /usr/bin/cargo-wrapper && \
-    echo 'fi' >> /usr/bin/cargo-wrapper && \
-    echo 'echo "Using custom Cargo wrapper with CARGO_HOME=$CARGO_WRAPPER_DIR/cargo_home" >&2' >> /usr/bin/cargo-wrapper && \
+    echo 'CARGO_WRAPPER_DIR=/root/.tmpfs/$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)' >> /usr/bin/cargo-wrapper && \
+    echo 'mkdir -p "$CARGO_WRAPPER_DIR"' >> /usr/bin/cargo-wrapper && \
+    echo 'export CARGO_WRAPPER_DIR' >> /usr/bin/cargo-wrapper && \
+    echo 'echo "Using custom Cargo wrapper with CARGO_HOME=$CARGO_WRAPPER_DIR" >&2' >> /usr/bin/cargo-wrapper && \
     echo 'export CARGO_HOME="$CARGO_WRAPPER_DIR"' >> /usr/bin/cargo-wrapper && \
+    echo 'trap "rm -rf $CARGO_WRAPPER_DIR" EXIT' >> /usr/bin/cargo-wrapper && \
     echo '/usr/bin/cargo-bin "$@"' >> /usr/bin/cargo-wrapper && \
     chmod +x /usr/bin/cargo-wrapper && \
     mv /usr/bin/cargo /usr/bin/cargo-bin && \
