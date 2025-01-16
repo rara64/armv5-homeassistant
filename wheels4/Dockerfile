@@ -29,9 +29,10 @@ RUN echo '#!/bin/sh' > /usr/bin/cargo-wrapper && \
     echo 'if [ -z "$CARGO_WRAPPER_DIR" ]; then' >> /usr/bin/cargo-wrapper && \
     echo '  CARGO_WRAPPER_DIR=$(mktemp -d)' >> /usr/bin/cargo-wrapper && \
     echo '  export CARGO_WRAPPER_DIR' >> /usr/bin/cargo-wrapper && \
-    echo '  trap "rm -rf $CARGO_WRAPPER_DIR" EXIT' >> /usr/bin/cargo-wrapper && \
+    echo '  mount -t tmpfs none "$CARGO_WRAPPER_DIR/cargo_home"' >> /usr/bin/cargo-wrapper && \
+    echo '  trap "umount $CARGO_WRAPPER_DIR/cargo_home; rm -rf $CARGO_WRAPPER_DIR" EXIT' >> /usr/bin/cargo-wrapper && \
     echo 'fi' >> /usr/bin/cargo-wrapper && \
-    echo 'echo "Using custom Cargo wrapper with CARGO_HOME=$CARGO_WRAPPER_DIR/cargo_home" >&2' >> /usr/bin/cargo-wrapper && \
+    echo 'echo "Using custom Cargo wrapper with CARGO_HOME=$CARGO_WRAPPER_DIR/cargo_home (tmpfs)" >&2' >> /usr/bin/cargo-wrapper && \
     echo 'export CARGO_HOME="$CARGO_WRAPPER_DIR/cargo_home"' >> /usr/bin/cargo-wrapper && \
     echo '/usr/bin/cargo-bin "$@"' >> /usr/bin/cargo-wrapper && \
     chmod +x /usr/bin/cargo-wrapper && \
