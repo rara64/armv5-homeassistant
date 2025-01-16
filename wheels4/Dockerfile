@@ -25,10 +25,12 @@ RUN cd boxcar && \
 
 #ENV CARGO_BUILD_LOCKED=true
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git
-ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 # Build & install maturin wheel
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -v maturin
+RUN mkdir -p /root/.cargo
+RUN echo '[net]' >> /root/.cargo/config.toml
+RUN echo 'git-fetch-with-cli = true' >> /root/.cargo/config.toml
+RUN pip install -v maturin
 RUN mkdir /wheels
 #RUN git clone --depth 1 https://github.com/PyO3/maturin.git /maturin
 #RUN cd /maturin && cargo build --release && mv /maturin/target/release/maturin /usr/local/bin/maturin
