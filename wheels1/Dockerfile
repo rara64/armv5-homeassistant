@@ -22,4 +22,4 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 RUN pip install -v \
 pynacl==$PYNACL_VER \
 orjson==$ORJSON_VER \
-pandas==$PANDAS_VER --no-deps
+pandas==$PANDAS_VER
