@@ -27,7 +27,7 @@ RUN cd boxcar && \
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git
 
 # Build & install maturin wheel
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs -o size=2G none /root/.cargo pip install -v maturin
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs -o size=2G none /root/.cargo && pip install -v maturin
 RUN mkdir /wheels
 #RUN git clone --depth 1 https://github.com/PyO3/maturin.git /maturin
 #RUN cd /maturin && cargo build --release && mv /maturin/target/release/maturin /usr/local/bin/maturin
