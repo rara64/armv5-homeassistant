@@ -17,7 +17,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip
 
 COPY $MATURIN .
-RUN unzip wheels4.zip && pip install --no-cache-dir $(find . -type f -iname 'maturin*')
+RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
