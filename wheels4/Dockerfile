@@ -23,9 +23,6 @@ RUN unzip boxcar.zip && \
 RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
 
-#ENV CARGO_BUILD_LOCKED=true
-
-ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
 # Build & install maturin wheel
