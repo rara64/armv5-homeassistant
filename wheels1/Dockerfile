@@ -18,7 +18,7 @@ COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-RUN maturin
+RUN maturin --version
 
 RUN pip install -v \
 pynacl==$PYNACL_VER \
