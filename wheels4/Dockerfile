@@ -30,6 +30,7 @@ ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git
 RUN mkdir -p /root/.cargo
 RUN echo '[net]' >> /root/.cargo/config.toml
 RUN echo 'git-fetch-with-cli = true' >> /root/.cargo/config.toml
+RUN cargo update
 RUN pip install -vvv maturin
 RUN mkdir /wheels
 #RUN git clone --depth 1 https://github.com/PyO3/maturin.git /maturin
