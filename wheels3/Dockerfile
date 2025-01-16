@@ -19,13 +19,12 @@ RUN pip install --upgrade pip
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install --no-cache-dir $(find . -type f -iname 'maturin*')
 
-#ENV RUSTFLAGS="-C lto=off"
-#ENV CARGO_BUILD_JOBS="2"
+ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
-RUN pip install -v --no-cache-dir \
+RUN pip install -v \
 anthropic==$ANTHROPIC_VER \
 elevenlabs==$ELEVENLABS_VER
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install --no-cache-dir \
+RUN pip install -v \
 zeroconf==$ZEROCONF_VER --no-deps
 
