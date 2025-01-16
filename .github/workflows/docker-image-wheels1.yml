@@ -36,7 +36,7 @@ jobs:
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           echo "WHEELS_NEEDED=0" >> $GITHUB_ENV
           
-          docker buildx build --load --tag wheels -f wheels1/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+          DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels1/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Build missing wheels4 if needed
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
