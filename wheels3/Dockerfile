@@ -7,10 +7,10 @@ ARG ANTHROPIC_VER
 ARG MATURIN
 
 #RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget jq
-#RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 #RUN apt install -y build-essential cmake rustc python3.12 python3.12-venv python3.12-dev autoconf libssl-dev pkg-config unzip
-#RUN dpkg -i *.deb
-RUN apt update && apt install -y cargo
+RUN dpkg -i *.deb
+#RUN apt update && apt install -y cargo
 
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -22,9 +22,9 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
-RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -v \
+RUN pip install -v \
 anthropic==$ANTHROPIC_VER --find-links .
 
 
