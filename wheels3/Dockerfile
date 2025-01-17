@@ -28,22 +28,11 @@ ENV RUST_BACKTRACE=1
 #ENV CARGO_LOG=debug
 #ENV CARGO_BUILD_JOBS=2
 
-RUN echo "monitor_usage() { while true; do ps -p $$ -o %cpu,%mem,cmd; sleep 1; done; }" > /opt/monitor.sh
+RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
 
-RUN ( \
-    bash /opt/monitor.sh > /proc/1/fd/1 2>&1 & \
-    MONITOR_PID=$! ; \
-    pip install -v elevenlabs==$ELEVENLABS_VER --find-links . ; \
-    pip install -v anthropic==$ANTHROPIC_VER --find-links . ; \
-    pip install -v zeroconf==$ZEROCONF_VER --find-links . ; \
-    kill $MONITOR_PID \
-)
-
-#RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
-
-#RUN pip install -v \
-#anthropic==$ANTHROPIC_VER --find-links .
+RUN pip install -v \
+anthropic==$ANTHROPIC_VER --find-links .
 
 
-#RUN pip install -v zeroconf==$ZEROCONF_VER --find-links .
+RUN pip install -v zeroconf==$ZEROCONF_VER --find-links .
 
