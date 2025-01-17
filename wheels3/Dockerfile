@@ -16,7 +16,7 @@ RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 #RUN pip install --upgrade pip
-RUN uname -u
+RUN uname -a
 
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
