@@ -45,15 +45,16 @@ jobs:
 
       - name: Copy Seccomp Profile
         run: |
-          mkdir -p ~/.docker/
-          cp .github/allow-ptrace.json ~/.docker/allow-ptrace.json
-          cat <<EOF | docker context update --builder ${BUILDX_BUILDER_NAME}
-          {
-            "buildkitd": {
-             "seccompProfile": "$(cat ~/.docker/allow-ptrace.json)"
+           mkdir -p ~/.docker/
+            cp .github/allow-ptrace.json ~/.docker/allow-ptrace.json
+            ESCAPED_JSON=$(jq -c . ~/.docker/allow-ptrace.json)
+            cat <<EOF | docker context update --builder ${BUILDX_BUILDER_NAME}
+            {
+              "buildkitd": {
+                "seccompProfile": ${ESCAPED_JSON}
+              }
             }
-          }
-          EOF
+            EOF
       - name: Build and load the image
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
