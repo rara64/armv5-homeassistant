@@ -21,7 +21,9 @@ COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-ENV MATURIN_LOG=debug
+
+ENV RUST_BACKTRACE=1
+ENV CARGO_TERM_VERBOSE=true
 #ENV CARGO_BUILD_JOBS=2
 
 RUN pip install -vv elevenlabs==$ELEVENLABS_VER --find-links .
