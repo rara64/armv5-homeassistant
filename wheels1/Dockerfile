@@ -22,5 +22,4 @@ RUN maturin --version
 
 RUN pip install -v \
 pynacl==$PYNACL_VER \
-orjson==$ORJSON_VER \
-pandas==$PANDAS_VER --find-links .
+orjson==$ORJSON_VER --find-links .
