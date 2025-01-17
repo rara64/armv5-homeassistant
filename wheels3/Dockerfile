@@ -10,7 +10,7 @@ ARG MATURIN
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 #RUN apt install -y build-essential cmake rustc python3.12 python3.12-venv python3.12-dev autoconf libssl-dev pkg-config unzip
 RUN dpkg -i *.deb
-#RUN apt update && apt install -y cargo
+RUN apt update && apt install -y strace
 
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -23,11 +23,11 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
 ENV RUST_BACKTRACE=1
-ENV CARGO_TERM_VERBOSE=true
-ENV CARGO_LOG=debug
+#ENV CARGO_TERM_VERBOSE=true
+#ENV CARGO_LOG=debug
 #ENV CARGO_BUILD_JOBS=2
 
-RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
+RUN strace -f -e trace=all pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
 
 RUN pip install -v \
 anthropic==$ANTHROPIC_VER --find-links .
