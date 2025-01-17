@@ -10,7 +10,7 @@ ARG MATURIN
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 #RUN apt install -y build-essential cmake rustc python3.12 python3.12-venv python3.12-dev autoconf libssl-dev pkg-config unzip
 RUN dpkg -i *.deb
-#RUN apt update && apt install -y strace
+RUN apt update && apt install -y procps
 
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -28,11 +28,24 @@ ENV RUST_BACKTRACE=1
 #ENV CARGO_LOG=debug
 #ENV CARGO_BUILD_JOBS=2
 
-RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
+# Function to monitor CPU and memory usage
+RUN echo "monitor_usage() { while true; do ps -p $$ -o %cpu,%mem,cmd; sleep 1; done; }" > /opt/monitor.sh
 
-RUN pip install -v \
-anthropic==$ANTHROPIC_VER --find-links .
+# Install ElevenLabs, Anthropic, and Zeroconf in the background with monitoring
+RUN ( \
+    bash /opt/monitor.sh & \
+    MONITOR_PID=$! ; \
+    pip install -v elevenlabs==$ELEVENLABS_VER --find-links . ; \
+    pip install -v anthropic==$ANTHROPIC_VER --find-links . ; \
+    pip install -v zeroconf==$ZEROCONF_VER --find-links . ; \
+    kill $MONITOR_PID \
+)
+
+#RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
+
+#RUN pip install -v \
+#anthropic==$ANTHROPIC_VER --find-links .
 
 
-RUN pip install -v zeroconf==$ZEROCONF_VER --find-links .
+#RUN pip install -v zeroconf==$ZEROCONF_VER --find-links .
 
