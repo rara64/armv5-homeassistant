@@ -15,15 +15,15 @@ RUN dpkg -i *.deb
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-RUN pip install --upgrade pip
+#RUN pip install --upgrade pip
 
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-ENV CARGO_BUILD_JOBS=2
+#ENV CARGO_BUILD_JOBS=2
 
-RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
+RUN pip install -vvv elevenlabs==$ELEVENLABS_VER --find-links .
 
 RUN pip install -v \
 anthropic==$ANTHROPIC_VER --find-links .
