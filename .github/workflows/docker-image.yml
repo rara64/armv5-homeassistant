@@ -162,7 +162,7 @@ jobs:
 
           export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/${{ env.HASS_RELEASE }}/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
           
-           DOCKER_BUILDKIT=0 docker buildx build --load --network=host --build-arg GO2RTC=$GO2RTC --build-arg WHEELS3=wheels3.zip --build-arg WHEELS=wheels.zip --build-arg WHEELS2=wheels2.zip --build-arg WHEELS4=wheels4.zip --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest .
+          DOCKER_BUILDKIT=0 docker buildx build --load --network=host --build-arg GO2RTC=$GO2RTC --build-arg WHEELS3=wheels3.zip --build-arg WHEELS=wheels.zip --build-arg WHEELS2=wheels2.zip --build-arg WHEELS4=wheels4.zip --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest .
 
           docker save -o test.tar test:latest
       - name: Upload wheels
