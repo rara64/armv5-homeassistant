@@ -36,6 +36,8 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760
       - name: Build and load the image
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
@@ -48,7 +50,7 @@ jobs:
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           echo "WHEELS_NEEDED=0" >> $GITHUB_ENV
           
-          DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels3/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache --log-opt max-buffer-size=32m .
+          DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels3/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Build missing wheels4 if needed
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
