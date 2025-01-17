@@ -21,9 +21,9 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -v \
+RUN pip install -v \
 anthropic==$ANTHROPIC_VER \
 elevenlabs==$ELEVENLABS_VER --find-links .
 
-RUN pip install -v zeroconf==$ZEROCONF_VER
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -v zeroconf==$ZEROCONF_VER --find-links .
 
