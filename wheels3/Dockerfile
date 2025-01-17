@@ -7,9 +7,10 @@ ARG ANTHROPIC_VER
 ARG MATURIN
 
 #RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y curl wget jq
-RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
+#RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 #RUN apt install -y build-essential cmake rustc python3.12 python3.12-venv python3.12-dev autoconf libssl-dev pkg-config unzip
-RUN dpkg -i *.deb
+#RUN dpkg -i *.deb
+RUN apt update && apt install -y cargo
 
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
