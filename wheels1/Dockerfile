@@ -20,7 +20,7 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 RUN maturin --version
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -v \
+RUN pip install -v \
 pynacl==$PYNACL_VER \
 orjson==$ORJSON_VER \
 pandas==$PANDAS_VER
