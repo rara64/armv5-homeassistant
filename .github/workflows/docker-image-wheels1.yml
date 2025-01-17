@@ -13,7 +13,7 @@ jobs:
         shell: bash
         run: |
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
-          export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON')
+          export WHEELS_LIST=('CRYPTOGRAPHY' 'PYNACL' 'ORJSON')
           for wheel in "${WHEELS_LIST[@]}"; do 
             export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
@@ -36,7 +36,7 @@ jobs:
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           echo "WHEELS_NEEDED=0" >> $GITHUB_ENV
           
-          DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels1/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+          DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels1/Dockerfile --build-arg MATURIN=wheels4.zip --build-arg CRYPTOGRAPHY_VER=${{ env.CRYPTOGRAPHY_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Build missing wheels4 if needed
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
