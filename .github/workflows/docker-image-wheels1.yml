@@ -49,7 +49,7 @@ jobs:
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
           
-          export WHEELS_LIST=('PANDAS' 'PYNACL' 'ORJSON')
+          export WHEELS_LIST=('CRYPTOGRAPHY' 'PYNACL' 'ORJSON')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
       - name: Upload wheels
@@ -59,7 +59,7 @@ jobs:
           name: wheels
           path: |
             ${{ env.PYNACL }}
-            ${{ env.PANDAS }}
+            ${{ env.CRYPTOGRAPHY }}
             ${{ env.ORJSON }}
       - name: Dispatch armv5-homeassistant
         if: ${{ env.WHEELS_NEEDED == '0' }}
