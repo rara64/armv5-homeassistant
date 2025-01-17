@@ -17,11 +17,11 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
-RUN pip install -v ha-av==$HAAV_VER --no-binary av
+RUN pip install -v ha-av==$HAAV_VER --no-binary av --find-links .
 
 RUN pip install -v \
-numpy==$NUMPY_VER
+numpy==$NUMPY_VER --find-links .
 
 RUN pip install -v \
-pandas==$PANDAS_VER
+pandas==$PANDAS_VER --find-links .
 
