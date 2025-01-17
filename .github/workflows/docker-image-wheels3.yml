@@ -35,8 +35,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: all
-          qemu-cpu: arm926ej-s
+          platforms: arm
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
