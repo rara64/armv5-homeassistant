@@ -4,6 +4,7 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 ARG NUMPY_VER
 ARG CRYPTOGRAPHY_VER
 ARG HAAV_VER
+ARG PANDAS_VER
 ARG MATURIN
 
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -26,4 +27,7 @@ RUN pip install -v ha-av==$HAAV_VER --no-binary av
 
 RUN pip install -v \
 numpy==$NUMPY_VER
+
+RUN pip install -v \
+pandas==$PANDAS_VER
 
