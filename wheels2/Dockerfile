@@ -2,7 +2,6 @@
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 
 ARG NUMPY_VER
-ARG CRYPTOGRAPHY_VER
 ARG HAAV_VER
 ARG PANDAS_VER
 ARG MATURIN
