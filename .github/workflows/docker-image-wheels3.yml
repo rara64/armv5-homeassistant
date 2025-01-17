@@ -39,16 +39,18 @@ jobs:
       - name: Monitor Docker Build Process
         run: |
           while true; do
-            # Get Docker build process ID (adjust if needed)
-            DOCKER_PID=$(pgrep -f 'docker build') 
-            if [ -n "$DOCKER_PID" ]; then
-              ps -p $DOCKER_PID -o %cpu,%mem,cmd
+            # Get Docker build container ID (more reliable)
+            CONTAINER_ID=$(docker ps -q --filter "name=buildx_build_") 
+            if [ -n "$CONTAINER_ID" ]; then
+              # Use docker stats for CPU and memory
+              docker stats --no-stream --format "{{.Name}}: CPU {{.CPUPerc}}, MEM {{.MemUsage}}" $CONTAINER_ID
             else
-              echo "Docker build process not found."
+              echo "Docker build container not found."
             fi
             sleep 1
           done &
           MONITOR_PID=$!
+          echo "Monitor PID: $MONITOR_PID"  # Output the monitor PID for debugging
       - name: Build and load the image
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
