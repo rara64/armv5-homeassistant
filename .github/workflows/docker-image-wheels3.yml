@@ -34,14 +34,15 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+          qemu-cpu: arm926ej-s
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           driver-opts: |
             env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760
       - name: Build and load the image
-        env:
-          QEMU_CPU: arm926ej-s
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
 
