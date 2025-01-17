@@ -52,7 +52,7 @@ jobs:
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
           
-          export WHEELS_LIST=('NUMPY' 'CRYPTOGRAPHY')
+          export WHEELS_LIST=('NUMPY' 'PANDAS')
           for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
 
@@ -65,7 +65,7 @@ jobs:
           name: wheels2
           path: |
             ${{ env.NUMPY }}
-            ${{ env.CRYPTOGRAPHY }}
+            ${{ env.PANDAS }}
             ${{ env.HAAV }}
       - name: Dispatch armv5-homeassistant
         if: ${{ env.WHEELS_NEEDED == '0' }}
