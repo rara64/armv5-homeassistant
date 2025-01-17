@@ -36,21 +36,6 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Monitor Docker Build Process
-        run: |
-          while true; do
-            # Get Docker build container ID (more reliable)
-            CONTAINER_ID=$(docker ps -q --filter "name=buildx_build_") 
-            if [ -n "$CONTAINER_ID" ]; then
-              # Use docker stats for CPU and memory
-              docker stats --no-stream --format "{{.Name}}: CPU {{.CPUPerc}}, MEM {{.MemUsage}}" $CONTAINER_ID
-            else
-              echo "Docker build container not found."
-            fi
-            sleep 1
-          done &
-          MONITOR_PID=$!
-          echo "Monitor PID: $MONITOR_PID"  # Output the monitor PID for debugging
       - name: Build and load the image
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
@@ -64,8 +49,6 @@ jobs:
           echo "WHEELS_NEEDED=0" >> $GITHUB_ENV
           
           DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels3/Dockerfile --progress=plain --build-arg MATURIN=wheels4.zip --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
-      - name: Stop Monitor
-        run: kill $MONITOR_PID
       - name: Build missing wheels4 if needed
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
