@@ -37,7 +37,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760
+            image=moby/buildkit:v0.12.4-rootless
+            files=[".github/allow-ptrace.json=~/.docker/buildkitd.toml"]
+          buildkitd-flags: --allow-insecure-entitlement security.insecure
+
+      - name: Copy Seccomp Profile
+        run: |
+          mkdir -p ~/.docker/
+          cp .github/allow-ptrace.json ~/.docker/allow-ptrace.json
+          cat <<EOF | docker context update --builder ${BUILDX_BUILDER_NAME}
+          {
+            "buildkitd": {
+             "seccompProfile": "$(cat ~/.docker/allow-ptrace.json)"
+            }
+          }
+          EOF
       - name: Build and load the image
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "wheels4") | .archive_download_url' | head -n 1)
