@@ -21,12 +21,12 @@ COPY $WHEELS3 .
 COPY $WHEELS4 .
 
 # Install prebuilt wheels from wheel jobs
-RUN unzip wheels.zip -d wheels && \
-    unzip wheels2.zip -d wheels && \
-    unzip wheels3.zip -d wheels && \
-    unzip wheels4.zip -d wheels && \
-    find /wheels -type f -iname '*.whl' -exec pip install --no-cache-dir {} + && \
-    rm wheels.zip && rm wheels2.zip && rm wheels3.zip && rm wheels4.zip
+RUN unzip -j "*.whl" wheels.zip -d wheels && \
+    unzip -j "*.whl" wheels2.zip -d wheels && \
+    unzip -j "*.whl" wheels3.zip -d wheels && \
+    unzip -j "*.whl" wheels4.zip -d wheels && \
+    find wheels/ -type f -name '*.whl' -exec pip install --no-cache-dir {} + && \
+    rm wheels.zip wheels2.zip wheels3.zip wheels4.zip
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
