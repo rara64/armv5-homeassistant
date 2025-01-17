@@ -6,8 +6,9 @@ ARG HAAV_VER
 ARG PANDAS_VER
 ARG MATURIN
 
-RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
-RUN dpkg -i *.deb
+#RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
+#RUN dpkg -i *.deb
+RUN apt update && apt install -y cargo
 
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
