@@ -51,12 +51,16 @@ jobs:
           docker create --name wheels wheels
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
-          
-          export WHEELS_LIST=('NUMPY' 'PANDAS')
-          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
-          for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
 
-          export HAAV="$(find . -type f -name "*.whl" | grep -i "ha_av")"
+          declare -A WHEEL_PATHS
+
+          WHEELS_LIST=('NUMPY' 'PANDAS')
+          for wheel in "${WHEELS_LIST[@]}"; do
+            WHEEL_PATHS[$wheel]=$(find ./wheels -type f -name "*.whl" | grep -i "${wheel}")
+            echo "${wheel}=${WHEEL_PATHS[$wheel]}" >> $GITHUB_ENV
+          done
+
+          HAAV=$(find ./wheels -type f -name "*.whl" | grep -i "ha_av")
           echo "HAAV=$HAAV" >> $GITHUB_ENV
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
