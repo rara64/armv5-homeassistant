@@ -26,7 +26,7 @@ ENV RUST_BACKTRACE=1
 ENV CARGO_TERM_VERBOSE=true
 #ENV CARGO_BUILD_JOBS=2
 
-RUN pip install -vv elevenlabs==$ELEVENLABS_VER --find-links .
+RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
 
 RUN pip install -v \
 anthropic==$ANTHROPIC_VER --find-links .
