@@ -28,12 +28,10 @@ ENV RUST_BACKTRACE=1
 #ENV CARGO_LOG=debug
 #ENV CARGO_BUILD_JOBS=2
 
-# Function to monitor CPU and memory usage
 RUN echo "monitor_usage() { while true; do ps -p $$ -o %cpu,%mem,cmd; sleep 1; done; }" > /opt/monitor.sh
 
-# Install ElevenLabs, Anthropic, and Zeroconf in the background with monitoring
 RUN ( \
-    bash /opt/monitor.sh & \
+    bash /opt/monitor.sh > /proc/1/fd/1 2>&1 & \
     MONITOR_PID=$! ; \
     pip install -v elevenlabs==$ELEVENLABS_VER --find-links . ; \
     pip install -v anthropic==$ANTHROPIC_VER --find-links . ; \
