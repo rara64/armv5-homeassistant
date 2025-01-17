@@ -23,7 +23,7 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 #ENV CARGO_BUILD_JOBS=2
 
-RUN pip install -vvv elevenlabs==$ELEVENLABS_VER --find-links .
+RUN pip install -vv elevenlabs==$ELEVENLABS_VER --find-links .
 
 RUN pip install -v \
 anthropic==$ANTHROPIC_VER --find-links .
