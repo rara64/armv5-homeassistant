@@ -17,7 +17,11 @@ COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-RUN maturin --version
+
+RUN pip install -v \
+cryptography==$CRYPTOGRAPHY_VER \
+--config-settings=setup-args="-Dallow-noblas=true" \
+--find-links .
 
 RUN pip install -v \
 pynacl==$PYNACL_VER \
