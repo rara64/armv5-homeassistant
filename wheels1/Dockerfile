@@ -1,6 +1,7 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 
+ARG CRYPTOGRAPHY_VER
 ARG PYNACL_VER
 ARG ORJSON_VER
 ARG MATURIN
