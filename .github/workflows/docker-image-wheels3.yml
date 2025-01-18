@@ -30,86 +30,45 @@ jobs:
           echo $ELEVENLABS_VER
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install QEMU
-        run: sudo apt-get update && sudo apt-get install -y qemu-system-arm qemu-utils
-      - name: Download Debian ARM EL root filesystem
-        run: |
-          wget "https://deb.debian.org/debian/dists/stable/main/installer-armel/current/images/netboot/debian-installer/armel/root.tar.gz" -O rootfs.tar.gz
 
-      - name: Create QEMU disk image
-        run: qemu-img create -f qcow2 debian_armel.img 4G
+      - name: Install Required Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu qemu-user-static binfmt-support debootstrap docker.io
 
-      - name: Partition and format the disk image
+      - name: Create ARM Root Filesystem
         run: |
-          parted -s debian_armel.img mklabel msdos
-          parted -s debian_armel.img mkpart primary ext4 1MiB 100%
-          sudo losetup -f --show -P debian_armel.img
-          sudo mkfs.ext4 /dev/loop0p1
-      
-      - name: Mount and extract root filesystem
+          mkdir -p armel-rootfs
+          sudo debootstrap --foreign --arch=armel stretch armel-rootfs http://deb.debian.org/debian
+          sudo cp /usr/bin/qemu-arm-static armel-rootfs/usr/bin/
+
+          # Complete the debootstrap process inside the chroot environment
+          sudo chroot armel-rootfs /debootstrap/debootstrap --second-stage
+
+      - name: Create QEMU Disk Image
         run: |
-          sudo mkdir -p /mnt/armel
-          sudo mount /dev/loop0p1 /mnt/armel
-          sudo tar -xzf rootfs.tar.gz -C /mnt/armel
+          dd if=/dev/zero of=armel.img bs=1M count=1024
+          mkfs.ext4 armel.img
+          mkdir -p /mnt/armel
+          sudo mount -o loop armel.img /mnt/armel
+          sudo cp -r armel-rootfs/* /mnt/armel
           sudo umount /mnt/armel
 
-      - name: Download Kernel and Initrd
+      - name: Boot QEMU and Build Dockerfile
         run: |
-          wget https://deb.debian.org/debian/dists/stable/main/installer-armel/current/images/netboot/vmlinuz-6.1.0-17-armmp-lpae
-          wget https://deb.debian.org/debian/dists/stable/main/installer-armel/current/images/netboot/initrd.gz-6.1.0-17-armmp-lpae
-
-      - name: Run QEMU with the disk image
-        run: |
+          # Start QEMU with the ARM disk image
           qemu-system-arm \
-            -M versatilepb \
-            -kernel vmlinuz-6.1.0-17-armmp-lpae \
-            -initrd initrd.gz-6.1.0-17-armmp-lpae \
-            -drive file=debian_armel.img,if=virtio,format=qcow2 \
-            -append "root=/dev/vda1 console=ttyAMA0" \
-            -net nic \
-            -net user,hostfwd=tcp::2222-:22 \
-            -nographic \
-            -no-reboot
+          -M versatilepb \
+          -kernel /usr/lib/linux-image-*-armel-versatile/vmlinuz \
+          -append "root=/dev/sda" \
+          -hda armel.img \
+          -serial stdio &
 
-      - name: Wait for SSH to become available
-        run: |
-          while ! nc -z localhost 2222; do
-            sleep 1
-          done
-      
-      - name: Create a script to copy files
-        run: |
-          echo '#!/bin/bash' > copy_files.sh
-          echo 'scp -o StrictHostKeyChecking=no -P 2222 -r ./* root@localhost:/root' >> copy_files.sh
-          chmod +x copy_files.sh
+          # Wait for QEMU to boot
+          sleep 60
 
-      - name: Copy files to the emulated system
-        run: ./copy_files.sh
-
-      - name: Execute commands in the emulated system
-        run: |
-          ssh -o StrictHostKeyChecking=no -p 2222 root@localhost << EOF
-            uname -a
-            # Install Docker (adapt these commands based on your Debian version)
-            apt-get update
-            apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
-            curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-            echo "deb [arch=armel signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
-            apt-get update
-            apt-get install -y docker-ce docker-ce-cli containerd.io
-            
-            # Build your Docker image (example)
-            cd /root
-            docker build -t my-armv5-image -f Dockerfile.armv5 . 
-
-            # Save the Docker image to a tar file
-            docker save my-armv5-image > my-armv5-image.tar
-          EOF
-      - name: Create a script to copy back the image
-        run: |
-          echo '#!/bin/bash' > copy_image.sh
-          echo 'scp -o StrictHostKeyChecking=no -P 2222 root@localhost:/root/my-armv5-image.tar .' >> copy_image.sh
-          chmod +x copy_image.sh
+          # Build Dockerfile in QEMU
+          docker build -t arm-build .
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and load the image
@@ -129,8 +88,6 @@ jobs:
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 4th batch of wheels"}'  
-      - name: Copy the Docker image back to the host
-        run: ./copy_image.sh
       - name: Copy wheels from the image
         if: ${{ env.WHEELS_NEEDED == '0' }}
         shell: bash
