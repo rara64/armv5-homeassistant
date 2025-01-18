@@ -34,8 +34,6 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Running original rustc..."' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Command: /usr/bin/rustc_real $@" ' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '/usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
