@@ -13,14 +13,11 @@ jobs:
         shell: bash
         run: |
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
-          export WHEELS_LIST=('NUMPY' 'PANDAS')
+          export WHEELS_LIST=('NUMPY' 'PANDAS' 'AV')
           for wheel in "${WHEELS_LIST[@]}"; do 
             export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
-          
-          export HAAV_VER=$(curl -s https://pypi.org/pypi/ha-av/json | jq -r '.info.version')
-          echo "HAAV_VER=$HAAV_VER" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up QEMU
@@ -39,7 +36,7 @@ jobs:
           wget -O wheels4.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-)
           echo "WHEELS_NEEDED=0" >> $GITHUB_ENV
           
-          DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels2/Dockerfile --build-arg HAAV_VER=${{ env.HAAV_VER }} --build-arg MATURIN=wheels4.zip --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
+          DOCKER_BUILDKIT=0 docker buildx build --load --tag wheels -f wheels2/Dockerfile --build-arg AV_VER=${{ env.AV_VER }} --build-arg MATURIN=wheels4.zip --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache .
       - name: Build missing wheels4 if needed
         if: ${{ env.WHEELS_NEEDED == '1' }}
         run: |
@@ -51,17 +48,10 @@ jobs:
           docker create --name wheels wheels
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
-
-          declare -A WHEEL_PATHS
-
-          WHEELS_LIST=('NUMPY' 'PANDAS')
-          for wheel in "${WHEELS_LIST[@]}"; do
-            WHEEL_PATHS[$wheel]=$(find ./wheels -type f -name "*.whl" | grep -i "${wheel}")
-            echo "${wheel}=${WHEEL_PATHS[$wheel]}" >> $GITHUB_ENV
-          done
-
-          HAAV=$(find ./wheels -type f -name "*.whl" | grep -i "ha_av")
-          echo "HAAV=$HAAV" >> $GITHUB_ENV
+          
+          export WHEELS_LIST=('NUMPY' 'PANDAS' 'AV')
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
+          for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
         uses: actions/upload-artifact@v3
@@ -70,7 +60,7 @@ jobs:
           path: |
             ${{ env.NUMPY }}
             ${{ env.PANDAS }}
-            ${{ env.HAAV }}
+            ${{ env.AV }}
       - name: Dispatch armv5-homeassistant
         if: ${{ env.WHEELS_NEEDED == '0' }}
         run: |
