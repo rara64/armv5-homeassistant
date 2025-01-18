@@ -19,7 +19,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'if [[ ! "$@" =~ "print" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'if [[ "$@" =~ "build" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
@@ -34,12 +34,12 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/usr/bin/maturin_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
 # Rename the original rustc and replace it with the wrapper
-RUN mv /usr/bin/rustc /usr/bin/rustc_real && \
-    ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/rustc
+RUN mv /usr/bin/maturin /usr/bin/maturin_real && \
+    ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/maturin
     
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
