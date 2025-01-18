@@ -2,7 +2,7 @@
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 
 ARG NUMPY_VER
-ARG HAAV_VER
+ARG AV_VER
 ARG PANDAS_VER
 ARG MATURIN
 
@@ -17,7 +17,7 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
-RUN pip install -v ha-av==$HAAV_VER --no-binary av --find-links .
+RUN pip install -v av==$AV_VER --no-binary av --find-links .
 
 RUN pip install -v \
 numpy==$NUMPY_VER --find-links .
