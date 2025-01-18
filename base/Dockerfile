@@ -12,7 +12,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y \
     libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev \
     libsnappy-dev libsoxr-dev libssh-dev libtool libv4l-dev libva-dev libvdpau-dev \
     libvo-amrwbenc-dev libvorbis-dev libwebp-dev libx264-dev libx265-dev libxcb-shape0-dev \
-    libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev lzma-dev meson nasm texinfo \
+    libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev meson nasm texinfo \
     yasm libdrm-dev python3-dev python3-pip --no-install-recommends && apt clean && apt autoclean
 
 RUN apt install -y ffmpeg
