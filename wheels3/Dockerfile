@@ -23,13 +23,10 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'found=0' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'for arg in "$@"; do' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  if [[ "$arg" == --extra-filename=* ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '    found=1' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '    break' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'done' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'if echo "$@" | grep -i "extra-filename"; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "skipek"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  found=1' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'if [ "$found" -eq 1 ]; then' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
@@ -43,10 +40,11 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Disk Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'exec /usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
+
 
 # Rename the original rustc and replace it with the wrapper
 RUN mv /usr/bin/rustc /usr/bin/rustc_real && \
