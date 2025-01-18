@@ -39,7 +39,7 @@ jobs:
       - name: Create ARM Root Filesystem
         run: |
           mkdir -p armel-rootfs
-          sudo debootstrap --foreign --arch=armel stretch armel-rootfs http://deb.debian.org/debian
+          sudo debootstrap --foreign --arch=armel stretch armel-rootfs http://archive.debian.org/debian
           sudo cp /usr/bin/qemu-arm-static armel-rootfs/usr/bin/
 
           # Complete the debootstrap process inside the chroot environment
