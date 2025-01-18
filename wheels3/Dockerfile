@@ -32,18 +32,16 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "Disk Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Running original rustc..."' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Command: /usr/bin/rustc_real $@" ' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'RUSTC_OUTPUT=$(' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/usr/bin/rustc_real "$@" ' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '2>&1' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo ')' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "rustc Output:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "$RUSTC_OUTPUT"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Running original rustc with timeout..."' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Command: /usr/bin/rustc_real $@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'timeout 5s /usr/bin/rustc_real "$@" 2>&1 | tee /tmp/rustc_output.txt &' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'sleep 2' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "rustc Output (Delayed):"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'cat /tmp/rustc_output.txt' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'exit $?' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
+# Rename the original rustc and replace it with the wrapper
 RUN mv /usr/bin/rustc /usr/bin/rustc_real && \
     ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/rustc
     
