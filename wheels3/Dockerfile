@@ -17,6 +17,12 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 #RUN pip install --upgrade pip
 
+   
+COPY $MATURIN .
+RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
+
+RUN whereis maturin
+
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'if [[ "$@" =~ "build" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
@@ -39,9 +45,6 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
 
 RUN mv /usr/local/bin/maturin /usr/local/bin/maturin_real && \
     ln -s /usr/local/bin/rustc_wrapper.sh /usr/local/bin/maturin
-    
-COPY $MATURIN .
-RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
