@@ -33,10 +33,15 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo 'df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "Running original rustc..."' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Command: /usr/bin/rustc_real $@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Command: /usr/bin/rustc_real $@" ' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'RUSTC_OUTPUT=$(' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/usr/bin/rustc_real "$@" ' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '2>&1' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo ')' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "rustc Output:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "$RUSTC_OUTPUT"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'exit $?' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
 RUN mv /usr/bin/rustc /usr/bin/rustc_real && \
