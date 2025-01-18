@@ -23,7 +23,7 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'if printf "%s\n" "$@" | grep -q "\.rs"; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'if (for arg in "$@"; do echo "$arg" | grep -q "\.rs"; done); then' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
