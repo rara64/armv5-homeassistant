@@ -1,3 +1,5 @@
+name: Build 3rd batch of wheels
+
 on:
   repository_dispatch:
     types: Build 3rd batch of wheels
@@ -30,50 +32,9 @@ jobs:
           echo $ELEVENLABS_VER
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Install Required Tools
+      - name: Qemu
         run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-system-arm qemu-user-static debootstrap
-
-      - name: Create ARM Root Filesystem
-        run: |
-          mkdir -p armel-rootfs
-          sudo debootstrap --foreign --arch=armel stretch armel-rootfs http://archive.debian.org/debian
-          sudo cp /usr/bin/qemu-arm-static armel-rootfs/usr/bin/
-
-          # Complete the debootstrap process inside the chroot environment
-          sudo chroot armel-rootfs /debootstrap/debootstrap --second-stage
-
-      - name: Create QEMU Disk Image
-        run: |
-          dd if=/dev/zero of=armel.img bs=1M count=1024
-          mkfs.ext4 armel.img
-
-          # Prepare mount point with correct permissions
-          sudo mkdir -p /mnt/armel
-          sudo chmod 777 /mnt/armel
-
-          # Mount and copy filesystem
-          sudo mount -o loop armel.img /mnt/armel
-          sudo cp -r armel-rootfs/* /mnt/armel
-          sudo umount /mnt/armel
-
-      - name: Boot QEMU and Build Dockerfile
-        run: |
-          # Start QEMU with the ARM disk image
-          qemu-system-arm \
-          -M versatilepb \
-          -kernel /usr/lib/linux-image-*-armel-versatile/vmlinuz \
-          -append "root=/dev/sda" \
-          -hda armel.img \
-          -serial stdio &
-
-          # Wait for QEMU to boot
-          sleep 60
-
-          # Build Dockerfile in QEMU
-          docker build -t arm-build .
+          sudo update-binfmts --enable qemu-arm
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and load the image
