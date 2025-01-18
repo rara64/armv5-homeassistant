@@ -23,6 +23,7 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "test123"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'if echo "$@" | grep -i "extra-filename"; then' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  found=1' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
