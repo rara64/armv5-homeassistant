@@ -34,12 +34,11 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/usr/bin/maturin_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/usr/local/bin/maturin_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
-# Rename the original rustc and replace it with the wrapper
-RUN mv /usr/bin/maturin /usr/bin/maturin_real && \
-    ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/maturin
+RUN mv /usr/local/bin/maturin /usr/local/bin/maturin_real && \
+    ln -s /usr/local/bin/rustc_wrapper.sh /usr/local/bin/maturin
     
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
