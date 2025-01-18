@@ -19,7 +19,7 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install -v \
+RUN pip install -v \
 cryptography==$CRYPTOGRAPHY_VER \
 --config-settings=setup-args="-Dallow-noblas=true" \
 --find-links .
