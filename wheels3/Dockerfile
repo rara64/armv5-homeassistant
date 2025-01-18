@@ -40,11 +40,11 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/usr/local/bin/maturin_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/opt/venv/bin/maturin/maturin_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
-RUN mv /usr/local/bin/maturin /usr/local/bin/maturin_real && \
-    ln -s /usr/local/bin/rustc_wrapper.sh /usr/local/bin/maturin
+RUN mv /opt/venv/bin/maturin /opt/venv/bin/maturin_real && \
+    ln -s /usr/local/bin/rustc_wrapper.sh /opt/venv/bin/maturin
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
