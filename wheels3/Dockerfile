@@ -48,8 +48,8 @@ RUN mv /usr/bin/rustc /usr/bin/rustc_real && \
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
 ENV RUST_BACKTRACE=1
-#ENV CARGO_TERM_VERBOSE=true
-ENV CARGO_LOG=debug
+ENV CARGO_TERM_VERBOSE=true
+#ENV CARGO_LOG=debug
 #ENV CARGO_BUILD_JOBS=2
 
 RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
