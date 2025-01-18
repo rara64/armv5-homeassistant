@@ -25,7 +25,7 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'found=0' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'for arg in "$@"; do' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  if echo "$arg" | grep -q "\.rs"; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  if [[ "$arg" == *.rs ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '    found=1' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '    break' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  fi' >> /usr/local/bin/rustc_wrapper.sh && \
