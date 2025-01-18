@@ -21,11 +21,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
-RUN whereis maturin
-
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'if [[ "$@" =~ "build" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'if [[ ! "$@" =~ "--print" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
@@ -40,17 +38,18 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/opt/venv/bin/maturin/maturin_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
-RUN mv /opt/venv/bin/maturin /opt/venv/bin/maturin_real && \
-    ln -s /usr/local/bin/rustc_wrapper.sh /opt/venv/bin/maturin
+# Rename the original rustc and replace it with the wrapper
+RUN mv /usr/bin/rustc /usr/bin/rustc_real && \
+    ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/rustc
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
 ENV RUST_BACKTRACE=1
 #ENV CARGO_TERM_VERBOSE=true
-#ENV CARGO_LOG=debug
+ENV CARGO_LOG=debug
 #ENV CARGO_BUILD_JOBS=2
 
 RUN pip install -vv elevenlabs==$ELEVENLABS_VER --find-links .
