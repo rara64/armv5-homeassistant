@@ -36,10 +36,19 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support
-
-      - name: Register ARMv5 interpreter with binfmt_misc
+      - name: Register qemu-arm with binfmt_misc
         run: |
-          sudo sh -c 'echo ":armv5tel:M::\\x7fELF\\x01\\x01\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x02\\x00\\x28\\x00:\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\x00\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xfe\\xff\\xff\\xff:/usr/bin/qemu-arm-static:-cpu arm926ej-s:" > /proc/sys/fs/binfmt_misc/register'
+          sudo update-binfmts --enable qemu-arm
+
+      - name: Create custom entry point for qemu-arm-static
+        run: |
+          echo '#!/bin/bash' | sudo tee /usr/bin/qemu-arm-custom
+          echo '/usr/bin/qemu-arm-static -cpu arm926ej-s "$@"' | sudo tee -a /usr/bin/qemu-arm-custom
+          sudo chmod +x /usr/bin/qemu-arm-custom
+
+      - name: Add qemu-arm-custom to qemu-arm config file
+        run: |
+          sudo sed -i 's|/usr/bin/qemu-arm-static|/usr/bin/qemu-arm-custom|g' /var/lib/binfmts/qemu-arm
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and load the image
