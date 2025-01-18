@@ -32,8 +32,14 @@ jobs:
           echo $ELEVENLABS_VER
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Install QEMU and binfmt-support
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static binfmt-support
+
+      - name: Register ARMv5 interpreter with binfmt_misc
+        run: |
+          sudo sh -c 'echo ":armv5tel:M::\\x7fELF\\x01\\x01\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x02\\x00\\x28\\x00:\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\x00\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xff\\xfe\\xff\\xff\\xff:/usr/bin/qemu-arm-static:-cpu arm926ej-s:" > /proc/sys/fs/binfmt_misc/register'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and load the image
