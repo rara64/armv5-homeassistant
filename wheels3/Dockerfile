@@ -33,14 +33,14 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo 'df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "Running original rustc..."' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Command: /usr/local/cargo/bin/rustc_real \\"\$@\\""' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Command: /usr/bin/rustc_real \\"\$@\\""' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '/usr/local/cargo/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
-RUN mv /usr/local/cargo/bin/rustc /usr/local/cargo/bin/rustc_real && \
-    ln -s /usr/local/bin/rustc_wrapper.sh /usr/local/cargo/bin/rustc
+RUN mv /usr/bin/rustc /usr/bin/rustc_real && \
+    ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/rustc
     
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
