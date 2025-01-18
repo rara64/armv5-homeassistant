@@ -19,26 +19,24 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Memory Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'free -h' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "CPU Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'top -b -n 1 | head -n 5' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Disk Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'df -h' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Running original rustc with timeout..."' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "Command: /usr/bin/rustc_real $@"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'timeout 5s /usr/bin/rustc_real "$@" 2>&1 | tee /tmp/rustc_output.txt &' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'sleep 2' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "rustc Output (Delayed):"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'cat /tmp/rustc_output.txt' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'if [[ ! "$@" =~ "--print" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "Memory Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  free -h' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "CPU Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  top -b -n 1 | head -n 5' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "Disk Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Running original rustc..."' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Command: /usr/bin/rustc_real $@" ' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
 # Rename the original rustc and replace it with the wrapper
