@@ -34,7 +34,7 @@ jobs:
       - name: Install Required Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu qemu-user-static binfmt-support debootstrap docker.io
+          sudo apt-get install -y qemu-system-arm qemu-user-static binfmt-support debootstrap docker.io
 
       - name: Create ARM Root Filesystem
         run: |
