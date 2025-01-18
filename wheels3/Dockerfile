@@ -19,7 +19,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'if [[ ! "$@" =~ "--print" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'if [[ ! "$@" =~ "print" ]]; then' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
@@ -51,7 +51,7 @@ ENV RUST_BACKTRACE=1
 #ENV CARGO_LOG=debug
 #ENV CARGO_BUILD_JOBS=2
 
-RUN pip install -v elevenlabs==$ELEVENLABS_VER --find-links .
+RUN pip install -vv elevenlabs==$ELEVENLABS_VER --find-links .
 
 RUN pip install -v \
 anthropic==$ANTHROPIC_VER --find-links .
