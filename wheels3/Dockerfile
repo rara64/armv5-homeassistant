@@ -16,8 +16,32 @@ RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 #RUN pip install --upgrade pip
-RUN uname -a
 
+RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
+    echo '' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Memory Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'free -h' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "CPU Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'top -b -n 1 | head -n 5' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Disk Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'df -h' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Running original rustc..."' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "Command: /usr/local/cargo/bin/rustc_real \\"\$@\\""' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '/usr/local/cargo/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    chmod +x /usr/local/bin/rustc_wrapper.sh
+
+RUN mv /usr/local/cargo/bin/rustc /usr/local/cargo/bin/rustc_real && \
+    ln -s /usr/local/bin/rustc_wrapper.sh /usr/local/cargo/bin/rustc
+    
 COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
