@@ -23,8 +23,8 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'echo "test123"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'if echo "$@" | grep -i "extra-filename"; then' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo '  echo "skipek"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  found=1' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'if [ "$found" -eq 1 ]; then' >> /usr/local/bin/rustc_wrapper.sh && \
@@ -42,7 +42,7 @@ RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
     echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
     echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
     echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'exec /usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'exec stdbuf -oL -eL /usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
     chmod +x /usr/local/bin/rustc_wrapper.sh
 
 
