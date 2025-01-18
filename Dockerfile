@@ -33,8 +33,7 @@ RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/release
 # Install & build HASS components
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && \
-    pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt --find-links /wheels
+RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt --find-links /wheels
 
 # Install HASS core package
 RUN pip install homeassistant
