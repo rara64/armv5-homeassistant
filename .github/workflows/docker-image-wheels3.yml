@@ -49,7 +49,12 @@ jobs:
         run: |
           dd if=/dev/zero of=armel.img bs=1M count=1024
           mkfs.ext4 armel.img
-          mkdir -p /mnt/armel
+
+          # Prepare mount point with correct permissions
+          sudo mkdir -p /mnt/armel
+          sudo chmod 777 /mnt/armel
+
+          # Mount and copy filesystem
           sudo mount -o loop armel.img /mnt/armel
           sudo cp -r armel-rootfs/* /mnt/armel
           sudo umount /mnt/armel
