@@ -19,6 +19,14 @@ RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 
+# rustc wrapper for github actions - fixes freeze on compiling for some reason
+RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
+    echo '' >> /usr/local/bin/rustc_wrapper.sh && \
+    echo 'exec stdbuf -oL -eL /usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
+    chmod +x /usr/local/bin/rustc_wrapper.sh && \
+    mv /usr/bin/rustc /usr/bin/rustc_real && \
+    ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/rustc
+
 RUN pip install -v \
 cryptography==$CRYPTOGRAPHY_VER \
 --config-settings=setup-args="-Dallow-noblas=true" \
