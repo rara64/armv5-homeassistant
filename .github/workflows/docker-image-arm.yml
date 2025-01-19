@@ -34,7 +34,7 @@ jobs:
       - name: Build and push the image
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
-          docker buildx build --load --network=host --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest .
+          docker buildx build --load --network=host --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest --path ./Dockerfile.arm .
 
           docker save -o test.tar test:latest
       - name: Upload wheels
