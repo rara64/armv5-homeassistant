@@ -36,11 +36,7 @@ jobs:
       - name: Install QEMU and dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst cloud-utils qemu-utils
-
-      - name: Load nbd module
-        run: |
-          sudo modprobe nbd max_part=8
+          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst cloud-utils
 
       - name: Create a VM disk image
         run: |
@@ -50,19 +46,12 @@ jobs:
         run: |
           wget https://cloud-images.ubuntu.com/minimal/releases/focal/release/ubuntu-20.04-minimal-cloudimg-amd64.img -O ubuntu-cloud.img
 
-      - name: Resize Ubuntu image to fill VM disk
+      # Using virt-resize to expand the image and the root partition
+      - name: Expand VM disk image and root partition
         run: |
-          qemu-img resize vm-disk.qcow2 +15G #expand image to accommodate the ubuntu img
-          sudo qemu-nbd --connect=/dev/nbd0 vm-disk.qcow2
-          sudo parted /dev/nbd0 resizepart 1 100%
-          sudo partprobe /dev/nbd0
-          sudo e2fsck -f /dev/nbd0p1
-          sudo resize2fs /dev/nbd0p1
-          sudo qemu-nbd --disconnect /dev/nbd0
-
-      - name: Copy ubuntu image to VM disk
-        run: |
-          sudo dd if=ubuntu-cloud.img of=vm-disk.qcow2 bs=4M conv=notrunc oflag=direct status=progress
+          sudo virt-install --import --name dummy --memory 512 --disk size=1,path=vm-disk.qcow2 --vcpus 1 --os-type linux --os-variant ubuntu20.04 --noautoconsole --boot hd --graphics none --network none
+          sudo virt-resize --expand /dev/sda1 ubuntu-cloud.img vm-disk.qcow2
+          sudo virt-uninstall --domain dummy
 
       - name: Create a cloud-init ISO for VM configuration
         run: |
