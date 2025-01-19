@@ -36,10 +36,29 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 RUN pip install maturin
 
 # Build numpy with no blas
+
+COPY <<EOF /cross_file.ini
+[binaries]
+c = 'arm-linux-gnueabi-gcc'
+cpp = 'arm-linux-gnueabi-g++'
+ar = 'arm-linux-gnueabi-ar'
+strip = 'arm-linux-gnueabi-strip'
+pkgconfig = 'arm-linux-gnueabi-pkg-config'
+
+[properties]
+needs_exe_wrapper = false
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7'
+endian = 'little'
+EOF
+
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export NUMPY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "numpy" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    MESON_ARGS="-Dtests=false" pip install -v numpy==$NUMPY_VER \
-    --config-settings=setup-args="-Dallow-noblas=true"
+    pip install -v numpy==$NUMPY_VER \
+    --config-settings=--cross-file=/cross_file.ini --config-settings=setup-args="-Dallow-noblas=true"
 
 # Build pandas
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
