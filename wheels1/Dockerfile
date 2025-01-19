@@ -18,35 +18,6 @@ COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-#ENV RUST_BACKTRACE=full
-#ENV CARGO_LOG=trace
-ENV RUSTC_LOG=trace
-
-# rustc wrapper for github actions - fixes freeze on compiling for some reason
-RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
-    echo '' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'if echo "$@" | grep -i "extra-filename"; then' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  found=1' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'if [ "$found" -eq 1 ]; then' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "Resource Usage Before rustc Execution:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "Date/Time: $(date)"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "Memory Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  free -h' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "CPU Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  top -b -n 1 | head -n 5' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "----------------------------------------"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "Disk Usage:"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  df -h' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo '  echo "========================================"' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'fi' >> /usr/local/bin/rustc_wrapper.sh && \
-    echo 'exec stdbuf -oL -eL /usr/bin/rustc_real "$@"' >> /usr/local/bin/rustc_wrapper.sh && \
-    chmod +x /usr/local/bin/rustc_wrapper.sh && \
-    mv /usr/bin/rustc /usr/bin/rustc_real && \
-    ln -s /usr/local/bin/rustc_wrapper.sh /usr/bin/rustc
 
 RUN pip install -v \
 cryptography==$CRYPTOGRAPHY_VER \
