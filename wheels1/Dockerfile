@@ -18,8 +18,8 @@ COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-ENV CARGO_LOG=debug cargo build
-ENV RUSTC_LOG=debug cargo build
+ENV CARGO_LOG="debug cargo build"
+ENV RUSTC_LOG="debug cargo build"
 
 # rustc wrapper for github actions - fixes freeze on compiling for some reason
 RUN echo '#!/bin/bash' > /usr/local/bin/rustc_wrapper.sh && \
