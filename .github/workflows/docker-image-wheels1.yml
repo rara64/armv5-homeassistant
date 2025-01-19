@@ -71,16 +71,16 @@ jobs:
       - name: Boot the VM
         run: |
           sudo qemu-system-x86_64 \
-            -m 2048 \
-            -smp 2 \
-            -enable-kvm \
-            -drive file=vm-disk.qcow2,format=qcow2 \
-            -drive file=ubuntu-cloud.img,format=qcow2 \
-            -cdrom cloud-init.iso \
-            -nographic \
-            -net user,hostfwd=tcp::2222-:22 \
-            -net nic \
-            &
+          -m 2048 \
+          -smp 2 \
+          -enable-kvm \
+          -drive file=vm-disk.qcow2,format=qcow2 \
+          -drive file=cloud-init.iso,media=cdrom \
+          -boot d \
+          -nographic \
+          -net user,hostfwd=tcp::2222-:22 \
+          -net nic \
+          &
 
           sleep 30
 
