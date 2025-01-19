@@ -1,0 +1,84 @@
+# syntax = docker/dockerfile:experimental
+FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as hass-builder
+
+# Install latest cargo from rara64/armv5te-cargo repo
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
+RUN dpkg -i *.deb
+
+# Setup Python VENV
+RUN python3.12 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir wheel
+
+# Compile AV against ffmpeg binary included in the base image
+RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    export AV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "av" | awk -F'=' '{print $NF}' | tr -d '\n') && \
+    pip install -v av==$AV_VER --no-binary av
+
+RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    export UV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "uv" | awk -F'=' '{print $NF}' | tr -d '\n') && \
+    wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip && \
+    unzip uv.zip && \
+    mv uv-$UV_VER uv && \
+    rm uv.zip 
+
+# Replace atomic64 with atomic32 inside boxcar crate
+RUN wget -O boxcar.zip https://github.com/ibraheemdev/boxcar/archive/refs/tags/v$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml).zip
+RUN unzip boxcar.zip && \
+    mv boxcar-$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml) boxcar && \
+    rm boxcar.zip
+RUN cd boxcar && \
+    sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
+
+ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
+
+# Build & install maturin wheel
+RUN pip install maturin
+
+# Patch & build uv wheel
+RUN mkdir wheels && cd uv && \
+    sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml && \
+    sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = false/" Cargo.toml
+RUN cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
+
+RUN find /wheels -type f -iname '*.whl' -exec pip install {} \;
+
+# Build cryptography with no blas
+RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    export CRYPTOGRAPHY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "cryptography" | awk -F'=' '{print $NF}' | tr -d '\n') && \
+    pip install -v \
+    cryptography==$CRYPTOGRAPHY_VER \
+    --config-settings=setup-args="-Dallow-noblas=true"
+
+# Clone latest release of HASS
+RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
+
+# Install & build HASS components
+RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
+
+# Install HASS core package
+RUN pip install homeassistant
+
+# Cleanup
+RUN pip cache purge
+
+FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as runner
+
+# Copy Python VENV from hass-builder to runner
+RUN mkdir /config
+
+# Install go2rtc binary
+RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+') && \
+    curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
+    && chmod +x /bin/go2rtc
+
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && dpkg -i *.deb && rm *.deb
+
+COPY --from=hass-builder /opt/venv /opt/venv
+
+RUN ldconfig && apt clean
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+CMD ["hass","-v","-c","/config"]
