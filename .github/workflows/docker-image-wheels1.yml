@@ -4,7 +4,7 @@ on:
   repository_dispatch:
     types: Build 1st batch of wheels
   workflow_dispatch:
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,6 +46,20 @@ jobs:
         run: |
           wget https://cloud-images.ubuntu.com/minimal/releases/focal/release/ubuntu-20.04-minimal-cloudimg-amd64.img -O ubuntu-cloud.img
 
+      - name: Resize Ubuntu image to fill VM disk
+        run: |
+          qemu-img resize vm-disk.qcow2 +15G #expand image to accommodate the ubuntu img
+          sudo qemu-nbd --connect=/dev/nbd0 vm-disk.qcow2
+          sudo parted /dev/nbd0 resizepart 1 100%
+          sudo partprobe /dev/nbd0
+          sudo e2fsck -f /dev/nbd0p1
+          sudo resize2fs /dev/nbd0p1
+          sudo qemu-nbd --disconnect /dev/nbd0
+
+      - name: Copy ubuntu image to VM disk
+        run: |
+          sudo dd if=ubuntu-cloud.img of=vm-disk.qcow2 bs=4M conv=notrunc oflag=direct status=progress
+
       - name: Create a cloud-init ISO for VM configuration
         run: |
           cat > user-data <<EOF
@@ -76,13 +90,13 @@ jobs:
           -enable-kvm \
           -drive file=vm-disk.qcow2,format=qcow2 \
           -drive file=cloud-init.iso,media=cdrom \
-          -boot d \
+          -boot c \
           -nographic \
           -net user,hostfwd=tcp::2222-:22 \
           -net nic \
           &
 
-          sleep 30
+          sleep 60
 
       - name: Build Docker image in VM
         if: ${{ env.WHEELS_NEEDED == '0' }}
@@ -91,11 +105,14 @@ jobs:
           PYNACL_VER: ${{ env.PYNACL_VER }}
           ORJSON_VER: ${{ env.ORJSON_VER }}
         run: |
+          mkdir -p ~/.ssh
           ssh-keyscan -p 2222 localhost >> ~/.ssh/known_hosts
+          scp -o StrictHostKeyChecking=no -P 2222 wheels1/Dockerfile ubuntu@localhost:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -P 2222 wheels4.zip ubuntu@localhost:/home/ubuntu/
           ssh -o StrictHostKeyChecking=no -p 2222 ubuntu@localhost << EOF
             sudo docker build --tag wheels \
-              -f wheels1/Dockerfile \
-              --build-arg MATURIN=wheels4.zip \
+              -f /home/ubuntu/Dockerfile \
+              --build-arg MATURIN=/home/ubuntu/wheels4.zip \
               --build-arg CRYPTOGRAPHY_VER=${CRYPTOGRAPHY_VER} \
               --build-arg PYNACL_VER=${PYNACL_VER} \
               --build-arg ORJSON_VER=${ORJSON_VER} \
