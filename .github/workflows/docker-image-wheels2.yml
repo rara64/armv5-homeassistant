@@ -50,7 +50,12 @@ jobs:
           docker cp wheels:./root/.cache/pip/wheels wheels
           
           export WHEELS_LIST=('NUMPY' 'PANDAS' 'AV')
-          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}=$(find . -type f -name "*.whl" | grep -i "${wheel}"); done
+          for wheel in "${WHEELS_LIST[@]}"; do
+            w=${wheel}
+            wheel_path=$(find . -type f -name "*.whl" | grep -i "${wheel}")
+            export "${wheel}=${wheel_path}"
+          done
+
           for wheel in "${WHEELS_LIST[@]}"; do w=${wheel}; echo "${wheel}=${!w}" >> $GITHUB_ENV; done
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
