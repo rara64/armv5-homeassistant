@@ -39,7 +39,8 @@ RUN pip install maturin
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export NUMPY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "numpy" | awk -F'=' '{print $NF}' | tr -d '\n') && \
     pip install -v numpy==$NUMPY_VER \
-    --config-settings=setup-args="-Dallow-noblas=true -Dtest=false"
+    --config-settings=setup-args="-Dallow-noblas=true" \
+    --config-settings=setup-args="-Dtest=false"
 
 # Build pandas
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
