@@ -55,6 +55,11 @@ RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/
     export NUMPY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "numpy" | awk -F'=' '{print $NF}' | tr -d '\n') && \
     pip install -v --no-build-isolation --no-binary numpy==$NUMPY_VER
 
+# Build pandas
+RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    export PANDAS_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "pandas" | awk -F'=' '{print $NF}' | tr -d '\n') && \
+    pip install -v pandas==$PANDAS_VER
+
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
 
