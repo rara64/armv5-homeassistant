@@ -50,6 +50,9 @@ RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/
     cryptography==$CRYPTOGRAPHY_VER \
     --config-settings=setup-args="-Dallow-noblas=true"
 
+# Disable meson tests, otherwise numpy fails
+ENV MESON_ARGS="-Dtests=false"
+
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
 
