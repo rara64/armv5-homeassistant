@@ -18,7 +18,7 @@ COPY $MATURIN .
 RUN unzip wheels4.zip && pip install $(find . -type f -iname 'maturin*')
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-ENV RUST_BACKTRACE=full
+#ENV RUST_BACKTRACE=full
 #ENV CARGO_LOG=trace
 ENV RUSTC_LOG=trace
 
