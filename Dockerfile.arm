@@ -37,23 +37,19 @@ RUN pip install maturin
 
 # Build numpy with no blas
 
-COPY <<EOF /cross_file.ini
-[binaries]
-c = 'arm-linux-gnueabi-gcc'
-cpp = 'arm-linux-gnueabi-g++'
-ar = 'arm-linux-gnueabi-ar'
-strip = 'arm-linux-gnueabi-strip'
-pkgconfig = 'arm-linux-gnueabi-pkg-config'
-
-[properties]
-needs_exe_wrapper = false
-
-[host_machine]
-system = 'linux'
-cpu_family = 'arm'
-cpu = 'armv7'
-endian = 'little'
-EOF
+RUN echo "[binaries]" > /cross_file.ini && \
+    echo "c = 'arm-linux-gnueabi-gcc'" >> /cross_file.ini && \
+    echo "cpp = 'arm-linux-gnueabi-g++'" >> /cross_file.ini && \
+    echo "ar = 'arm-linux-gnueabi-ar'" >> /cross_file.ini && \
+    echo "strip = 'arm-linux-gnueabi-strip'" >> /cross_file.ini && \
+    echo "pkgconfig = 'arm-linux-gnueabi-pkg-config'" >> /cross_file.ini && \
+    echo "[properties]" >> /cross_file.ini && \
+    echo "needs_exe_wrapper = false" >> /cross_file.ini && \
+    echo "[host_machine]" >> /cross_file.ini && \
+    echo "system = 'linux'" >> /cross_file.ini && \
+    echo "cpu_family = 'arm'" >> /cross_file.ini && \
+    echo "cpu = 'armv7'" >> /cross_file.ini && \
+    echo "endian = 'little'" >> /cross_file.ini
 
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export NUMPY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "numpy" | awk -F'=' '{print $NF}' | tr -d '\n') && \
