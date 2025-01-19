@@ -49,7 +49,9 @@ jobs:
       # Using virt-resize to expand the image and the root partition
       - name: Expand VM disk image and root partition
         run: |
-          sudo virt-install --import --name dummy --memory 512 --disk size=1,path=vm-disk.qcow2 --vcpus 1 --os-type linux --os-variant ubuntu20.04 --noautoconsole --boot hd --graphics none --network none
+          sudo chown libvirt-qemu:kvm vm-disk.qcow2
+          sudo chmod +x $PWD
+          sudo virt-install --import --name dummy --memory 2048 --disk size=1,path=vm-disk.qcow2,perms=rw --vcpus 1 --os-variant ubuntu20.04 --noautoconsole --boot hd --graphics none --network none
           sudo virt-resize --expand /dev/sda1 ubuntu-cloud.img vm-disk.qcow2
           sudo virt-uninstall --domain dummy
 
