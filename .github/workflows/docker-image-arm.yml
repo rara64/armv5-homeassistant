@@ -1,0 +1,47 @@
+name: Build armv5-homeassistant on ARM
+
+concurrency: 
+  group: my-workflow-${{ github.ref }}
+  cancel-in-progress: true
+
+on: 
+  #schedule:
+  #  - cron: '32 1 * * MON'
+  workflow_dispatch:
+  repository_dispatch:
+    types: Build armv5-homeassistant on ARM
+  
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check for new release of HASS
+        run: |
+          export HASS_RELEASE=$(jq -r 'map(select(.prerelease==false)) | first | .tag_name' <<< $(curl --silent https://api.github.com/repos/home-assistant/core/releases))
+          export ARMV5_RELEASE=$(jq -r '[.results[] | select(.name!="latest")][0].name' <<< $(curl --silent https://hub.docker.com/v2/repositories/rara64/armv5-homeassistant/tags/?page_size=1000))
+          echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
+          echo "ARMV5_RELEASE=$ARMV5_RELEASE" >> $GITHUB_ENV
+          echo "HASS_RELEASE: $HASS_RELEASE , ARMV5_RELEASE: $ARMV5_RELEASE"
+      - name: Checkout code
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        uses: docker/setup-buildx-action@v3.7.1
+      - name: Login to Docker Hub
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Build and push the image
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        run: |
+          docker buildx build --load --network=host --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest .
+
+          docker save -o test.tar test:latest
+      - name: Upload wheels
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test
+          path: |
+            test.tar
+
