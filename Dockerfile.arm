@@ -50,10 +50,10 @@ RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/
     cryptography==$CRYPTOGRAPHY_VER \
     --config-settings=setup-args="-Dallow-noblas=true"
 
-# Disable meson tests, otherwise numpy fails
+# Build numpy
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export NUMPY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "numpy" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    MESON_ARGS="-Dtests=false" pip install -v numpy==$NUMPY_VER
+    pip install -v --no-build-isolation --no-binary numpy==$NUMPY_VER
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
