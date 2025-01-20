@@ -40,7 +40,7 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
           docker buildx create --use --name armv5builder --buildkitd-flags '--allow-insecure-entitlement security.insecure' --platform linux/arm/v6
-          docker buildx build --load --network=host --platform linux/arm/v5 --builder armv5builder --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
+          docker buildx build --load --platform linux/arm/v5 --builder armv5builder --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
 
           docker save -o test.tar test:latest
       - name: Upload wheels
