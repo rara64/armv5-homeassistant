@@ -35,6 +35,13 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 # Build & install maturin wheel
 RUN pip install maturin
 
+# Build cryptography with no blas
+RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    export CRYPTOGRAPHY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "cryptography" | awk -F'=' '{print $NF}' | tr -d '\n') && \
+    pip install -v \
+    cryptography==$CRYPTOGRAPHY_VER \
+    --config-settings=setup-args="-Dallow-noblas=true"
+
 # Patch & build uv wheel
 RUN mkdir wheels && cd uv && \
     sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml && \
@@ -52,13 +59,6 @@ RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export PANDAS_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "pandas" | awk -F'=' '{print $NF}' | tr -d '\n') && \
     pip install -v pandas==$PANDAS_VER 
-
-# Build cryptography with no blas
-RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    export CRYPTOGRAPHY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "cryptography" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install -v \
-    cryptography==$CRYPTOGRAPHY_VER \
-    --config-settings=setup-args="-Dallow-noblas=true"
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
