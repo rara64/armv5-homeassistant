@@ -1,6 +1,8 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as hass-builder
 
+RUN uname -m
+
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 RUN dpkg -i *.deb
