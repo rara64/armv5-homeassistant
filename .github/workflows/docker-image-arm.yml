@@ -30,6 +30,7 @@ jobs:
         uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/arm/v6
+          installer: linuxkit/binfmt:latest
       - name: Set up Docker Buildx
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         uses: docker/setup-buildx-action@v3
@@ -39,8 +40,7 @@ jobs:
       - name: Build and push the image
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
-          docker buildx create --use --name armv5builder --buildkitd-flags '--allow-insecure-entitlement security.insecure' --platform linux/arm/v6
-          docker buildx build --load --platform linux/arm/v5 --builder armv5builder --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
+          docker buildx build --load --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
 
           docker save -o test.tar test:latest
       - name: Upload wheels
