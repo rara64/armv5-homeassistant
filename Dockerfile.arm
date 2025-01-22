@@ -17,19 +17,19 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV RUSTFLAGS="-C codegen-units=1 -C opt-level=1 -C debuginfo=0"
 
 # Build & install maturin wheel
-RUN pip install -v maturin
+RUN pip install maturin
 
 # Build cryptography with no blas
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export CRYPTOGRAPHY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "cryptography" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install -v \
+    pip install \
     cryptography==$CRYPTOGRAPHY_VER \
     --config-settings=setup-args="-Dallow-noblas=true"
 
 # Compile AV against ffmpeg binary included in the base image
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export AV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "av" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install -v av==$AV_VER --no-binary av
+    pip install av==$AV_VER --no-binary av
 
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export UV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "uv" | awk -F'=' '{print $NF}' | tr -d '\n') && \
@@ -56,13 +56,13 @@ RUN find /wheels -type f -iname '*.whl' -exec pip install {} \;
 # Build numpy with no blas
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export NUMPY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "numpy" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install -v numpy==$NUMPY_VER \
+    pip install numpy==$NUMPY_VER \
     --config-settings=setup-args="-Dallow-noblas=true"
 
 # Build pandas
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export PANDAS_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "pandas" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install -v pandas==$PANDAS_VER 
+    pip install pandas==$PANDAS_VER 
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
