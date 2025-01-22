@@ -43,7 +43,7 @@ jobs:
 
           docker save -o test.tar test:
       - name: Collect logs
-        if: ${{ job.status == 'cancelled' }}
+        if: ${{ always() }}
         run: |
           dmesg -T | tail -n 20
 
