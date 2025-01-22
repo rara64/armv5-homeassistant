@@ -27,9 +27,9 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up QEMU
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
-        uses: dbhi/qus/action@main
+        uses: docker/setup-qemu-action@v3
         with:
-          targets: arm
+          platforms: linux/arm/v5
       - name: Set up Docker Buildx
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         uses: docker/setup-buildx-action@v3
