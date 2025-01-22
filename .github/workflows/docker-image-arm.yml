@@ -45,7 +45,7 @@ jobs:
       - name: Collect logs
         if: ${{ always() }}
         run: |
-          sudo dmesg -T | tail -n 20
+          sudo dmesg
 
       - name: Upload wheels
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
