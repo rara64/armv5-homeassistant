@@ -41,7 +41,12 @@ jobs:
         run: |
           docker buildx build --load --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
 
-          docker save -o test.tar test:latest
+          docker save -o test.tar test:
+      - name: Collect logs
+        if: ${{ job.status == 'cancelled' }}
+        run: |
+          dmesg -T | tail -n 20
+
       - name: Upload wheels
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         uses: actions/upload-artifact@v4
