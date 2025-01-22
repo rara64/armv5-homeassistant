@@ -14,7 +14,7 @@ RUN pip install wheel
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
-ENV RUSTFLAGS="-C codegen-units=1 -C opt-level=1 -C lto=thin -C debuginfo=0"
+ENV RUSTFLAGS="-C codegen-units=1 -C opt-level=1 -C debuginfo=0"
 
 # Build & install maturin wheel
 RUN pip install -v maturin
