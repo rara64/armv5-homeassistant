@@ -35,7 +35,7 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
           export DOCKER_BUILDKIT=0 
-          sudo apt-get update && apt-get install -y qemu-user-static binfmt-support
+          sudo apt install -y qemu-user-static binfmt-support
 
           sudo update-binfmts --install armv5 /usr/bin/qemu-arm-static \
           --magic "\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00" \
