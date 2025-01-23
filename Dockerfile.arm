@@ -3,7 +3,12 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as hass-builder
 
 RUN apt-get update && apt-get install -y qemu-user-static binfmt-support
 
-RUN --security=insecure echo ':armv5:M::\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:FPC' > /proc/sys/fs/binfmt_misc/register
+RUN cp /usr/bin/qemu-arm-static /usr/bin/qemu-arm-static-copy
+
+# Register binfmt interpreter using the copied binary
+RUN --security=insecure update-binfmts --install armv5 /usr/bin/qemu-arm-static-copy \
+    --magic "\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00" \
+    --mask "\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
 
 RUN uname -m
 
