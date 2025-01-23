@@ -3,6 +3,8 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as hass-builder
 
 RUN uname -m
 
+ARG DEPS
+
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 RUN dpkg -i *.deb
@@ -17,12 +19,17 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
 
+# Install pre-built dependencies
+COPY $DEPS .
+RUN unzip -j "*.whl" deps.zip -d wheels && \
+    find wheels/ -type f -name '*.whl' -exec pip install {} /;
+
 # Get latest requirements_all.txt for HASS Core
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
 
 # Install & build HASS components
-RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r requirements_all.txt
+RUN pip install --find-links ./wheels --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r requirements_all.txt
 
 # Install HASS core package
 RUN pip install homeassistant
