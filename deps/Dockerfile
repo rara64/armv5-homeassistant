@@ -12,6 +12,11 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
 
+# Setup Python VENV
+RUN python3.12 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install wheel
+
 # Build & install maturin wheel
 RUN pip install maturin
 
