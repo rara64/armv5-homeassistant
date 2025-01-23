@@ -22,17 +22,39 @@ jobs:
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "ARMV5_RELEASE=$ARMV5_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: $HASS_RELEASE , ARMV5_RELEASE: $ARMV5_RELEASE"
+      - name: Check for new version of deps
+        run: |
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
+          wget -O deps.zip $(curl -I -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" $LINK | grep location: | cut -d: -f2-) || echo 'deps download failed'
+          7z x deps.zip -o ./deps || echo 'deps extract failed'
+          
+          # GET CURRENT VERSION OF DEPS
+          export WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV')
+          
+          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-' || echo '0'); done
+          
+          for wheel in "${WHEELS_LIST[@]}"; do 
+            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+          done
+
+          # COMPARE VERSIONS OF DEPS
+          export OUTDATED_DEPS=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [[ "${!wh}" != "${!w}" ]]; then echo '1'; break; fi; done)
+          echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
+      - name: Dispatch build of deps
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS != ''}}
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant deps"}'
       - name: Checkout code
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
         uses: actions/checkout@v3
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
         uses: docker/setup-buildx-action@v3
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
         run: |
           export DOCKER_BUILDKIT=0 
           sudo apt install -y qemu-user-static binfmt-support
@@ -44,11 +66,11 @@ jobs:
 
           uname -m
 
-          docker buildx build --load --platform linux/arm/v5 --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
+          docker buildx build --load --platform linux/arm/v5 --build-arg DEPS="deps.zip" --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
 
           docker save -o test.tar test:latest
       - name: Upload wheels
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: test
