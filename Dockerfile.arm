@@ -1,6 +1,6 @@
+# syntax = docker/dockerfile:experimental
 FROM deitch/binfmt_register as qemu
 
-# syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as hass-builder
 
 COPY --from=qemu /usr/bin/qemu-*-static /usr/bin/
