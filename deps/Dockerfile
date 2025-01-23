@@ -12,6 +12,10 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
 
+# Install latest cargo from rara64/armv5te-cargo repo
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
+RUN dpkg -i *.deb
+
 # Setup Python VENV
 RUN python3.12 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
