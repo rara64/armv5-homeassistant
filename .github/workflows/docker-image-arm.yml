@@ -36,6 +36,12 @@ jobs:
           # COMPARE VERSIONS OF DEPS
           export OUTDATED_DEPS=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [[ "${!wh}" != "${!w}" ]]; then echo '1'; break; fi; done)
           echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
+
+          echo "PANDAS: Found (PANDAS_WHL_VER) = ${PANDAS_WHL_VER}, Expected (PANDAS_VER) = ${PANDAS_VER}"
+          echo "NUMPY: Found (NUMPY_WHL_VER) = ${NUMPY_WHL_VER}, Expected (NUMPY_VER) = ${NUMPY_VER}"
+          echo "CRYPTOGRAPHY: Found (CRYPTOGRAPHY_WHL_VER) = ${CRYPTOGRAPHY_WHL_VER}, Expected (CRYPTOGRAPHY_VER) = ${CRYPTOGRAPHY_VER}"
+          echo "UV: Found (UV_WHL_VER) = ${UV_WHL_VER}, Expected (UV_VER) = ${UV_VER}"
+          echo "AV: Found (AV_WHL_VER) = ${AV_WHL_VER}, Expected (AV_VER) = ${AV_VER}"
       - name: Dispatch build of deps
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS != ''}}
         run: |
