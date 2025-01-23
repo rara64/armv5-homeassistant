@@ -17,59 +17,12 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
 
-# Build & install maturin wheel
-RUN pip install maturin
-
-# Build cryptography with no blas
-RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    export CRYPTOGRAPHY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "cryptography" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install \
-    cryptography==$CRYPTOGRAPHY_VER \
-    --config-settings=setup-args="-Dallow-noblas=true"
-
-# Compile AV against ffmpeg binary included in the base image
-RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    export AV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "av" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install av==$AV_VER --no-binary av
-
-RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    export UV_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "uv" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip && \
-    unzip uv.zip && \
-    mv uv-$UV_VER uv && \
-    rm uv.zip 
-
-# Replace atomic64 with atomic32 inside boxcar crate
-RUN wget -O boxcar.zip https://github.com/ibraheemdev/boxcar/archive/refs/tags/v$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml).zip
-RUN unzip boxcar.zip && \
-    mv boxcar-$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml) boxcar && \
-    rm boxcar.zip
-RUN cd boxcar && \
-    sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
-
-# Patch & build uv wheel
-RUN mkdir wheels && cd uv && \
-    sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml && \
-    sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = false/" Cargo.toml
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
-RUN find /wheels -type f -iname '*.whl' -exec pip install {} \;
-
-# Build numpy with no blas
-RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    export NUMPY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "numpy" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install numpy==$NUMPY_VER \
-    --config-settings=setup-args="-Dallow-noblas=true"
-
-# Build pandas
-RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    export PANDAS_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "pandas" | awk -F'=' '{print $NF}' | tr -d '\n') && \
-    pip install pandas==$PANDAS_VER 
-
-# Clone latest release of HASS
-RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
+# Get latest requirements_all.txt for HASS Core
+RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
+    wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
 
 # Install & build HASS components
-RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
+RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r requirements_all.txt
 
 # Install HASS core package
 RUN pip install homeassistant
