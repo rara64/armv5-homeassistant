@@ -46,17 +46,13 @@ jobs:
           mkdir wheels
           docker cp wheels:./root/.cache/pip/wheels wheels
           docker cp wheels:./wheels wheels
-
-          find "./wheels" -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do
-            zip "deps.zip" "$file"
-          done
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
         uses: actions/upload-artifact@v4
         with:
           name: deps
           path: |
-            deps.zip
+            ./wheels
       - name: Dispatch armv5-homeassistant on ARM
         if: ${{ env.WHEELS_NEEDED == '0' }}
         run: |
