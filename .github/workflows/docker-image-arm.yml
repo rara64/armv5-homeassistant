@@ -25,12 +25,17 @@ jobs:
           7z x deps.zip -o./deps || echo 'deps extract failed'
           
           # GET CURRENT VERSION OF DEPS
-          export WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV')
-          
-          for wheel in "${WHEELS_LIST[@]}"; do export ${wheel}_WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wheel}" | cut -f 2 -d '-' || echo '0'); done
+          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV')
           
           for wheel in "${WHEELS_LIST[@]}"; do 
-            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase for file searching
+            WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wh}" | cut -f 2 -d '-' | head -n 1)
+            export ${wheel}_WHL_VER="${WHL_VER:-0}"
+          done
+          
+          for wheel in "${WHEELS_LIST[@]}"; do 
+            VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            export ${wheel}_VER="${VER:-0}"
           done
 
           # COMPARE VERSIONS OF DEPS
