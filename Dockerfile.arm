@@ -22,6 +22,7 @@ ENV RUSTFLAGS="-C codegen-units=1"
 # Install pre-built dependencies
 COPY $DEPS .
 RUN unzip deps.zip -d wheels && \
+    find wheels/ -type f -name 'numpy*' -exec pip install {} \; && \
     find wheels/ -type f -name '*.whl' -exec pip install {} \;
 
 # Get latest requirements_all.txt for HASS Core
@@ -29,7 +30,7 @@ RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/release
     wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
 
 # Install & build HASS components
-RUN pip install --find-links ./wheels --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r requirements_all.txt
+RUN pip install --find-links ./wheels --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r ./requirements_all.txt
 
 # Install HASS core package
 RUN pip install homeassistant
