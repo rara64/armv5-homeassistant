@@ -18,13 +18,13 @@ jobs:
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "ARMV5_RELEASE=$ARMV5_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: $HASS_RELEASE , ARMV5_RELEASE: $ARMV5_RELEASE"
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Check for new version of deps
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
           7z x deps.zip -o./deps || echo 'deps extract failed'
-
-          echo "DEPS_PATH=./deps.zip" >> $GITHUB_ENV
           
           # GET CURRENT VERSION OF DEPS
           WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV')
@@ -76,9 +76,6 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant deps"}'
-      - name: Checkout code
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
-        uses: actions/checkout@v3
       - name: Set up Docker Buildx
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
         uses: docker/setup-buildx-action@v3
@@ -99,7 +96,7 @@ jobs:
           uname -m
           ls
 
-          docker buildx build --load --platform linux/arm/v5 --build-arg DEPS="{{ env.DEPS_PATH }}" --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
+          docker buildx build --load --platform linux/arm/v5 --build-arg DEPS="deps.zip" --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
 
           docker save -o test.tar test:latest
       - name: Upload wheels
