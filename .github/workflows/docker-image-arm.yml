@@ -36,14 +36,20 @@ jobs:
             wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
             required_version=${wheel}_VER
 
-            WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wh}" | grep -F "${!required_version}" | cut -f 2 -d '-' | head -n 1)
+            matching_files=$(find ./deps -type f -name "*.whl" | grep -i "${wh}")
 
-            if [[ -z "$WHL_VER" ]]; then
-              WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wh}" | cut -f 2 -d '-' | head -n 1)
-            fi
-
-            export ${wheel}_WHL_VER="${WHL_VER:-0}"
+            for file in $matching_files; do
+              if [[ "$file" == *"${!required_version}"* ]]; then
+                echo "Keeping $file (matches version ${!required_version})"
+              else
+                echo "Removing $file (does not match version ${!required_version})"
+                rm -f "$file"
+              fi
+            done
           done
+          
+          7z a filtered_deps.zip ./deps/* || echo 'deps repack failed'
+          mv filtered_deps.zip deps.zip
 
           # COMPARE VERSIONS OF DEPS
           OUTDATED_DEPS=0
