@@ -41,6 +41,7 @@ jobs:
             for file in $matching_files; do
               if [[ "$file" == *"${!required_version}"* ]]; then
                 echo "Keeping $file (matches version ${!required_version})"
+                export ${wheel}_WHL_VER="${!required_version}"
               else
                 echo "Removing $file (does not match version ${!required_version})"
                 rm -f "$file"
