@@ -22,7 +22,7 @@ ENV RUSTFLAGS="-C codegen-units=1"
 # Install pre-built dependencies
 COPY $DEPS .
 RUN unzip -o -j deps.zip -d wheels && \
-    find wheels/ -type f -name '*.whl' -exec pip install {} --find-links ./wheels \;
+    find wheels/ -type f -name '*.whl' -exec pip install {} --no-index --find-links ./wheels \;
 
 # Get latest requirements_all.txt for HASS Core
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
