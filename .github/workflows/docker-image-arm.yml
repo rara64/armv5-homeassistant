@@ -95,6 +95,7 @@ jobs:
           --fix-binary yes
 
           uname -m
+          ls
 
           docker buildx build --load --platform linux/arm/v5 --build-arg DEPS="deps.zip" --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
 
