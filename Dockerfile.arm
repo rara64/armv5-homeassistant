@@ -27,11 +27,11 @@ RUN unzip -o -j deps.zip -d wheels && \
     find wheels/ -type f -name 'patchelf*' -exec pip install {} --find-links ./wheels \; && \
     find wheels/ -type f -name '*.whl' -exec pip install {} --find-links ./wheels \;
 
-# Get latest requirements_all.txt for HASS Core
-RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt && \
-    mv requirements_all.txt requirements.txt && \
-    pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r requirements.txt
+# Clone latest release of HASS
+RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
+
+# Install HASS dependencies
+RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
 
 # Install HASS core package
 RUN pip install homeassistant
