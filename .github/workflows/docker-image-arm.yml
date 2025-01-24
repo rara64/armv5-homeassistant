@@ -28,14 +28,21 @@ jobs:
           WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV')
           
           for wheel in "${WHEELS_LIST[@]}"; do 
-            wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase for file searching
-            WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wh}" | cut -f 2 -d '-' | head -n 1)
-            export ${wheel}_WHL_VER="${WHL_VER:-0}"
+            VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            export ${wheel}_VER="${VER:-0}"
           done
 
           for wheel in "${WHEELS_LIST[@]}"; do 
-            VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
-            export ${wheel}_VER="${VER:-0}"
+            wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
+            required_version=${wheel}_VER
+
+            WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wh}" | grep -F "${!required_version}" | cut -f 2 -d '-' | head -n 1)
+
+            if [[ -z "$WHL_VER" ]]; then
+              WHL_VER=$(find ./deps -type f -name "*.whl" | grep -i "${wh}" | cut -f 2 -d '-' | head -n 1)
+            fi
+
+            export ${wheel}_WHL_VER="${WHL_VER:-0}"
           done
 
           # COMPARE VERSIONS OF DEPS
