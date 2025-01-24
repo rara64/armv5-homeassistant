@@ -21,7 +21,7 @@ ENV RUSTFLAGS="-C codegen-units=1"
 
 # Install pre-built dependencies
 COPY $DEPS .
-RUN unzip -j "*.whl" deps.zip -d wheels && \
+RUN 7z x deps.zip -owheels && \
     find wheels/ -type f -name '*.whl' -exec pip install {} /;
 
 # Get latest requirements_all.txt for HASS Core
