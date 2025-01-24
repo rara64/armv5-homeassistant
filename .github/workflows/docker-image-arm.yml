@@ -27,9 +27,13 @@ jobs:
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
           7z x deps.zip -o./deps || echo 'deps extract failed'
-          
+
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps2") | .archive_download_url' | head -n 1)
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps2.zip "$LINK" || echo 'deps download failed'
+          7z x deps2.zip -o./deps || echo 'deps2 extract failed'
+
           # GET CURRENT VERSION OF DEPS
-          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV')
+          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON')
           
           for wheel in "${WHEELS_LIST[@]}"; do 
             VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/${{ env.HASS_RELEASE }}/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
@@ -58,34 +62,51 @@ jobs:
 
           # COMPARE VERSIONS OF DEPS
           OUTDATED_DEPS=0
+          OUTDATED_DEPS_2=0
           for wheel in "${WHEELS_LIST[@]}"; do
             wh=${wheel}_WHL_VER
             w=${wheel}_VER
             if [[ "${!wh}" != "${!w}" ]]; then
+              case "${wheel}" in
+                PYNACL|ZEROCONF|ORJSON)
+                  OUTDATED_DEPS_2=1
+                  break
+                  ;;
+              esac
               OUTDATED_DEPS=1
               break
             fi
           done
+
           export OUTDATED_DEPS
+          export OUTDATED_DEPS_2
           echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
+          echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
 
           echo "PANDAS: Found (PANDAS_WHL_VER) = ${PANDAS_WHL_VER}, Expected (PANDAS_VER) = ${PANDAS_VER}"
           echo "NUMPY: Found (NUMPY_WHL_VER) = ${NUMPY_WHL_VER}, Expected (NUMPY_VER) = ${NUMPY_VER}"
           echo "CRYPTOGRAPHY: Found (CRYPTOGRAPHY_WHL_VER) = ${CRYPTOGRAPHY_WHL_VER}, Expected (CRYPTOGRAPHY_VER) = ${CRYPTOGRAPHY_VER}"
           echo "UV: Found (UV_WHL_VER) = ${UV_WHL_VER}, Expected (UV_VER) = ${UV_VER}"
           echo "AV: Found (AV_WHL_VER) = ${AV_WHL_VER}, Expected (AV_VER) = ${AV_VER}"
+          echo "PYNACL: Found (PYNACL_WHL_VER) = ${PYNACL_WHL_VER}, Expected (PYNACL_VER) = ${PYNACL_VER}"
+          echo "ZEROCONF: Found (ZEROCONF_WHL_VER) = ${ZEROCONF_WHL_VER}, Expected (ZEROCONF_VER) = ${ZEROCONF_VER}"
+          echo "ORJSON: Found (ORJSON_WHL_VER) = ${ORJSON_WHL_VER}, Expected (ORJSON_VER) = ${ORJSON_VER}"
+      - name: Dispatch build of deps2
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build 2nd batch of armv5-homeassistant deps"}'
       - name: Dispatch build of deps
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant deps"}'
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0}}
         uses: docker/setup-buildx-action@v3
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0}}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0}}
         run: |
           export DOCKER_BUILDKIT=0 
           sudo apt install -y qemu-user-static binfmt-support
@@ -102,7 +123,7 @@ jobs:
 
           docker save -o test.tar test:latest
       - name: Upload wheels
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0}}
         uses: actions/upload-artifact@v4
         with:
           name: test
