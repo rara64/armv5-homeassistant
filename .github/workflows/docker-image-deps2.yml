@@ -37,6 +37,9 @@ jobs:
 
           uname -m
 
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
+
           docker buildx build --load --tag wheels --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg DEPS="deps.zip" --platform linux/arm/v5 --allow security.insecure --no-cache -f ./deps2/Dockerfile .
       - name: Extract wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
