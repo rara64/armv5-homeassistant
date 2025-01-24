@@ -26,11 +26,11 @@ jobs:
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
-          7z x deps.zip -o./deps || echo 'deps extract failed'
+          7z x deps.zip -o./deps -y || echo 'deps extract failed'
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps2") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps2.zip "$LINK" || echo 'deps download failed'
-          7z x deps2.zip -o./deps || echo 'deps2 extract failed'
+          7z x deps2.zip -o./deps -y || echo 'deps2 extract failed'
 
           # GET CURRENT VERSION OF DEPS
           WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON')
