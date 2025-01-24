@@ -19,8 +19,10 @@ jobs:
           echo "ARMV5_RELEASE=$ARMV5_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: $HASS_RELEASE , ARMV5_RELEASE: $ARMV5_RELEASE"
       - name: Checkout code
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         uses: actions/checkout@v3
       - name: Check for new version of deps
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
