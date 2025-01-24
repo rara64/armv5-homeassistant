@@ -39,7 +39,16 @@ jobs:
           done
 
           # COMPARE VERSIONS OF DEPS
-          export OUTDATED_DEPS=$(for wheel in "${WHEELS_LIST[@]}"; do wh=${wheel}_WHL_VER; w=${wheel}_VER; if [[ "${!wh}" != "${!w}" ]]; then echo '1'; break; fi; done)
+          OUTDATED_DEPS=0
+          for wheel in "${WHEELS_LIST[@]}"; do
+            wh=${wheel}_WHL_VER
+            w=${wheel}_VER
+            if [[ "${!wh}" != "${!w}" ]]; then
+              OUTDATED_DEPS=1
+              break
+            fi
+          done
+          export OUTDATED_DEPS
           echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
 
           echo "PANDAS: Found (PANDAS_WHL_VER) = ${PANDAS_WHL_VER}, Expected (PANDAS_VER) = ${PANDAS_VER}"
@@ -48,20 +57,20 @@ jobs:
           echo "UV: Found (UV_WHL_VER) = ${UV_WHL_VER}, Expected (UV_VER) = ${UV_VER}"
           echo "AV: Found (AV_WHL_VER) = ${AV_WHL_VER}, Expected (AV_VER) = ${AV_VER}"
       - name: Dispatch build of deps
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS != ''}}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant deps"}'
       - name: Checkout code
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
         uses: actions/checkout@v3
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
         uses: docker/setup-buildx-action@v3
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
         run: |
           export DOCKER_BUILDKIT=0 
           sudo apt install -y qemu-user-static binfmt-support
@@ -77,7 +86,7 @@ jobs:
 
           docker save -o test.tar test:latest
       - name: Upload wheels
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == '' }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 }}
         uses: actions/upload-artifact@v4
         with:
           name: test
