@@ -19,6 +19,8 @@ jobs:
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
+          sed '/^#/d' reqs.txt > filtered_reqs.txt
+          mv filtered_reqs.txt reqs.txt
           export WHEELS_LIST=('ORJSON' 'PYNACL' 'ZEROCONF' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC')
           for wheel in "${WHEELS_LIST[@]}"; do 
             export ${wheel}_VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
