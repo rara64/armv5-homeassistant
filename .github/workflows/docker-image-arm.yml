@@ -37,6 +37,8 @@ jobs:
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
+          sed '/^#/d' reqs.txt > filtered_reqs.txt
+          mv filtered_reqs.txt reqs.txt
 
           WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC')
           
@@ -44,8 +46,7 @@ jobs:
             VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
             export ${wheel}_VER="${VER:-0}"
           done
-          set -x
-          echo "Here0!"
+
           for wheel in "${WHEELS_LIST[@]}"; do 
             wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
             required_version=${wheel}_VER
@@ -54,7 +55,6 @@ jobs:
 
             if [[ -z "$matching_files" ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
-              export ${wheel}_WHL_VER="${!required_version}"
             else
               for file in $matching_files; do
                 if [[ "$file" == *"${!required_version}"* ]]; then
@@ -70,14 +70,13 @@ jobs:
           
           7z a filtered_deps.zip ./deps/* || echo 'deps repack failed'
           mv filtered_deps.zip deps.zip
-          echo "Here!"
+
           # COMPARE VERSIONS OF DEPS
           OUTDATED_DEPS=0
           OUTDATED_DEPS_2=0
           for wheel in "${WHEELS_LIST[@]}"; do
             wh=${wheel}_WHL_VER
             w=${wheel}_VER
-            echo "Here2!"
             if [[ "${!wh}" != "${!w}" ]]; then
               case "${wheel}" in
                 PYNACL|ZEROCONF|ORJSON|DEEBOT|ELEVENLABS|ANTHROPIC)
@@ -89,7 +88,7 @@ jobs:
               break
             fi
           done
-          echo "Here3!"
+
           export OUTDATED_DEPS
           export OUTDATED_DEPS_2
           echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
