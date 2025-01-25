@@ -126,6 +126,7 @@ jobs:
           echo "DEEBOT-CLIENT: Found (DEEBOT_WHL_VER) = ${DEEBOT_WHL_VER}, Expected (DEEBOT_VER) = ${DEEBOT_VER}"
           echo "ANTHROPIC: Found (ANTHROPIC_WHL_VER) = ${ANTHROPIC_WHL_VER}, Expected (ANTHROPIC_VER) = ${ANTHROPIC_VER}"
           echo "ELEVENLABS: Found (ELEVENLABS_WHL_VER) = ${ELEVENLABS_WHL_VER}, Expected (ELEVENLABS_VER) = ${ELEVENLABS_VER}"
+          echo "MATRIX-NIO: Found (MATRIX_WHL_VER) = ${MATRIX_WHL_VER}, Expected (MATRIX_VER) = ${MATRIX_VER}"
       - name: Dispatch build of deps2
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
         run: |
