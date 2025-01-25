@@ -73,7 +73,7 @@ jobs:
             w=${wheel}_VER
             if [[ "${!wh}" != "${!w}" ]]; then
               case "${wheel}" in
-                PYNACL|ZEROCONF|ORJSON|DEEBOT-CLIENT|ELEVENLABS|ANTHROPIC)
+                PYNACL|ZEROCONF|ORJSON|DEEBOT|ELEVENLABS|ANTHROPIC)
                   OUTDATED_DEPS_2=1
                   break
                   ;;
