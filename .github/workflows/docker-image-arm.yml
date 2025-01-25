@@ -52,7 +52,7 @@ jobs:
 
             matching_files=$(find ./deps -type f -name "*.whl" | grep -i "${wh}")
 
-            if [ "$matching_files" == '' ]; then
+            if [[ -z $matching_files ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
               export ${wheel}_WHL_VER="${!required_version}"
               continue
