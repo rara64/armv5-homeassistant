@@ -24,6 +24,7 @@ jobs:
       - name: Check for new version of deps
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
+          # DOWNLOAD ARTIFACTS FROM DEPS AND DEPS2 JOBS
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
           7z e deps.zip -o./deps -y || echo 'deps extract failed'
@@ -32,7 +33,7 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps2.zip "$LINK" || echo 'deps download failed'
           7z e deps2.zip -o./deps -y || echo 'deps2 extract failed'
 
-          # GET CURRENT VERSION OF DEPS
+          # GET CURRENT VERSION OF HASS DEPENDENCIES
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
@@ -46,7 +47,8 @@ jobs:
             VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
             export ${wheel}_VER="${VER:-0}"
           done
-
+          
+          # FIND WHEEL VERSIONS AND REMOVE DUPLICATE FILES
           for wheel in "${WHEELS_LIST[@]}"; do 
             wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
             required_version=${wheel}_VER
@@ -69,12 +71,12 @@ jobs:
             fi
           done
           
+          # REPACK DEPS.ZIP WITHOUT DUPLICATES
           7z a filtered_deps.zip ./deps/* || echo 'deps repack failed'
           mv filtered_deps.zip deps.zip
 
           # GET VERSIONS FROM VERSIONS.TXT (FOR PACKAGES WITHOUT WHEELS - DEPENDENCIES ONLY IN DEPS2)
           WHEELS_LIST=('ELEVENLABS' 'ANTHROPIC')
-
           for wheel in "${WHEELS_LIST[@]}"; do 
             VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
             WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
@@ -99,7 +101,6 @@ jobs:
               break
             fi
           done
-          
 
           export OUTDATED_DEPS
           export OUTDATED_DEPS_2
