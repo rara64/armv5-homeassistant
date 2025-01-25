@@ -58,7 +58,7 @@ jobs:
               export ${wheel}_WHL_VER="0"
             else
               for file in $matching_files; do
-                if [[ $file =~ $wheel-${!required_version} ]]; then
+                if [[ "$file" == *"${!required_version}"* ]]; then
                   echo "Keeping $file (matches version ${!required_version})"
                   export ${wheel}_WHL_VER="${!required_version}"
                 else
