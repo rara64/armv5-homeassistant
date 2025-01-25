@@ -7,6 +7,7 @@ ARG ZEROCONF_VER
 ARG ANTHROPIC_VER
 ARG DEEBOT_VER
 ARG ELEVENLABS_VER
+ARG MATRIX_VER
 ARG DEPS
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
@@ -28,6 +29,9 @@ COPY $DEPS .
 RUN unzip -o -j deps.zip -d wheels && \
     find wheels/ -type f -name 'maturin*' -exec pip install {} \; && \
     find wheels/ -type f -name 'numpy*' -exec pip install {} \;
+
+# Build matrix-nio
+RUN pip install matrix-nio==$MATRIX_VER
 
 # Build anthropic
 RUN pip install anthropic==$ANTHROPIC_VER
