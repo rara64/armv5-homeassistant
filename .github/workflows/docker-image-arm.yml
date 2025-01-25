@@ -55,7 +55,7 @@ jobs:
 
             if [[ -z "$matching_files" ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
-              export ${wheel}_VER="0"
+              export ${wheel}_WHL_VER="0"
             else
               for file in $matching_files; do
                 if [[ "$file" == *"${!required_version}"* ]]; then
