@@ -26,7 +26,8 @@ RUN pip install wheel
 # Install maturin
 COPY $DEPS .
 RUN unzip -o -j deps.zip -d wheels && \
-    find wheels/ -type f -name 'maturin*' -exec pip install {} \;
+    find wheels/ -type f -name 'maturin*' -exec pip install {} \; && \
+    find wheels/ -type f -name 'numpy*' -exec pip install {} \;
 
 # Build anthropic
 RUN pip install anthropic==$ANTHROPIC_VER
