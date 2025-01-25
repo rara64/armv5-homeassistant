@@ -51,7 +51,7 @@ jobs:
             wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
             required_version=${wheel}_VER
 
-            matching_files=$(find ./deps -type f -name "${wh}*" -print 2>/dev/null | tr -d '\0')
+            matching_files=$(find ./deps -type f -iname "${wh}*" -print 2>/dev/null | tr -d '\0')
 
             if [[ -z "$matching_files" ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
