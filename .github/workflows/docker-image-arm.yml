@@ -155,7 +155,11 @@ jobs:
           uname -m
           ls
 
-          docker buildx build --load --platform linux/arm/v5 --build-arg DEPS="deps.zip" --allow security.insecure --no-cache -t test:latest -f ./Dockerfile.arm .
+          docker buildx build --load --platform linux/arm/v5 \
+          --build-arg DEPS="deps.zip" \
+          --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} \
+          --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
+          --allow security.insecure --no-cache -t test:latest -f ./Dockerfile
 
           docker save -o test.tar test:latest
       - name: Upload wheels
