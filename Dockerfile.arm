@@ -25,16 +25,16 @@ COPY $DEPS .
 
 
 RUN unzip -o -j deps.zip -d wheels && \
-    find wheels/ -type f -name 'maturin*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'token*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'jiter*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'pydantic*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'numpy*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'cffi*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name 'patchelf*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -name '*.whl' -exec pip install {} --find-links ./wheels \;
+    find wheels/ -type f -iname 'maturin*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'token*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'jiter*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'pydantic*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'numpy*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'cffi*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname 'patchelf*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -iname '*.whl' -exec pip install {} --find-links ./wheels \;
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
