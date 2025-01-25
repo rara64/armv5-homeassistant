@@ -96,6 +96,9 @@ jobs:
           echo "PYNACL: Found (PYNACL_WHL_VER) = ${PYNACL_WHL_VER}, Expected (PYNACL_VER) = ${PYNACL_VER}"
           echo "ZEROCONF: Found (ZEROCONF_WHL_VER) = ${ZEROCONF_WHL_VER}, Expected (ZEROCONF_VER) = ${ZEROCONF_VER}"
           echo "ORJSON: Found (ORJSON_WHL_VER) = ${ORJSON_WHL_VER}, Expected (ORJSON_VER) = ${ORJSON_VER}"
+          echo "ANTHROPIC: Found (ANTHROPIC_WHL_VER) = ${ANTHROPIC_WHL_VER}, Expected (ANTHROPIC_VER) = ${ANTHROPIC_VER}"
+          echo "ZEROCONF: Found (ELEVENLABS_WHL_VER) = ${ELEVENLABS_WHL_VER}, Expected (ELEVENLABS_VER) = ${ELEVENLABS_VER}"
+          echo "DEEBOT-CLIENT: Found (DEEBOT-CLIENT_WHL_VER) = ${DEEBOT-CLIENT_WHL_VER}, Expected (DEEBOT-CLIENT_VER) = ${DEEBOT-CLIENT_VER}"
       - name: Dispatch build of deps2
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
         run: |
