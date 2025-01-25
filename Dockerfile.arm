@@ -62,6 +62,8 @@ COPY --from=hass-builder /opt/venv /opt/venv
 
 RUN ldconfig && apt clean
 
+RUN pip install --upgrade psutil 
+
 ENV PATH="/opt/venv/bin:$PATH"
 
 CMD ["hass","-v","-c","/config"]
