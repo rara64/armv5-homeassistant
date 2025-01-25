@@ -51,10 +51,11 @@ jobs:
             wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
             required_version=${wheel}_VER
 
-            matching_files=$(find ./deps -type f -name "*.whl" -print0 2>/dev/null | xargs -0 grep -i "$wh" || true)
+            matching_files=$(find ./deps -type f -name "*.whl" -print0 2>/dev/null)
 
             if [[ -z "$matching_files" ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
+              export ${wheel}_VER="0"
             else
               for file in $matching_files; do
                 if [[ "$file" == *"${!required_version}"* ]]; then
