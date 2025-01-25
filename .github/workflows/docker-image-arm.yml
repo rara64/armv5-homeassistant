@@ -72,11 +72,14 @@ jobs:
           7z a filtered_deps.zip ./deps/* || echo 'deps repack failed'
           mv filtered_deps.zip deps.zip
 
+          # GET VERSIONS FROM VERSIONS.TXT (FOR PACKAGES WITHOUT WHEELS - DEPENDENCIES ONLY IN DEPS2)
           WHEELS_LIST=('ELEVENLABS' 'ANTHROPIC')
-          
+
           for wheel in "${WHEELS_LIST[@]}"; do 
-            VER=$(cat ./deps/versions.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
             export ${wheel}_VER="${VER:-0}"
+            export ${wheel}_WHL_VER="${WHL_VER:-0}"
           done
 
           # COMPARE VERSIONS OF DEPS
