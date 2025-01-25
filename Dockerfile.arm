@@ -26,6 +26,7 @@ COPY $DEPS .
 
 RUN unzip -o -j deps.zip -d wheels && \
     find wheels/ -type f -name 'maturin*' -exec pip install {} --find-links ./wheels \; && \
+    find wheels/ -type f -name 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
     find wheels/ -type f -name 'token*' -exec pip install {} --find-links ./wheels \; && \
     find wheels/ -type f -name 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
     find wheels/ -type f -name 'jiter*' -exec pip install {} --find-links ./wheels \; && \
