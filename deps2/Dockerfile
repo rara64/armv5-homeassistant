@@ -5,7 +5,7 @@ ARG ORJSON_VER
 ARG PYNACL_VER
 ARG ZEROCONF_VER
 ARG ANTHROPIC_VER
-ARG DEEBOT-CLIENT_VER
+ARG DEEBOT_VER
 ARG ELEVENLABS_VER
 ARG DEPS
 
@@ -32,7 +32,7 @@ RUN unzip -o -j deps.zip -d wheels && \
 RUN pip install anthropic==$ANTHROPIC_VER
 
 # Build deebot-client
-RUN pip install deebot-client==$DEEBOT-CLIENT_VER
+RUN pip install deebot-client==$DEEBOT_VER
 
 # Build elevenlabs
 RUN pip install elevenlabs==$ELEVENLABS_VER
