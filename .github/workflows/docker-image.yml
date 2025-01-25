@@ -1,11 +1,11 @@
-name: Build armv5-homeassistant on ARM
+name: Build armv5-homeassistant
 
 on: 
-  #schedule:
-  #  - cron: '32 1 * * MON'
+  schedule:
+    - cron: '32 1 * * MON'
   workflow_dispatch:
   repository_dispatch:
-    types: Build armv5-homeassistant on ARM
+    types: Build armv5-homeassistant
   
 jobs:
   build:
