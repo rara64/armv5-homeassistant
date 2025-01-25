@@ -52,21 +52,20 @@ jobs:
 
             matching_files=$(find ./deps -type f -name "*.whl" | grep -i "${wh}")
 
-            if [[ -z $matching_files ]]; then
+            if [[ -z "$matching_files" ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
               export ${wheel}_WHL_VER="${!required_version}"
-              continue
+            else
+              for file in $matching_files; do
+                if [[ "$file" == *"${!required_version}"* ]]; then
+                  echo "Keeping $file (matches version ${!required_version})"
+                  export ${wheel}_WHL_VER="${!required_version}"
+                else
+                  echo "Removing $file (does not match version ${!required_version})"
+                  rm -f "$file"
+                fi
+              done
             fi
-
-            for file in $matching_files; do
-              if [[ "$file" == *"${!required_version}"* ]]; then
-                echo "Keeping $file (matches version ${!required_version})"
-                export ${wheel}_WHL_VER="${!required_version}"
-              else
-                echo "Removing $file (does not match version ${!required_version})"
-                rm -f "$file"
-              fi
-            done
           done
           
           7z a filtered_deps.zip ./deps/* || echo 'deps repack failed'
