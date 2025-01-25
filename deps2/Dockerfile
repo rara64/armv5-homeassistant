@@ -4,6 +4,9 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 ARG ORJSON_VER
 ARG PYNACL_VER
 ARG ZEROCONF_VER
+ARG ANTHROPIC_VER
+ARG DEEBOT-CLIENT_VER
+ARG ELEVENLABS_VER
 ARG DEPS
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
@@ -24,6 +27,15 @@ RUN pip install wheel
 COPY $DEPS .
 RUN unzip -o -j deps.zip -d wheels && \
     find wheels/ -type f -name 'maturin*' -exec pip install {} \;
+
+# Build anthropic
+RUN pip install anthropic==$ANTHROPIC_VER
+
+# Build deebot-client
+RUN pip install deebot-client==$DEEBOT-CLIENT_VER
+
+# Build elevenlabs
+RUN pip install elevenlabs==$ELEVENLABS_VER
 
 # Build orjson
 RUN pip install orjson==$ORJSON_VER
