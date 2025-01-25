@@ -40,7 +40,7 @@ jobs:
           sed '/^#/d' reqs.txt > filtered_reqs.txt
           mv filtered_reqs.txt reqs.txt
 
-          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC')
+          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ANTHROPIC')
           
           for wheel in "${WHEELS_LIST[@]}"; do 
             VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
@@ -80,7 +80,7 @@ jobs:
             w=${wheel}_VER
             if [[ "${!wh}" != "${!w}" ]]; then
               case "${wheel}" in
-                PYNACL|ZEROCONF|ORJSON|DEEBOT|ELEVENLABS|ANTHROPIC)
+                PYNACL|ZEROCONF|ORJSON|DEEBOT|ANTHROPIC)
                   OUTDATED_DEPS_2=1
                   break
                   ;;
@@ -104,7 +104,6 @@ jobs:
           echo "ZEROCONF: Found (ZEROCONF_WHL_VER) = ${ZEROCONF_WHL_VER}, Expected (ZEROCONF_VER) = ${ZEROCONF_VER}"
           echo "ORJSON: Found (ORJSON_WHL_VER) = ${ORJSON_WHL_VER}, Expected (ORJSON_VER) = ${ORJSON_VER}"
           echo "ANTHROPIC: Found (ANTHROPIC_WHL_VER) = ${ANTHROPIC_WHL_VER}, Expected (ANTHROPIC_VER) = ${ANTHROPIC_VER}"
-          echo "ZEROCONF: Found (ELEVENLABS_WHL_VER) = ${ELEVENLABS_WHL_VER}, Expected (ELEVENLABS_VER) = ${ELEVENLABS_VER}"
           echo "DEEBOT-CLIENT: Found (DEEBOT_WHL_VER) = ${DEEBOT_WHL_VER}, Expected (DEEBOT_VER) = ${DEEBOT_VER}"
       - name: Dispatch build of deps2
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
