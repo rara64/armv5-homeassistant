@@ -95,15 +95,15 @@ jobs:
 
             # COMPARE VERSIONS OF DEPS
             WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
-            OUTDATED_DEPS=0
-            OUTDATED_DEPS_2=0
+            export OUTDATED_DEPS=0
+            export OUTDATED_DEPS_2=0
             for wheel in "${WHEELS_LIST[@]}"; do
               wh=${wheel}_WHL_VER
               w=${wheel}_VER
               if [[ "${!wh}" != "${!w}" ]]; then
                 case "${wheel}" in
                   PYNACL|ZEROCONF|ORJSON|DEEBOT|ANTHROPIC|ELEVENLABS|MATRIX)
-                    OUTDATED_DEPS_2=1
+                    export OUTDATED_DEPS_2=1
                     break
                     ;;
                 esac
