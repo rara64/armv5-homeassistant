@@ -21,7 +21,7 @@ jobs:
           cat *.txt >> reqs.txt
           sed '/^#/d' reqs.txt > filtered_reqs.txt
           mv filtered_reqs.txt reqs.txt
-          export WHEELS_LIST=('ORJSON' 'PYNACL' 'ZEROCONF' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC')
+          export WHEELS_LIST=('ORJSON' 'PYNACL' 'ZEROCONF' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX-NIO')
           for wheel in "${WHEELS_LIST[@]}"; do 
             export ${wheel}_VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
@@ -52,6 +52,7 @@ jobs:
           --build-arg ORJSON_VER=${{ env.ORJSON_VER }} \
           --build-arg PYNACL_VER=${{ env.PYNACL_VER }} \
           --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} \
+          --build-arg MATRIX-NIO_VER=${{ env.MATRIX-NIO_VER }} \
           --build-arg DEPS="deps.zip" \
           --platform linux/arm/v5 --allow security.insecure --no-cache -f ./deps2/Dockerfile .
       - name: Extract wheels
@@ -63,6 +64,7 @@ jobs:
           docker cp wheels:./root/.cache/pip/wheels wheels
           echo "elevenlabs==${{ env.ELEVENLABS_VER }}" >> ./wheels/versions.txt
           echo "anthropic==${{env.ANTHROPIC_VER }}" >> ./wheels/versions.txt
+          echo "matrix-nio==${{ env.MATRIX-NIO_VER }}" >> ./wheels/versions.txt
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
         uses: actions/upload-artifact@v4
