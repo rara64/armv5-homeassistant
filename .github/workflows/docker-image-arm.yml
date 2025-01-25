@@ -44,7 +44,7 @@ jobs:
             VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
             export ${wheel}_VER="${VER:-0}"
           done
-          
+          set -x
           echo "Here0!"
           for wheel in "${WHEELS_LIST[@]}"; do 
             wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
