@@ -19,7 +19,7 @@ jobs:
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
-          export WHEELS_LIST=('ORJSON' 'PYNACL' 'ZEROCONF' 'DEEBOT-CLIENT' 'ELEVENLABS' 'ANTHROPIC')
+          export WHEELS_LIST=('ORJSON' 'PYNACL' 'ZEROCONF' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC')
           for wheel in "${WHEELS_LIST[@]}"; do 
             export ${wheel}_VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
@@ -45,7 +45,7 @@ jobs:
 
           docker buildx build --load --tag wheels \
           --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} \
-          --build-arg DEEBOT-CLIENT_VER=${{ env.DEEBOT-CLIENT_VER }} \
+          --build-arg DEEBOT_VER=${{ env.DEEBOT_VER }} \
           --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} \
           --build-arg ORJSON_VER=${{ env.ORJSON_VER }} \
           --build-arg PYNACL_VER=${{ env.PYNACL_VER }} \
