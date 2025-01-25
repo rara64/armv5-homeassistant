@@ -76,39 +76,46 @@ jobs:
           mv filtered_deps.zip deps.zip
 
           # GET VERSIONS FROM VERSIONS.TXT (FOR PACKAGES WITHOUT WHEELS - DEPENDENCIES ONLY IN DEPS2)
-          WHEELS_LIST=('ELEVENLABS' 'ANTHROPIC')
+          if [[ -f ./deps/versions.txt ]]; then
+            echo "versions.txt found. Proceeding..."
+            HEELS_LIST=('ELEVENLABS' 'ANTHROPIC')
           
-          # HANDLE MATRIX-NIO MANUALLY
-          export VER=$(cat reqs.txt | grep -m 1 -i "matrix-nio" | awk -F'=' '{print $NF}' | tr -d '\n')
-          export WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "matrix" | awk -F'=' '{print $NF}' | tr -d '\n')
-          export MATRIX_VER="${VER:-0}"
-          export $MATRIX_WHL_VER="${WHL_VER:-0}"
+            # HANDLE MATRIX-NIO MANUALLY
+            export VER=$(cat reqs.txt | grep -m 1 -i "matrix-nio" | awk -F'=' '{print $NF}' | tr -d '\n')
+            export WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "matrix" | awk -F'=' '{print $NF}' | tr -d '\n')
+            export MATRIX_VER="${VER:-0}"
+            export $MATRIX_WHL_VER="${WHL_VER:-0}"
 
-          for wheel in "${WHEELS_LIST[@]}"; do 
-            VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
-            WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
-            export ${wheel}_VER="${VER:-0}"
-            export ${wheel}_WHL_VER="${WHL_VER:-0}"
-          done
+            for wheel in "${WHEELS_LIST[@]}"; do 
+              VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+              WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+              export ${wheel}_VER="${VER:-0}"
+              export ${wheel}_WHL_VER="${WHL_VER:-0}"
+            done
 
-          # COMPARE VERSIONS OF DEPS
-          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
-          OUTDATED_DEPS=0
-          OUTDATED_DEPS_2=0
-          for wheel in "${WHEELS_LIST[@]}"; do
-            wh=${wheel}_WHL_VER
-            w=${wheel}_VER
-            if [[ "${!wh}" != "${!w}" ]]; then
-              case "${wheel}" in
-                PYNACL|ZEROCONF|ORJSON|DEEBOT|ANTHROPIC|ELEVENLABS|MATRIX)
-                  OUTDATED_DEPS_2=1
-                  break
-                  ;;
-              esac
-              OUTDATED_DEPS=1
-              break
-            fi
-          done
+            # COMPARE VERSIONS OF DEPS
+            WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
+            OUTDATED_DEPS=0
+            OUTDATED_DEPS_2=0
+            for wheel in "${WHEELS_LIST[@]}"; do
+              wh=${wheel}_WHL_VER
+              w=${wheel}_VER
+              if [[ "${!wh}" != "${!w}" ]]; then
+                case "${wheel}" in
+                  PYNACL|ZEROCONF|ORJSON|DEEBOT|ANTHROPIC|ELEVENLABS|MATRIX)
+                    OUTDATED_DEPS_2=1
+                    break
+                    ;;
+                esac
+                OUTDATED_DEPS=1
+                break
+              fi
+            done
+          else
+            echo "Error: deps/versions.txt not found."
+            export OUTDATED_DEPS=0
+            export OUTDATED_DEPS_2=1
+          fi
 
           export OUTDATED_DEPS
           export OUTDATED_DEPS_2
