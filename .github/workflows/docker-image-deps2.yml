@@ -16,9 +16,12 @@ jobs:
       - name: Find dependencies versions
         run: |
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
-          export WHEELS_LIST=('ORJSON' 'PYNACL' 'ZEROCONF')
+          wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
+          wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
+          cat *.txt >> reqs.txt
+          export WHEELS_LIST=('ORJSON' 'PYNACL' 'ZEROCONF' 'DEEBOT-CLIENT' 'ELEVENLABS' 'ANTHROPIC')
           for wheel in "${WHEELS_LIST[@]}"; do 
-            export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            export ${wheel}_VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
       - name: Checkout code
@@ -40,7 +43,15 @@ jobs:
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
 
-          docker buildx build --load --tag wheels --build-arg ORJSON_VER=${{ env.ORJSON_VER }} --build-arg PYNACL_VER=${{ env.PYNACL_VER }} --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} --build-arg DEPS="deps.zip" --platform linux/arm/v5 --allow security.insecure --no-cache -f ./deps2/Dockerfile .
+          docker buildx build --load --tag wheels \
+          --build-arg ANTHROPIC_VER=${{ env.ANTHROPIC_VER }} \
+          --build-arg DEBOOT-CLIENT_VER=${{ env.DEBOOT-CLIENT_VER }} \
+          --build-arg ELEVENLABS_VER=${{ env.ELEVENLABS_VER }} \
+          --build-arg ORJSON_VER=${{ env.ORJSON_VER }} \
+          --build-arg PYNACL_VER=${{ env.PYNACL_VER }} \
+          --build-arg ZEROCONF_VER=${{ env.ZEROCONF_VER }} \
+          --build-arg DEPS="deps.zip" \
+          --platform linux/arm/v5 --allow security.insecure --no-cache -f ./deps2/Dockerfile .
       - name: Extract wheels
         if: ${{ env.WHEELS_NEEDED == '0' }}
         shell: bash
