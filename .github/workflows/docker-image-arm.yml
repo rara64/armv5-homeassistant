@@ -38,7 +38,7 @@ jobs:
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
 
-          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT-CLIENT' 'ELEVENLABS' 'ANTHROPIC')
+          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC')
           
           for wheel in "${WHEELS_LIST[@]}"; do 
             VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
@@ -98,7 +98,7 @@ jobs:
           echo "ORJSON: Found (ORJSON_WHL_VER) = ${ORJSON_WHL_VER}, Expected (ORJSON_VER) = ${ORJSON_VER}"
           echo "ANTHROPIC: Found (ANTHROPIC_WHL_VER) = ${ANTHROPIC_WHL_VER}, Expected (ANTHROPIC_VER) = ${ANTHROPIC_VER}"
           echo "ZEROCONF: Found (ELEVENLABS_WHL_VER) = ${ELEVENLABS_WHL_VER}, Expected (ELEVENLABS_VER) = ${ELEVENLABS_VER}"
-          echo "DEEBOT-CLIENT: Found (DEEBOT-CLIENT_WHL_VER) = ${DEEBOT-CLIENT_WHL_VER}, Expected (DEEBOT-CLIENT_VER) = ${DEEBOT-CLIENT_VER}"
+          echo "DEEBOT-CLIENT: Found (DEEBOT_WHL_VER) = ${DEEBOT_WHL_VER}, Expected (DEEBOT_VER) = ${DEEBOT_VER}"
       - name: Dispatch build of deps2
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
         run: |
