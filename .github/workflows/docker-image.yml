@@ -39,12 +39,12 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
           7z e go2rtc.zip -o./go2rtc -y || echo 'go2rtc extract failed'
 
-          export GO2RTC_VER = $(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/${{ env.HASS_RELEASE }}/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
-          export GO2RTC_BUILD_VER = $(cat ./go2rtc/go2rtc_ver.txt)
+          export GO2RTC_VER=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/${{ env.HASS_RELEASE }}/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
+          export GO2RTC_BUILD_VER=$(cat ./go2rtc/go2rtc_ver.txt)
 
-          export OUTDATED_GO2RTC = 0
+          export OUTDATED_GO2RTC=0
           if [[ "${GO2RTC_VER}" != "${GO2RTC_BUILD_VER}" ]]; then
-            export OUTDATED_GO2RTC = 1
+            export OUTDATED_GO2RTC=1
             echo "OUTDATED_GO2RTC=$OUTDATED_GO2RTC" >> $GITHUB_ENV
             export OUTDATED_DEPS=0
             export OUTDATED_DEPS_2=0
