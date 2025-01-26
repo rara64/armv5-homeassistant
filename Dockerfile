@@ -1,8 +1,6 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as hass-builder
 
-RUN uname -m
-
 ARG DEPS
 
 # Install latest cargo from rara64/armv5te-cargo repo
@@ -51,6 +49,7 @@ RUN pip install homeassistant
 RUN pip cache purge
 
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as runner
+
 ARG GO2RTC
 
 # Copy Python VENV from hass-builder to runner
@@ -62,10 +61,12 @@ RUN mv go2rtc_linux_armv5 /bin/go2rtc && chmod +x /bin/go2rtc
 
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && dpkg -i *.deb && rm *.deb
 
+COPY --from=hass-builder /opt/venv /opt/venv
 COPY --from=hass-builder /opt/uv-venv /opt/uv-venv
 
 RUN ldconfig && apt clean
 
+ENV PATH="/opt/venv/bin:$PATH"
 ENV PATH="/opt/uv-venv/bin:$PATH"
 
 RUN pip install --upgrade psutil 
