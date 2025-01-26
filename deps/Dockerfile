@@ -24,6 +24,9 @@ RUN pip install wheel
 # Build & install maturin wheel
 RUN pip install maturin
 
+# Build latest uv
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install uv==$UV_VER
+
 # Build cryptography with no blas
 RUN pip install \
     cryptography==$CRYPTOGRAPHY_VER \
@@ -31,9 +34,6 @@ RUN pip install \
 
 # Compile AV against ffmpeg binary included in the base image
 RUN pip install av==$AV_VER --no-binary av
-
-# Install latest uv
-RUN pip install uv==$UV_VER
 
 # Build numpy with no blas
 RUN pip install numpy==$NUMPY_VER \
