@@ -52,6 +52,7 @@ jobs:
             echo "Outdated GO2RTC! Expected: ${GO2RTC_VER} Got: ${GO2RTC_BUILD_VER}"
             exit 0
           fi
+          echo "OUTDATED_GO2RTC=$OUTDATED_GO2RTC" >> $GITHUB_ENV
 
           # GET CURRENT VERSION OF HASS DEPENDENCIES
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
