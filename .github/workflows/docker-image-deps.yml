@@ -20,6 +20,7 @@ jobs:
           for wheel in "${WHEELS_LIST[@]}"; do 
             export ${wheel}_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
           done
+          export UV_VER=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
       - name: Checkout code
         uses: actions/checkout@v3
