@@ -51,15 +51,14 @@ RUN pip install homeassistant
 RUN pip cache purge
 
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as runner
+ARG GO2RTC
 
 # Copy Python VENV from hass-builder to runner
 RUN mkdir /config
 
 # Install go2rtc binary
-RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
-    export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+') && \
-    curl -o /bin/go2rtc -L "https://github.com/AlexxIT/go2rtc/releases/download/v${GO2RTC}/go2rtc_linux_arm" \
-    && chmod +x /bin/go2rtc
+COPY $GO2RTC .
+RUN mv go2rtc_linux_armv5 /bin/go2rtc && chmod +x /bin/go2rtc
 
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && dpkg -i *.deb && rm *.deb
 
