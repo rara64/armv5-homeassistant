@@ -1,9 +1,5 @@
 name: Build deps for armv5-homeassistant
 
-concurrency: 
-  group: my-workflow-${{ github.ref }}
-  cancel-in-progress: true
-
 on: 
   workflow_dispatch:
   repository_dispatch:
