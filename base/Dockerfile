@@ -3,7 +3,7 @@ FROM --platform=linux/arm/v5 debian:trixie
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y \
     curl wget unzip jq rustc build-essential cmake autoconf pkg-config \
-    python3.12 python3.12-venv python3.12-dev git bluez libffi-dev libssl-dev \
+    python3.13 python3.13-venv python3.13-dev git bluez libffi-dev libssl-dev \
     libjpeg-dev zlib1g-dev libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata \
     libudev-dev libpcap-dev libyaml-dev libxml2 libxslt-dev automake doxygen \
     graphviz imagemagick libasound2-dev libass-dev libavcodec-dev libavdevice-dev \
