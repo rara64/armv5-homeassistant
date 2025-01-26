@@ -78,7 +78,7 @@ jobs:
           # GET VERSIONS FROM VERSIONS.TXT (FOR PACKAGES WITHOUT WHEELS - DEPENDENCIES ONLY IN DEPS2)
           if [[ -f ./deps/versions.txt ]]; then
             echo "versions.txt found. Proceeding..."
-            HEELS_LIST=('ELEVENLABS' 'ANTHROPIC')
+            export HEELS_LIST=('ELEVENLABS' 'ANTHROPIC')
           
             # HANDLE MATRIX-NIO MANUALLY
             export VER=$(cat reqs.txt | grep -m 1 -i "matrix-nio" | awk -F'=' '{print $NF}' | tr -d '\n')
@@ -94,7 +94,7 @@ jobs:
             done
 
             # COMPARE VERSIONS OF DEPS
-            WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
+            export WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
             export OUTDATED_DEPS=0
             export OUTDATED_DEPS_2=0
             for wheel in "${WHEELS_LIST[@]}"; do
