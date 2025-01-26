@@ -30,6 +30,7 @@ jobs:
         export GOARM=5
         FILENAME="go2rtc_linux_armv5"
         go build -ldflags "-s -w" -trimpath -o $FILENAME && upx --lzma --force-overwrite -q --no-progress $FILENAME
+        ls -la
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
