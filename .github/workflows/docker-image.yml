@@ -87,40 +87,40 @@ jobs:
             exit 0
           fi
 
-            # HANDLE MATRIX-NIO, ANTHROPIC, ELEVENLABS MANUALLY
-            VER=$(cat reqs.txt | grep -m 1 -i "matrix-nio" | awk -F'=' '{print $NF}' | tr -d '\n')
-            WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "matrix" | awk -F'=' '{print $NF}' | tr -d '\n')
-            export MATRIX_VER="${VER:-0}"
-            export MATRIX_WHL_VER="${WHL_VER:-0}"
+          # HANDLE MATRIX-NIO, ANTHROPIC, ELEVENLABS MANUALLY
+          VER=$(cat reqs.txt | grep -m 1 -i "matrix-nio" | awk -F'=' '{print $NF}' | tr -d '\n')
+          WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "matrix" | awk -F'=' '{print $NF}' | tr -d '\n')
+          export MATRIX_VER="${VER:-0}"
+          export MATRIX_WHL_VER="${WHL_VER:-0}"
 
-            VER=$(cat reqs.txt | grep -m 1 -i "elevenlabs" | awk -F'=' '{print $NF}' | tr -d '\n')
-            WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "elevenlabs" | awk -F'=' '{print $NF}' | tr -d '\n')
-            export ELEVENLABS_VER="${VER:-0}"
-            export ELEVENLABS_WHL_VER="${WHL_VER:-0}"
+          VER=$(cat reqs.txt | grep -m 1 -i "elevenlabs" | awk -F'=' '{print $NF}' | tr -d '\n')
+          WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "elevenlabs" | awk -F'=' '{print $NF}' | tr -d '\n')
+          export ELEVENLABS_VER="${VER:-0}"
+          export ELEVENLABS_WHL_VER="${WHL_VER:-0}"
 
-            VER=$(cat reqs.txt | grep -m 1 -i "anthropic" | awk -F'=' '{print $NF}' | tr -d '\n')
-            WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "anthropic" | awk -F'=' '{print $NF}' | tr -d '\n')
-            export ANTHROPIC_VER="${VER:-0}"
-            export ANTHROPIC_WHL_VER="${WHL_VER:-0}"
+          VER=$(cat reqs.txt | grep -m 1 -i "anthropic" | awk -F'=' '{print $NF}' | tr -d '\n')
+          WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "anthropic" | awk -F'=' '{print $NF}' | tr -d '\n')
+          export ANTHROPIC_VER="${VER:-0}"
+          export ANTHROPIC_WHL_VER="${WHL_VER:-0}"
 
-            # COMPARE VERSIONS OF DEPS
-            export WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
-            export OUTDATED_DEPS=0
-            export OUTDATED_DEPS_2=0
-            for wheel in "${WHEELS_LIST[@]}"; do
-              wh=${wheel}_WHL_VER
-              w=${wheel}_VER
-              if [[ "${!wh}" != "${!w}" ]]; then
-                case "${wheel}" in
-                  PYNACL|ZEROCONF|ORJSON|DEEBOT|ANTHROPIC|ELEVENLABS|MATRIX)
-                    export OUTDATED_DEPS_2=1
-                    break
-                    ;;
-                esac
-                OUTDATED_DEPS=1
-                break
-              fi
-            done
+          # COMPARE VERSIONS OF DEPS
+          export WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
+          export OUTDATED_DEPS=0
+          export OUTDATED_DEPS_2=0
+          for wheel in "${WHEELS_LIST[@]}"; do
+            wh=${wheel}_WHL_VER
+            w=${wheel}_VER
+            if [[ "${!wh}" != "${!w}" ]]; then
+              case "${wheel}" in
+                PYNACL|ZEROCONF|ORJSON|DEEBOT|ANTHROPIC|ELEVENLABS|MATRIX)
+                  export OUTDATED_DEPS_2=1
+                  break
+                  ;;
+              esac
+              OUTDATED_DEPS=1
+              break
+            fi
+          done
 
           export OUTDATED_DEPS
           export OUTDATED_DEPS_2
@@ -171,5 +171,5 @@ jobs:
           --build-arg DEPS="deps.zip" \
           --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} \
           --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
-          --allow security.insecure --no-cache -f ./Dockerfile
+          --allow security.insecure --no-cache -f ./Dockerfile .
 
