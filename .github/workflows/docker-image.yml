@@ -84,7 +84,7 @@ jobs:
             export VER=$(cat reqs.txt | grep -m 1 -i "matrix-nio" | awk -F'=' '{print $NF}' | tr -d '\n')
             export WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "matrix" | awk -F'=' '{print $NF}' | tr -d '\n')
             export MATRIX_VER="${VER:-0}"
-            export $MATRIX_WHL_VER="${WHL_VER:-0}"
+            export MATRIX_WHL_VER="${WHL_VER:-0}"
 
             for wheel in "${WHEELS_LIST[@]}"; do 
               VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
