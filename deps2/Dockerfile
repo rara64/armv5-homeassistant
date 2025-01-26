@@ -20,7 +20,7 @@ RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/relea
 RUN dpkg -i *.deb
 
 # Setup Python VENV
-RUN python3.12 -m venv /opt/venv
+RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install wheel
 
