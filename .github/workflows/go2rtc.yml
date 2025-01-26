@@ -22,7 +22,7 @@ jobs:
         export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
         echo $GO2RTC >> go2rtc_ver.txt
 
-        git clone -b $GO2RTC https://github.com/AlexxIT/go2rtc/
+        git clone -b "v${GO2RTC}" https://github.com/AlexxIT/go2rtc/
         cd go2rtc
 
         export GOOS=linux
