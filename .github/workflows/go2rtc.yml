@@ -18,10 +18,22 @@ jobs:
 
     - name: Build
       run: |
-        git clone https://github.com/AlexxIT/go2rtc/
+        export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
+        export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
+        echo $GO2RTC >> go2rtc_ver.txt
+
+        git clone -b $GO2RTC https://github.com/AlexxIT/go2rtc/
         cd go2rtc
+
         export GOOS=linux
         export GOARCH=arm
         export GOARM=5
         FILENAME="go2rtc_linux_armv5"
         go build -ldflags "-s -w" -trimpath -o $FILENAME && upx --lzma --force-overwrite -q --no-progress $FILENAME
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: go2rtc
+        path: |
+          ./go2rtc_linux_arm_v5
+          ./go2rtc_ver.txt
