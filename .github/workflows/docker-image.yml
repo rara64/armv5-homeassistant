@@ -33,6 +33,26 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps2.zip "$LINK" || echo 'deps download failed'
           7z e deps2.zip -o./deps -y || echo 'deps2 extract failed'
 
+          # DOWNLOAD GO2RTC FOR ARMV5
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
+          7z e go2rtc.zip -o./go2rtc -y || echo 'go2rtc extract failed'
+
+          export GO2RTC_VER = $(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/${{ env.HASS_RELEASE }}/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
+          export GO2RTC_BUILD_VER = $(cat ./go2rtc/go2rtc_ver.txt)
+
+          export OUTDATED_GO2RTC = 0
+          if [[ "${GO2RTC_VER}" != "${GO2RTC_BUILD_VER}" ]]; then
+            export OUTDATED_GO2RTC = 1
+            echo "OUTDATED_GO2RTC=$OUTDATED_GO2RTC" >> $GITHUB_ENV
+            export OUTDATED_DEPS=0
+            export OUTDATED_DEPS_2=0
+            echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
+            echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
+            echo "Outdated GO2RTC! Expected: ${GO2RTC_VER} Got: ${GO2RTC_BUILD_VER}"
+            exit 0
+          fi
+
           # GET CURRENT VERSION OF HASS DEPENDENCIES
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
@@ -119,13 +139,11 @@ jobs:
                   break
                   ;;
               esac
-              OUTDATED_DEPS=1
+              export OUTDATED_DEPS=1
               break
             fi
           done
 
-          export OUTDATED_DEPS
-          export OUTDATED_DEPS_2
           echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
           echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
 
@@ -141,6 +159,7 @@ jobs:
           echo "ANTHROPIC: Found (ANTHROPIC_WHL_VER) = ${ANTHROPIC_WHL_VER}, Expected (ANTHROPIC_VER) = ${ANTHROPIC_VER}"
           echo "ELEVENLABS: Found (ELEVENLABS_WHL_VER) = ${ELEVENLABS_WHL_VER}, Expected (ELEVENLABS_VER) = ${ELEVENLABS_VER}"
           echo "MATRIX-NIO: Found (MATRIX_WHL_VER) = ${MATRIX_WHL_VER}, Expected (MATRIX_VER) = ${MATRIX_VER}"
+          echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
       - name: Dispatch build of deps2
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
         run: |
@@ -149,14 +168,18 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build deps for armv5-homeassistant"}'
-      - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0}}
+      - name: Dispatch build of go2rtc
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_GO2RTC == 1}}
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build go2rtc for armv5-homeassistant"}'
+     - name: Set up Docker Buildx
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0}}
         uses: docker/setup-buildx-action@v3
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0}}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0}}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0}}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0}}
         run: |
           export DOCKER_BUILDKIT=0 
           sudo apt install -y qemu-user-static binfmt-support
@@ -171,6 +194,7 @@ jobs:
 
           docker buildx build --push --platform linux/arm/v5 \
           --build-arg DEPS="deps.zip" \
+          --build-arg GO2RTC="go2rtc/go2rtc_linux_armv5" \
           --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} \
           --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
           --allow security.insecure --no-cache -f ./Dockerfile .
