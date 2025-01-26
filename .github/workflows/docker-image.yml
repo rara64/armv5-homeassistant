@@ -193,10 +193,17 @@ jobs:
           uname -m
           ls
 
-          docker buildx build --push --platform linux/arm/v5 \
+          docker buildx build --load --platform linux/arm/v5 \
           --build-arg DEPS="deps.zip" \
           --build-arg GO2RTC="go2rtc/go2rtc_linux_armv5" \
-          --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} \
-          --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
+          --tag armv5-homeassistant:latest \
           --allow security.insecure --no-cache -f ./Dockerfile .
 
+          docker save -o test.tar armv5-homeassistant:latest
+      - name: Upload wheels
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0}}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test
+          path: |
+            test.tar
