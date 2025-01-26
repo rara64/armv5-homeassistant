@@ -1,0 +1,27 @@
+name: Build go2rtc for armv5-homeassistant
+
+on: 
+  workflow_dispatch:
+  repository_dispatch:
+    types: Build go2rtc for armv5-homeassistant
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.20'
+
+    - name: Build
+      run: |
+        git clone https://github.com/AlexxIT/go2rtc/
+        cd go2rtc
+        export GOOS=linux
+        export GOARCH=arm
+        export GOARM=5
+        FILENAME="go2rtc_linux_armv5"
+        go build -ldflags "-s -w" -trimpath -o $FILENAME && upx --lzma --force-overwrite -q --no-progress $FILENAME
