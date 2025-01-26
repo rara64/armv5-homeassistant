@@ -35,5 +35,5 @@ jobs:
       with:
         name: go2rtc
         path: |
-          ./go2rtc_linux_arm_v5
+          ./go2rtc_linux_armv5
           ./go2rtc_ver.txt
