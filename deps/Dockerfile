@@ -40,4 +40,4 @@ RUN pip install numpy==$NUMPY_VER \
 RUN pip install pandas==$PANDAS_VER --no-deps 
 
 # Build latest uv
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" pip install uv==$UV_VER
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" pip install uv==$UV_VER
