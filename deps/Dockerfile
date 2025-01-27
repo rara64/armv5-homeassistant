@@ -24,6 +24,15 @@ RUN pip install wheel
 # Build & install maturin wheel
 RUN pip install maturin
 
+# Build UV
+RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip && \
+    unzip uv.zip && \
+    mv uv-$UV_VER uv && \
+    rm uv.zip && \
+    mkdir wheels
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
+RUN find /wheels -type f -iname '*.whl' -exec pip install {} \;
+
 # Build cryptography with no blas
 RUN pip install \
     cryptography==$CRYPTOGRAPHY_VER \
@@ -38,6 +47,3 @@ RUN pip install numpy==$NUMPY_VER \
 
 # Build pandas
 RUN pip install pandas==$PANDAS_VER --no-deps 
-
-# Build latest uv
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" pip install uv==$UV_VER
