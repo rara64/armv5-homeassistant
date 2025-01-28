@@ -12,20 +12,15 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install wheel
 
-COPY $DEPS .
-RUN unzip -o -j deps.zip -d wheels && \
-    find wheels/ -type f -iname 'uv*' -exec pip install {} --find-links ./wheels \;
-
-RUN uv venv /opt/uv-venv
-ENV PATH="/opt/uv-venv/bin:$PATH"
-
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
 
 # Install pre-built dependencies
-RUN find wheels/ -type f -iname 'maturin*' -exec pip install {} --find-links ./wheels \; && \
+COPY $DEPS .
+RUN unzip -o -j deps.zip -d wheels && \
+    find wheels/ -type f -iname 'maturin*' -exec pip install {} --find-links ./wheels \; && \
     find wheels/ -type f -iname 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
     find wheels/ -type f -iname 'token*' -exec pip install {} --find-links ./wheels \; && \
     find wheels/ -type f -iname 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
@@ -62,13 +57,13 @@ RUN mv go2rtc_linux_armv5 /bin/go2rtc && chmod +x /bin/go2rtc
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && dpkg -i *.deb && rm *.deb
 
 COPY --from=hass-builder /opt/venv /opt/venv
-COPY --from=hass-builder /opt/uv-venv /opt/uv-venv
 
 RUN ldconfig && apt clean
 
 ENV PATH="/opt/venv/bin:$PATH"
-ENV PATH="/opt/uv-venv/bin:$PATH"
+ENV VIRTUAL_ENV="/opt/venv"
 
+# Fix psutil error
 RUN pip install --upgrade psutil 
 
 CMD ["hass","-v","-c","/config"]
