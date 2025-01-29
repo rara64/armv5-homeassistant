@@ -32,7 +32,8 @@ RUN unzip -o -j deps.zip -d wheels && \
     find wheels/ -type f -iname '*.whl' -exec pip install {} --find-links ./wheels \;
 
 # Clone latest release of HASS
-RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core
+RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core && \
+    sed -i '/uv==/d' core/requirements_all.txt
 
 # Install HASS dependencies
 RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
