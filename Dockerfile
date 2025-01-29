@@ -33,7 +33,7 @@ RUN unzip -o -j deps.zip -d wheels && \
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core && \
-    sed -i '/uv==/d' core/requirements_all.txt
+    sed -i '/uv==/d' core/requirements.txt
 
 # Install HASS dependencies
 RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
