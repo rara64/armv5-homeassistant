@@ -27,7 +27,7 @@ Cargo, a package manager for Rust.\n\
 """' >> Cargo.toml
 RUN cargo deb --target armv5te-unknown-linux-gnueabi -- --features=vendored-openssl
 
-FROM --platform=linux/arm/v5 golang:1.23 as go2rtc-builder
+FROM --platform=linux/amd64 golang:1.23 as go2rtc-builder
 
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+') && \
