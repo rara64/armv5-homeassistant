@@ -8,7 +8,7 @@ Everything that runs [bodhi's debian](https://forum.doozan.com/read.php?2,12096)
 Use a similar command as the one provided in Home Assistant install guide to run the image:
 > docker run -d --name homeassistant --privileged --restart unless-stopped -e TZ MY_TIME_ZONE -v PATH_TO_YOUR_CONFIG:/config --network host rara64/armv5-homeassistant
 
-A new image should be automatically built and pushed to Docker Hub every week if there is a new release of Home Assistant available. Nevertheless, you can still download the `Dockerfile.local` file from this repo and build the image on your PC using the following command:
+A new image should be automatically built and pushed to Docker Hub every week if there is a new release of Home Assistant available. Nevertheless, you can use `local/Dockerfile` from this repo and build the image on your machine (just not on the NAS) using the following command:
 > docker buildx build --platform=linux/arm/v5 --load --allow security.insecure .
 
 ## My use case
