@@ -24,6 +24,21 @@ RUN pip install wheel
 # Build & install maturin wheel
 RUN pip install maturin
 
+# Build cryptography with no blas
+RUN pip install \
+    cryptography==$CRYPTOGRAPHY_VER \
+    --config-settings=setup-args="-Dallow-noblas=true"
+
+# Compile AV against ffmpeg binary included in the base image
+RUN pip install av==$AV_VER --no-binary av
+
+# Build numpy with no blas
+RUN pip install numpy==$NUMPY_VER \
+    --config-settings=setup-args="-Dallow-noblas=true"
+
+# Build pandas
+RUN pip install pandas==$PANDAS_VER --no-deps 
+
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip && \
     unzip uv.zip && \
@@ -42,18 +57,3 @@ RUN mkdir wheels && cd uv && \
     sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = false/" Cargo.toml
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
 RUN find /wheels -type f -iname '*.whl' -exec pip install {} \;
-
-# Build cryptography with no blas
-RUN pip install \
-    cryptography==$CRYPTOGRAPHY_VER \
-    --config-settings=setup-args="-Dallow-noblas=true"
-
-# Compile AV against ffmpeg binary included in the base image
-RUN pip install av==$AV_VER --no-binary av
-
-# Build numpy with no blas
-RUN pip install numpy==$NUMPY_VER \
-    --config-settings=setup-args="-Dallow-noblas=true"
-
-# Build pandas
-RUN pip install pandas==$PANDAS_VER --no-deps 
