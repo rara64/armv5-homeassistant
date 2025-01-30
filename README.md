@@ -1,4 +1,4 @@
-# Home Assistant docker image for ARMv5TE
+# Home Assistant docker image for ARMv5TE <br> ![Docker Pulls](https://img.shields.io/docker/pulls/rara64/armv5-homeassistant)
 #### This is not an official docker image of [Home Assistant](https://github.com/home-assistant) since `linux/arm/v5` platform is not supported.
 
 Image allows you to run Home Assistant on ARMv5 platform and is mainly build for NAS devices based on Kirkwood architecture.
