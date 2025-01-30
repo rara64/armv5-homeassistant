@@ -95,20 +95,6 @@ RUN mkdir wheels && cd uv && \
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
 RUN find /wheels -type f -iname '*.whl' -exec pip install {} \;
 
-# Install pre-built dependencies
-COPY $DEPS .
-RUN unzip -o -j deps.zip -d wheels && \
-    find wheels/ -type f -iname 'maturin*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'token*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'jiter*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'pydantic*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'numpy*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'cffi*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'patchelf*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname '*.whl' -exec pip install {} --find-links ./wheels \;
-
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core && \
     sed -i '/uv==/d' core/requirements.txt
