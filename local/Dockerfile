@@ -73,6 +73,13 @@ ENV RUSTFLAGS="-C codegen-units=1"
 
 RUN pip install wheel maturin
 
+# Clone latest release of HASS
+RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core && \
+    sed -i '/uv==/d' core/requirements.txt
+
+# Install HASS dependencies
+RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
+
 # Build UV for ARMV5TE
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
 ENV UV_VER=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
@@ -95,13 +102,6 @@ RUN mkdir wheels && cd uv && \
     sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = false/" Cargo.toml
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
 RUN find /wheels -type f -iname '*.whl' -exec pip install {} \;
-
-# Clone latest release of HASS
-RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core && \
-    sed -i '/uv==/d' core/requirements.txt
-
-# Install HASS dependencies
-RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
 
 # Install HASS core package
 RUN pip install --no-deps homeassistant
