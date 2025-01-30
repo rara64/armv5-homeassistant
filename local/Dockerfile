@@ -65,12 +65,13 @@ RUN dpkg -i *.deb
 # Setup Python VENV
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install wheel maturin
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
+
+RUN pip install wheel maturin
 
 # Build UV for ARMV5TE
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
