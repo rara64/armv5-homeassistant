@@ -29,6 +29,10 @@ RUN cargo deb --target armv5te-unknown-linux-gnueabi -- --features=vendored-open
 
 FROM --platform=linux/amd64 golang:1.23 as go2rtc-builder
 
+RUN echo "deb http://deb.debian.org/debian bookworm-backports main" | tee -a /etc/apt/sources.list.d/backports.list && \
+    apt update && \
+    apt install -y upx jq
+
 RUN export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && \
     export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+') && \
     git clone -b "v${GO2RTC}" https://github.com/AlexxIT/go2rtc/
@@ -37,8 +41,10 @@ RUN cd go2rtc && \
     export GOOS=linux && \
     export GOARCH=arm && \
     export GOARM=5 && \
-    FILENAME="go2rtc_linux_armv5" go build -ldflags "-s -w" -trimpath -o $FILENAME && upx --lzma --force-overwrite -q --no-progress $FILENAME && \
-    mv $FILENAME ../$FILENAME
+    export FILENAME="go2rtc_linux_armv5" && \
+    go build -ldflags "-s -w" -trimpath -o "$FILENAME" && \
+    upx --lzma --force-overwrite -q --no-progress "$FILENAME" && \
+    mv "$FILENAME" /go2rtc_linux_armv5
 
 FROM --platform=linux/arm/v5 debian:trixie as hass-builder
 
@@ -82,14 +88,12 @@ RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple
 
 # Build UV for ARMV5TE
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
-ENV UV_VER=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
-
-RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip && \
+RUN export UV_VER=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version') && \
+    wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$UV_VER.zip && \
     unzip uv.zip && \
     mv uv-$UV_VER uv && \
-    rm uv.zip 
-
-RUN wget -O boxcar.zip https://github.com/ibraheemdev/boxcar/archive/refs/tags/v$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml).zip && \
+    rm uv.zip && \
+    wget -O boxcar.zip https://github.com/ibraheemdev/boxcar/archive/refs/tags/v$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml).zip && \
     unzip boxcar.zip && \
     mv boxcar-$(grep -oP 'boxcar = { version = "\K[^"]+' uv/Cargo.toml) boxcar && \
     rm boxcar.zip && \
@@ -130,7 +134,7 @@ RUN apt install -y ffmpeg python-is-python3
 RUN mkdir /config
 
 # Install go2rtc binary
-COPY --from=go2rtc-builder ./go2rtc_linux_armv5 ./go2rtc_linux_armv5
+COPY --from=go2rtc-builder /go2rtc_linux_armv5 .
 RUN mv go2rtc_linux_armv5 /bin/go2rtc && chmod +x /bin/go2rtc
 
 # Install cargo
