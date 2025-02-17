@@ -22,7 +22,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install wheel
 
 # Build & install maturin wheel
-RUN pip install maturin
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install maturin
 
 # Build cryptography with no blas
 RUN pip install \
