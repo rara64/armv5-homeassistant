@@ -3,7 +3,7 @@ name: Build maturin for armv5-homeassistant
 on: 
   workflow_dispatch:
   repository_dispatch:
-    types: Build go2rtc for armv5-homeassistant
+    types: Build maturin for armv5-homeassistant
 
 jobs:
   build:
