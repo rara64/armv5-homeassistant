@@ -12,6 +12,8 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
 
+ENV CARGO_LOG=debug
+
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 RUN dpkg -i *.deb
@@ -22,7 +24,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install wheel
 
 # Build & install maturin wheel
-RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install maturin
+RUN pip install maturin
 
 # Build cryptography with no blas
 RUN pip install \
