@@ -18,7 +18,6 @@ jobs:
     - name: Install gcc-arm-linux-gnueabi
       run: |
           sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi
-    - uses: actions-rs/cargo@v1
     - name: Install x86 maturin & clone latest maturin source
       run: |
         pip install maturin
