@@ -1,4 +1,4 @@
-name: Build go2rtc for armv5-homeassistant
+name: Build maturin for armv5-homeassistant
 
 on: 
   workflow_dispatch:
