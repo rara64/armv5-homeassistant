@@ -17,14 +17,14 @@ jobs:
         override: true
     - name: Install gcc-arm-linux-gnueabi
       run: |
-          sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi
+        sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi
     - name: Install x86 maturin & clone latest maturin source
       run: |
         pip install maturin
         git clone https://github.com/PyO3/maturin --depth 1
-        cd maturin
     - name: Build maturin for armv5te
       run: |
+        cd maturin
         maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
         ls ./wheels
     - name: Upload artifact
