@@ -25,8 +25,8 @@ jobs:
     - name: Build maturin for armv5te
       run: |
         cd maturin
-        maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
-        ls ./wheels
+        RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
+        ls /wheels
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
