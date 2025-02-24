@@ -24,7 +24,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install wheel
 
 # Build & install maturin wheel
-RUN pip install maturin
+RUN pip install -vv maturin
 
 # Build cryptography with no blas
 RUN pip install \
