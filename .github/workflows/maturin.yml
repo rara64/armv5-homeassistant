@@ -1,0 +1,40 @@
+name: Build go2rtc for armv5-homeassistant
+
+on: 
+  workflow_dispatch:
+  repository_dispatch:
+    types: Build go2rtc for armv5-homeassistant
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: armv5te-unknown-linux-gnueabi
+        override: true
+    - name: Install gcc-arm-linux-gnueabi
+      run: |
+          sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi
+    - uses: actions-rs/cargo@v1
+    - name: Install x86 maturin & clone latest maturin source
+      run: |
+        pip install maturin
+        git clone https://github.com/PyO3/maturin --depth 1
+        cd maturin
+    - name: Build maturin for armv5te
+      run: |
+        maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
+        ls ./wheels
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: go2rtc
+        path: |
+          ./wheels/go2rtc_linux_armv5
+          ./go2rtc_ver.txt
+    - name: Dispatch armv5-homeassistant
+      run: |
+        sleep 90
