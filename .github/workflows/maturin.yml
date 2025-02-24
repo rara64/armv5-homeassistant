@@ -27,8 +27,7 @@ jobs:
         cd maturin
         RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
 
-        WHEEL_FILE=$(ls ./wheels/maturin-*.whl | head -n 1)
-        VERSION=$(echo $WHEEL_FILE | grep -o 'maturin-')
+        VERSION=$(curl -s https://api.github.com/repos/PyO3/maturin/releases/latest | jq -r .tag_name | sed 's/^v//')
         echo "$VERSION"
         echo $VERSION > ./maturin_ver.txt
     - name: Upload artifact
