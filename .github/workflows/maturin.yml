@@ -26,14 +26,18 @@ jobs:
       run: |
         cd maturin
         RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
-        ls ./wheels
+
+        WHEEL_FILE=$(ls ./wheels/maturin-*.whl | head -n 1)
+        VERSION=$(echo $WHEEL_FILE | grep -o 'maturin-')
+        echo "$VERSION"
+        echo $VERSION > ./maturin_ver.txt
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: go2rtc
+        name: maturin
         path: |
-          ./wheels/go2rtc_linux_armv5
-          ./go2rtc_ver.txt
+          ./maturin/wheels/*.whl
+          ./maturin/maturin_ver.txt
     - name: Dispatch armv5-homeassistant
       run: |
         sleep 90
