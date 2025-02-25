@@ -25,8 +25,7 @@ jobs:
       - name: Build deps
         run: |
           export DOCKER_BUILDKIT=0 
-          echo "deb https://archive.ubuntu.com/ubuntu/dists noble-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
-          echo "deb-src https://archive.ubuntu.com/ubuntu/dists noble-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+
           sudo apt update
           sudo apt install -y binfmt-support=2.2.2-7 qemu-user-static=1:8.2.2+ds-0ubuntu1.5
 
