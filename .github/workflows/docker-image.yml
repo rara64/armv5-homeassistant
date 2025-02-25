@@ -33,6 +33,30 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps2.zip "$LINK" || echo 'deps download failed'
           7z e deps2.zip -o./deps -y || echo 'deps2 extract failed'
 
+          # DOWNLOAD MATURIN FOR ARMV5
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || echo 'deps download failed'
+          7z e maturin.zip -o./maturin -y || echo 'maturin extract failed'
+
+          export MATURIN_VER=$(curl -s https://pypi.org/pypi/maturin/json | jq -r '.info.version')
+          export MATURIN_BUILD_VER=$(cat ./maturin/maturin_ver.txt)
+
+          export OUTDATED_MATURIN=0
+          if [[ "${MATURIN_VER}" != "${MATURIN_BUILD_VER}" ]]; then
+            export OUTDATED_MATURIN=1
+            echo "OUTDATED_MATURIN=$OUTDATED_MATURIN" >> $GITHUB_ENV
+            export OUTDATED_DEPS=0
+            export OUTDATED_DEPS_2=0
+            export OUTDATED_GO2RTC=0
+            echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
+            echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
+            echo "OUTDATED_GO2RTC=$OUTDATED_GO2RTC" >> $GITHUB_ENV
+            echo "Outdated Maturin! Expected: ${MATURIN_VER} Got: ${MATURIN_BUILD_VER}"
+            exit 0
+          fi
+          echo "OUTDATED_MATURIN=$OUTDATED_MATURIN" >> $GITHUB_ENV
+          mv ./maturin/*.whl ./deps
+
           # DOWNLOAD GO2RTC FOR ARMV5
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
@@ -161,6 +185,7 @@ jobs:
           echo "ELEVENLABS: Found (ELEVENLABS_WHL_VER) = ${ELEVENLABS_WHL_VER}, Expected (ELEVENLABS_VER) = ${ELEVENLABS_VER}"
           echo "MATRIX-NIO: Found (MATRIX_WHL_VER) = ${MATRIX_WHL_VER}, Expected (MATRIX_VER) = ${MATRIX_VER}"
           echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
+          echo "MATURIN: Found (MATURIN_BUILD_VER) = ${MATURIN_BUILD_VER}, Expected (MATURIN_VER) = ${MATURIN_VER}"
       - name: Dispatch build of deps2
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
         run: |
@@ -173,6 +198,10 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_GO2RTC == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build go2rtc for armv5-homeassistant"}'
+      - name: Dispatch build of maturin
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_MATURIN == 1}}
+        run: |
+          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build maturin for armv5-homeassistant"}'
       - name: Set up Docker Buildx
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0}}
         uses: docker/setup-buildx-action@v3
