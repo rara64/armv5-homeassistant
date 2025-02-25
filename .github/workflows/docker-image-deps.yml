@@ -50,7 +50,7 @@ jobs:
           echo "OUTDATED_MATURIN=$OUTDATED_MATURIN" >> $GITHUB_ENV
           export MATURIN_PATH = $(find ./maturin -name *.whl)
 
-          docker buildx build --load --tag wheels --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg MATURIN=${{ MATURIN_PATH }} --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg AV_VER=${{ env.AV_VER }} --build-arg CRYPTOGRAPHY_VER=${{ env.CRYPTOGRAPHY_VER }} --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ./deps/Dockerfile .
+          docker buildx build --load --tag wheels --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg MATURIN=$(MATURIN_PATH) --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg AV_VER=${{ env.AV_VER }} --build-arg CRYPTOGRAPHY_VER=${{ env.CRYPTOGRAPHY_VER }} --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ./deps/Dockerfile .
       - name: Dispatch maturin build
         if: ${{ env.OUTDATED_MATURIN == 1 }}
         run : |
