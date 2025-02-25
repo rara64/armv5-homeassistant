@@ -22,7 +22,7 @@ jobs:
           echo "CRYPTOGRAPHY_VER=$CRYPTOGRAPHY_VER" >> $GITHUB_ENV
     - name: Install gcc-arm-linux-gnueabi
       run: |
-        sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi pkg-config libc6-dev-armel-cross crossbuild-essential-armel
+        sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi pkg-config libc6-dev-armel-cross crossbuild-essential-armel libssl-dev
     - name: Install x86 maturin & clone latest cryptography source
       run: |
         pip install maturin
@@ -33,7 +33,7 @@ jobs:
         
         export PKG_CONFIG_ALLOW_CROSS="true"
         export PKG_CONFIG_PATH="/usr/lib/arm-linux-gnueabi/pkgconfig"
-        RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc -D allow-noblas=true" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --features vendored-openssl --manylinux off -o ./wheels
+        RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc -D allow-noblas=true" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
 
         echo ${{env.CRYPTOGRAPHY_VER}}
         echo ${{env.CRYPTOGRAPHY_VER}} > ./cryptography_ver.txt
