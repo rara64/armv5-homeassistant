@@ -48,9 +48,15 @@ jobs:
             exit 0
           fi
           echo "OUTDATED_MATURIN=$OUTDATED_MATURIN" >> $GITHUB_ENV
-          export MATURIN_PATH=$(find ./maturin -name *.whl)
-          export MATURIN=$(echo "$file" | sed 's/armv5tel/armv7l/g')
-          mv "$MATURIN_PATH" "$MATURIN"
+
+          find ./maturin -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do
+            if [ -f "$file" ]; then
+              new_name=$(echo "$file" | sed 's/armv5tel/armv7l/g')
+              if [ "$file" != "$new_name" ]; then
+                mv -v "$file" "$new_name"
+              fi
+            fi
+          done
 
           docker buildx build --load --tag wheels --build-arg NUMPY_VER=${{ env.NUMPY_VER }} --build-arg MATURIN=$(MATURIN) --build-arg PANDAS_VER=${{ env.PANDAS_VER }} --build-arg AV_VER=${{ env.AV_VER }} --build-arg CRYPTOGRAPHY_VER=${{ env.CRYPTOGRAPHY_VER }} --build-arg UV_VER=${{ env.UV_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ./deps/Dockerfile .
       - name: Dispatch maturin build
