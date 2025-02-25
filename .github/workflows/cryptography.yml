@@ -33,7 +33,7 @@ jobs:
         
         export PKG_CONFIG_ALLOW_CROSS="true"
         export PKG_CONFIG_PATH="/usr/lib/arm-linux-gnueabi/pkgconfig"
-        sed -i 's/ffi = { package = "openssl-sys", version = "[^"]*" }/&, features = ["vendored"] /' src/rust/cryptography-openssl/Cargo.toml
+        sed -i 's/ffi = { \(.*version = "[^"]*"\) }/ffi = { \1, features = ["vendored"] }/' src/rust/cryptography-openssl/Cargo.toml
         RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc -D allow-noblas=true" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --features vendored-openssl --manylinux off -o ./wheels
 
         echo ${{env.CRYPTOGRAPHY_VER}}
