@@ -15,14 +15,19 @@ jobs:
         toolchain: stable
         target: armv5te-unknown-linux-gnueabi
         override: true
+    - name: Find version number for the latest homeassistant
+      run: |
+          export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
+          export CRYPTOGRAPHY_VER=$(curl --silent "https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt" | grep -m 1 -i "CRYPTOGRAPHY" | awk -F'=' '{print $NF}' | tr -d '\n')
+          echo "CRYPTOGRAPHY_VER=$CRYPTOGRAPHY_VER" >> $GITHUB_ENV
     - name: Install gcc-arm-linux-gnueabi
       run: |
         sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi
     - name: Install x86 maturin & clone latest cryptography source
       run: |
         pip install maturin
-        git clone https://github.com/pyca/cryptography -b ${{env.CRYPTOGRAPHY_VER}} --depth 1
-    - name: Build maturin for armv5te
+        git clone https://github.com/pyca/cryptography  --depth 1 -b ${{env.CRYPTOGRAPHY_VER}}
+    - name: Build cryptography for armv5te
       run: |
         cd cryptography
         RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc -D allow-noblas=true" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
