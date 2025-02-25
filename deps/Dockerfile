@@ -24,7 +24,7 @@ RUN pip install wheel
 
 # Install maturin wheel
 COPY $MATURIN .
-RUN pip install $(find . -name maturin*)
+RUN pip install $(find . -name "maturin*.whl" -print -quit)
 
 # Build cryptography with no blas
 RUN pip install \
