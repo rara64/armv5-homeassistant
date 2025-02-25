@@ -6,13 +6,12 @@ ARG NUMPY_VER
 ARG PANDAS_VER
 ARG UV_VER
 ARG AV_VER
+ARG MATURIN
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
 ENV RUSTFLAGS="-C codegen-units=1"
-
-ENV CARGO_LOG=debug
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
@@ -23,8 +22,9 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install wheel
 
-# Build & install maturin wheel
-RUN pip install -v maturin
+# Install maturin wheel
+COPY MATURIN ./maturin
+RUN for i in ./maturin/*; do pip install "$i"; done
 
 # Build cryptography with no blas
 RUN pip install \
