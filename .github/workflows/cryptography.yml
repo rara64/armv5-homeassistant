@@ -1,0 +1,42 @@
+name: Build cryptography for armv5-homeassistant
+
+on: 
+  workflow_dispatch:
+  repository_dispatch:
+    types: Build cryptography for armv5-homeassistant
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: armv5te-unknown-linux-gnueabi
+        override: true
+    - name: Install gcc-arm-linux-gnueabi
+      run: |
+        sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi
+    - name: Install x86 maturin & clone latest cryptography source
+      run: |
+        pip install maturin
+        git clone https://github.com/pyca/cryptography -b ${{env.CRYPTOGRAPHY_VER}} --depth 1
+    - name: Build maturin for armv5te
+      run: |
+        cd cryptography
+        RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc -D allow-noblas=true" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
+
+        echo ${{env.CRYPTOGRAPHY_VER}}
+        echo ${{env.CRYPTOGRAPHY_VER}} > ./cryptography_ver.txt
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: maturin
+        path: |
+          ./cryptography/wheels/*.whl
+          ./cryptography/cryptography_ver.txt
+    - name: Dispatch armv5-homeassistant
+      run: |
+        sleep 90
+        curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build armv5-homeassistant"}'
