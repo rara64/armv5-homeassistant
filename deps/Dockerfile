@@ -23,8 +23,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install wheel
 
 # Install maturin wheel
-COPY MATURIN ./maturin
-RUN for i in ./maturin/*; do pip install "$i"; done
+COPY MATURIN .
+RUN pip install $(find . -name *.whl)
 
 # Build cryptography with no blas
 RUN pip install \
