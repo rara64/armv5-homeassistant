@@ -27,7 +27,7 @@ COPY $MATURIN .
 RUN pip install $(find . -name "maturin*.whl" -print -quit)
 
 # Build cryptography with no blas
-RUN pip install \
+RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && pip install \
     cryptography==$CRYPTOGRAPHY_VER \
     --config-settings=setup-args="-Dallow-noblas=true"
 
