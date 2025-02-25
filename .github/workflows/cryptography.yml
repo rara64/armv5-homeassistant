@@ -22,7 +22,8 @@ jobs:
           echo "CRYPTOGRAPHY_VER=$CRYPTOGRAPHY_VER" >> $GITHUB_ENV
     - name: Install gcc-arm-linux-gnueabi
       run: |
-        sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi pkg-config libc6-dev-armel-cross crossbuild-essential-armel librust-openssl-sys-dev
+        sudo dpkg --add-architecture armel
+        sudo apt update && sudo apt install -y gcc-arm-linux-gnueabi pkg-config libc6-dev-armel-cross crossbuild-essential-armel libssl-dev:armel
     - name: Install x86 maturin & clone latest cryptography source
       run: |
         pip install maturin
