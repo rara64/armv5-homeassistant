@@ -55,6 +55,16 @@ jobs:
             exit 0
           fi
           echo "OUTDATED_MATURIN=$OUTDATED_MATURIN" >> $GITHUB_ENV
+
+          find ./maturin -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do
+            if [ -f "$file" ]; then
+              new_name=$(echo "$file" | sed 's/armv5tel/armv7l/g')
+              if [ "$file" != "$new_name" ]; then
+                mv -v "$file" "$new_name"
+              fi
+            fi
+          done
+
           mv ./maturin/*.whl ./deps
 
           # DOWNLOAD GO2RTC FOR ARMV5
