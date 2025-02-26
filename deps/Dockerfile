@@ -26,7 +26,7 @@ RUN pip install wheel
 
 # Install maturin wheel
 COPY $MATURIN .
-RUN MATURIN=$(find . -name "maturin*.whl" -print -quit) && pip install $MATURIN
+RUN MATURIN=$(find . -name "maturin*.whl" -print -quit) && pip install $MATURIN && pip install cffi setuptools setuptools-rust semantic-version
 
 # Build cryptography with no blas
 RUN pip list | grep maturin
