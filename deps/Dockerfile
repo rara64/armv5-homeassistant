@@ -26,10 +26,11 @@ RUN pip install wheel
 
 # Install maturin wheel
 COPY $MATURIN .
-RUN pip install $(find . -name "maturin*.whl" -print -quit)
+RUN MATURIN=$(find . -name "maturin*.whl" -print -quit) && pip install $MATURIN && pip cache add $MATURIN
 
 # Build cryptography with no blas
-RUN CARGO_LOG=info pip install --find-links . \
+RUN pip list | grep maturin
+RUN CARGO_LOG=info pip install \
     cryptography==$CRYPTOGRAPHY_VER -v \
     --config-settings=setup-args="-Dallow-noblas=true"
 
