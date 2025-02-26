@@ -29,7 +29,7 @@ COPY $MATURIN .
 RUN pip install $(find . -name "maturin*.whl" -print -quit)
 
 # Build cryptography with no blas
-RUN CARGO_LOG=info pip install \
+RUN CARGO_LOG=info pip install --find-links . \
     cryptography==$CRYPTOGRAPHY_VER -v \
     --config-settings=setup-args="-Dallow-noblas=true"
 
