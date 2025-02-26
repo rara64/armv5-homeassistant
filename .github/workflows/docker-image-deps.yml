@@ -47,7 +47,7 @@ jobs:
 
           find ./maturin -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do
             if [ -f "$file" ]; then
-              new_name=$(echo "$file" | sed 's/py3-none-linux_armv5tel/cp313-cp313-linux_armv7l/g')
+              new_name=$(echo "$file" | sed 's/armv5tel/armv7l/g')
               if [ "$file" != "$new_name" ]; then
                 mv -v "$file" "$new_name"
               fi
