@@ -20,21 +20,13 @@ jobs:
           for wheel in "${WHEELS_LIST[@]}"; do w="${wheel}_VER"; echo "${wheel}_VER=${!w}" >> $GITHUB_ENV; done
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build deps
         run: |
           export DOCKER_BUILDKIT=0 
-
-          sudo apt update
-          sudo apt install -y binfmt-support=2.2.2-7 qemu-user-static=1:8.2.2+ds-0ubuntu1.5
-
-          sudo update-binfmts --install armv5 /usr/bin/qemu-arm-static \
-          --magic "\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00" \
-          --mask "\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff" \
-          --fix-binary yes
-
-          uname -m
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || echo 'deps download failed'
