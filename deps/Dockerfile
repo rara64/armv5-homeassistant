@@ -11,7 +11,7 @@ ARG MATURIN
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
-ENV RUSTFLAGS="-C codegen-units=1 -C opt-level=0"
+ENV RUSTFLAGS="-C codegen-units=1 -C lto=off"
 
 RUN uname -m
 
