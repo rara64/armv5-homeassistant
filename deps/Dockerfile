@@ -11,7 +11,7 @@ ARG MATURIN
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
 ENV CARGO_BUILD_JOBS=2
-ENV RUSTFLAGS="-C codegen-units=1 -C lto=off"
+ENV RUSTFLAGS="-C codegen-units=1"
 
 RUN uname -m
 
@@ -29,8 +29,8 @@ COPY $MATURIN .
 RUN pip install $(find . -name "maturin*.whl" -print -quit)
 
 # Build cryptography with no blas
-RUN pip install \
-    cryptography==$CRYPTOGRAPHY_VER \
+RUN CARGO_LOG=info pip install \
+    cryptography==$CRYPTOGRAPHY_VER -v \
     --config-settings=setup-args="-Dallow-noblas=true"
 
 # Compile AV against ffmpeg binary included in the base image
