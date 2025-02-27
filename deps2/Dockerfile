@@ -33,22 +33,22 @@ RUN unzip -o -j deps.zip -d wheels && \
 RUN pip install $(find . -name "maturin*.whl" -print -quit)
 
 # Build matrix-nio
-RUN pip install matrix-nio==$MATRIX_VER
+RUN pip install --find-links ./maturin matrix-nio==$MATRIX_VER
 
 # Build anthropic
-RUN pip install anthropic==$ANTHROPIC_VER
+RUN pip install --find-links ./maturin anthropic==$ANTHROPIC_VER
 
 # Build deebot-client
-RUN pip install deebot-client==$DEEBOT_VER
+RUN pip install --find-links ./maturin deebot-client==$DEEBOT_VER
 
 # Build elevenlabs
-RUN pip install elevenlabs==$ELEVENLABS_VER
+RUN pip install --find-links ./maturin elevenlabs==$ELEVENLABS_VER
 
 # Build orjson
-RUN pip install orjson==$ORJSON_VER
+RUN pip install --find-links ./maturin orjson==$ORJSON_VER
 
 # Build pynacl
-RUN pip install pynacl==$PYNACL_VER
+RUN pip install --find-links ./maturin pynacl==$PYNACL_VER
 
 # Build zeroconf
-RUN pip install zeroconf==$ZEROCONF_VER
+RUN pip install --find-links ./maturin zeroconf==$ZEROCONF_VER
