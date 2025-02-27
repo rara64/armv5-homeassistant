@@ -31,7 +31,7 @@ jobs:
           export DOCKER_BUILDKIT=0 
 
           sudo apt update
-          sudo apt install -y binfmt-support=2.2.2-7 qemu-user-static=1:8.2.2+ds-0ubuntu1.5
+          sudo apt install -y binfmt-support qemu-user-static
 
           sudo update-binfmts --install armv5 /usr/bin/qemu-arm-static \
           --magic "\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00" \
