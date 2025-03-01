@@ -60,9 +60,9 @@ jobs:
 
           export WHL_VER=$(cat ./deps/${{ matrix.dependency_name }}_version.txt)
 
-          if [[ "$(WHL_VER)" == *"$(VER)"* ]]; then
+          if [[ "$WHL_VER" == *"$VER"* ]]; then
             echo "WHEELS_NEEDED=1" >> "$GITHUB_ENV"
-            echo "WHEEL_VER=$(VER)" >> "$GITHUB_ENV"
+            echo "WHEEL_VER=$VER" >> "$GITHUB_ENV"
           else
             echo "WHEELS_NEEDED=0" >> "$GITHUB_ENV"
           fi
