@@ -1,20 +1,23 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
-ARG CARGO
-ARG MATURIN
+ARG CARGO_DEB
+ARG MATURIN_WHL
 ARG WHEEL_VER
+
+ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
+ENV CARGO_TERM_PROGRESS_WHEN="never"
 
 # Setup Python VENV
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install maturin
-COPY $MATURIN .
+COPY $MATURIN_WHL .
 RUN MATURIN=$(find . -name "maturin*.whl" -print -quit) && pip install $MATURIN
 
 # Install cargo
-COPY $CARGO .
-RUN dpkg -i *.deb && unset CARGO
+COPY $CARGO_DEB .
+RUN dpkg -i *.deb
 
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$WHEEL_VER.zip && \

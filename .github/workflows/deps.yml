@@ -93,10 +93,10 @@ jobs:
 
           wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
-          export CARGO="./cargo.deb"
-          export MATURIN="./maturin"
+          export CARGO_DEB="./cargo.deb"
+          export MATURIN_WHL="./maturin"
 
-          docker buildx build --load --tag wheels --build-arg MATURIN=$MATURIN --build-arg CARGO=$CARGO --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
+          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
 
       - name: Extract dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
