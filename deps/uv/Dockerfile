@@ -26,7 +26,7 @@ COPY $CARGO_DEB .
 RUN dpkg -i *.deb
 
 # Create wheels folder for maturin builds
-mkdir wheels
+RUN mkdir wheels
 
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$WHEEL_VER.zip && \

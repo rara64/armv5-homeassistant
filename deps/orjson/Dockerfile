@@ -26,7 +26,7 @@ COPY $CARGO_DEB .
 RUN dpkg -i *.deb
 
 # Create wheels folder for maturin builds
-mkdir wheels
+RUN mkdir wheels
 
 # Build orjson
 RUN pip install --find-links . orjson==$WHEEL_VER

@@ -26,7 +26,7 @@ COPY $CARGO_DEB .
 RUN dpkg -i *.deb
 
 # Create wheels folder for maturin builds
-mkdir wheels
+RUN mkdir wheels
 
 # Build elevenlabs
 RUN pip install --find-links . elevenlabs==$WHEEL_VER
