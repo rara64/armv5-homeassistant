@@ -96,7 +96,7 @@ jobs:
           export CARGO="./cargo.deb"
           export MATURIN="./maturin"
 
-          docker buildx build --load --tag wheels --build-arg MATURIN=$(MATURIN) --build-arg CARGO=$(CARGO) --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
+          docker buildx build --load --tag wheels --build-arg MATURIN=$MATURIN --build-arg CARGO=$CARGO --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
 
       - name: Extract dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
