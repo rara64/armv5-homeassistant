@@ -111,6 +111,7 @@ jobs:
           docker cp wheels:./root/.cache/pip/wheels wheels
           docker cp wheels:./wheels wheels
 
+          find wheels/ -name "*.whl" -type f -exec mv {} wheels/ \;
           echo ${{ env.WHEEL_VER }} >> ${{ matrix.dependency_name }}_version.txt
 
           if find wheels/ -name "*.whl" -type f -print -quit | grep -q .; then
