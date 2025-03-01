@@ -96,11 +96,17 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o numpy.zip "$LINK" || echo 'Numpy download failed'
           7z e numpy.zip -o./numpy -y || echo 'Numpy extract failed'
 
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "anthropic") | .archive_download_url' | head -n 1)
+          mkdir anthropic
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o anthropic.zip "$LINK" || echo 'Anthropic download failed'
+          7z e anthropic.zip -o./anthropic -y || echo 'Anthropic extract failed'
+
           export CARGO_DEB="./cargo.deb"
           export MATURIN_WHL="./maturin"
           export NUMPY_WHL="./numpy"
+          export ANTHROPIC_WHL="./anthropic"
 
-          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
+          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --build-arg ANTHROPIC_WHL=$ANTHROPIC_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
 
       - name: Extract dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
