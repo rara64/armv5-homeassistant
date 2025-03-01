@@ -11,27 +11,40 @@ jobs:
   build:
     runs-on: ubuntu-24.04-arm
     steps:
-      - name: Check for new release of HASS
+      - name: Check for new release of Home Assistant
         run: |
           export HASS_RELEASE=$(jq -r 'map(select(.prerelease==false)) | first | .tag_name' <<< $(curl --silent https://api.github.com/repos/home-assistant/core/releases))
           export ARMV5_RELEASE=$(jq -r '[.results[] | select(.name!="latest")][0].name' <<< $(curl --silent https://hub.docker.com/v2/repositories/rara64/armv5-homeassistant/tags/?page_size=1000))
           echo "HASS_RELEASE=$HASS_RELEASE" >> $GITHUB_ENV
           echo "ARMV5_RELEASE=$ARMV5_RELEASE" >> $GITHUB_ENV
           echo "HASS_RELEASE: $HASS_RELEASE , ARMV5_RELEASE: $ARMV5_RELEASE"
+
       - name: Checkout code
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         uses: actions/checkout@v3
-      - name: Check for new version of deps
+
+      - name: Check for new version of dependencies
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
-          # DOWNLOAD ARTIFACTS FROM DEPS AND DEPS2 JOBS
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps") | .archive_download_url' | head -n 1)
-          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps.zip "$LINK" || echo 'deps download failed'
-          7z e deps.zip -o./deps -y || echo 'deps extract failed'
+          # DOWNLOAD GO2RTC FOR ARMV5
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
+          7z e go2rtc.zip -o./go2rtc -y || echo 'go2rtc extract failed'
 
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "deps2") | .archive_download_url' | head -n 1)
-          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o deps2.zip "$LINK" || echo 'deps download failed'
-          7z e deps2.zip -o./deps -y || echo 'deps2 extract failed'
+          export GO2RTC_VER=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/${{ env.HASS_RELEASE }}/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
+          export GO2RTC_BUILD_VER=$(cat ./go2rtc/go2rtc_ver.txt)
+
+          if [[ "${GO2RTC_VER}" != "${GO2RTC_BUILD_VER}" ]]; then
+            echo "OUTDATED_GO2RTC=1" >> $GITHUB_ENV
+            echo "OUTDATED_DEPS=0" >> $GITHUB_ENV
+            echo "OUTDATED_MATURIN=0" >> $GITHUB_ENV
+            echo "Outdated GO2RTC! Expected: ${GO2RTC_VER} Got: ${GO2RTC_BUILD_VER}"
+            exit 0
+          fi
+          echo "OUTDATED_GO2RTC=0" >> $GITHUB_ENV
+          #
+
+
 
           # DOWNLOAD MATURIN FOR ARMV5
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
@@ -41,52 +54,30 @@ jobs:
           export MATURIN_VER=$(curl -s https://pypi.org/pypi/maturin/json | jq -r '.info.version')
           export MATURIN_BUILD_VER=$(cat ./maturin/maturin_ver.txt)
 
-          export OUTDATED_MATURIN=0
           if [[ "${MATURIN_VER}" != "${MATURIN_BUILD_VER}" ]]; then
-            export OUTDATED_MATURIN=1
-            echo "OUTDATED_MATURIN=$OUTDATED_MATURIN" >> $GITHUB_ENV
-            export OUTDATED_DEPS=0
-            export OUTDATED_DEPS_2=0
-            export OUTDATED_GO2RTC=0
-            echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
-            echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
-            echo "OUTDATED_GO2RTC=$OUTDATED_GO2RTC" >> $GITHUB_ENV
+            echo "OUTDATED_GO2RTC=0" >> $GITHUB_ENV
+            echo "OUTDATED_DEPS=0" >> $GITHUB_ENV
+            echo "OUTDATED_MATURIN=1" >> $GITHUB_ENV
             echo "Outdated Maturin! Expected: ${MATURIN_VER} Got: ${MATURIN_BUILD_VER}"
             exit 0
           fi
-          echo "OUTDATED_MATURIN=$OUTDATED_MATURIN" >> $GITHUB_ENV
+          echo "OUTDATED_MATURIN=0" >> $GITHUB_ENV
+          mv ./maturin/*.whl ./deps     
+          #
 
-          find ./maturin -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do
-            if [ -f "$file" ]; then
-              new_name=$(echo "$file" | sed 's/armv5tel/armv7l/g')
-              if [ "$file" != "$new_name" ]; then
-                mv -v "$file" "$new_name"
-              fi
-            fi
+
+
+          # DOWNLOAD ARTIFACTS FROM DEPS MATRIX BUILD
+          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot-client' 'elevenlabs' 'matrix-nio' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf')
+          for wheel in "${WHEELS_LIST[@]}"; do
+            export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "${wheel}") | .archive_download_url' | head -n 1)
+            curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o ${wheel}.zip "$LINK" || echo '${wheel} download failed'
+            7z e ${wheel}.zip -o./deps -y || echo '${wheel} extract failed'
+            export ${wheel}_whl_ver=$(cat ./deps/${wheel}_version.txt)
           done
+          #
 
-          mv ./maturin/*.whl ./deps
 
-          # DOWNLOAD GO2RTC FOR ARMV5
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
-          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
-          7z e go2rtc.zip -o./go2rtc -y || echo 'go2rtc extract failed'
-
-          export GO2RTC_VER=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/${{ env.HASS_RELEASE }}/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
-          export GO2RTC_BUILD_VER=$(cat ./go2rtc/go2rtc_ver.txt)
-
-          export OUTDATED_GO2RTC=0
-          if [[ "${GO2RTC_VER}" != "${GO2RTC_BUILD_VER}" ]]; then
-            export OUTDATED_GO2RTC=1
-            echo "OUTDATED_GO2RTC=$OUTDATED_GO2RTC" >> $GITHUB_ENV
-            export OUTDATED_DEPS=0
-            export OUTDATED_DEPS_2=0
-            echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
-            echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
-            echo "Outdated GO2RTC! Expected: ${GO2RTC_VER} Got: ${GO2RTC_BUILD_VER}"
-            exit 0
-          fi
-          echo "OUTDATED_GO2RTC=$OUTDATED_GO2RTC" >> $GITHUB_ENV
 
           # GET CURRENT VERSION OF HASS DEPENDENCIES
           export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
@@ -96,20 +87,21 @@ jobs:
           sed '/^#/d' reqs.txt > filtered_reqs.txt
           mv filtered_reqs.txt reqs.txt
 
-          WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT')
-          
-          for wheel in "${WHEELS_LIST[@]}"; do 
-            VER=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
-            export ${wheel}_VER="${VER:-0}"
+          for wheel in "${WHEELS_LIST[@]}"; do
+            if "${wheel}" == "uv"; then
+              export uv_ver=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
+            else
+              export ${wheel}_ver=$(cat reqs.txt | grep -m 1 -i "${{ matrix.dependency_name }}" | awk -F'=' '{print $NF}' | tr -d '\n')
+            fi
           done
+          #
 
-          export UV_VER=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
 
-          # FIND WHEEL VERSIONS AND REMOVE DUPLICATE FILES
+
+          # REMOVE DUPLCATE/NOT MATCHING FILES FROM DEPS FOLDER
           for wheel in "${WHEELS_LIST[@]}"; do 
-            wh=$(echo "${wheel}" | tr '[:upper:]' '[:lower:]')
-            required_version=${wheel}_VER
-
+            wh=${wheel}
+            required_version=${wheel}_ver
             matching_files=$(find ./deps -type f -iname "${wh}*" -print 2>/dev/null | tr -d '\0')
 
             if [[ -z "$matching_files" ]]; then
@@ -119,112 +111,75 @@ jobs:
               for file in $matching_files; do
                 if [[ "$file" == *"${!required_version}"* ]]; then
                   echo "Keeping $file (matches version ${!required_version})"
-                  export ${wheel}_WHL_VER="${!required_version}"
+                  export ${wheel}_whl_ver="${!required_version}"
                 else
                   echo "Removing $file (does not match version ${!required_version})"
                   rm -f "$file"
                 fi
               done
             fi
-          done
-          
-          # REPACK DEPS.ZIP WITHOUT DUPLICATES
-          7z a filtered_deps.zip ./deps/* || echo 'deps repack failed'
-          mv filtered_deps.zip deps.zip
+          done    
+          #
 
-          # GET VERSIONS FROM VERSIONS.TXT (FOR PACKAGES WITHOUT WHEELS - DEPENDENCIES ONLY IN DEPS2)
-          if [[ -f ./deps/versions.txt ]]; then
-            echo "versions.txt found. Proceeding..."
-          else
-            echo "Error: deps/versions.txt not found."
-            export OUTDATED_DEPS=0
-            export OUTDATED_DEPS_2=1
-            echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
-            echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
-            exit 0
-          fi
 
-          # HANDLE MATRIX-NIO, ANTHROPIC, ELEVENLABS MANUALLY
-          VER=$(cat reqs.txt | grep -m 1 -i "matrix-nio" | awk -F'=' '{print $NF}' | tr -d '\n')
-          WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "matrix" | awk -F'=' '{print $NF}' | tr -d '\n')
-          export MATRIX_VER="${VER:-0}"
-          export MATRIX_WHL_VER="${WHL_VER:-0}"
 
-          VER=$(cat reqs.txt | grep -m 1 -i "elevenlabs" | awk -F'=' '{print $NF}' | tr -d '\n')
-          WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "elevenlabs" | awk -F'=' '{print $NF}' | tr -d '\n')
-          export ELEVENLABS_VER="${VER:-0}"
-          export ELEVENLABS_WHL_VER="${WHL_VER:-0}"
-
-          VER=$(cat reqs.txt | grep -m 1 -i "anthropic" | awk -F'=' '{print $NF}' | tr -d '\n')
-          WHL_VER=$(cat ./deps/versions.txt | grep -m 1 -i "anthropic" | awk -F'=' '{print $NF}' | tr -d '\n')
-          export ANTHROPIC_VER="${VER:-0}"
-          export ANTHROPIC_WHL_VER="${WHL_VER:-0}"
-
-          # COMPARE VERSIONS OF DEPS
-          export WHEELS_LIST=('PANDAS' 'NUMPY' 'CRYPTOGRAPHY' 'UV' 'AV' 'PYNACL' 'ZEROCONF' 'ORJSON' 'DEEBOT' 'ELEVENLABS' 'ANTHROPIC' 'MATRIX')
+          # COMPARE VERSIONS OF DEPENDENCIES
           export OUTDATED_DEPS=0
-          export OUTDATED_DEPS_2=0
           for wheel in "${WHEELS_LIST[@]}"; do
-            wh=${wheel}_WHL_VER
-            w=${wheel}_VER
+            wh=${wheel}_whl_ver
+            w=${wheel}_ver
             if [[ "${!wh}" != "${!w}" ]]; then
-              case "${wheel}" in
-                PYNACL|ZEROCONF|ORJSON|DEEBOT|ANTHROPIC|ELEVENLABS|MATRIX)
-                  export OUTDATED_DEPS_2=1
-                  break
-                  ;;
-              esac
               export OUTDATED_DEPS=1
               break
             fi
           done
+          echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV   
+          #
 
-          echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV
-          echo "OUTDATED_DEPS_2=$OUTDATED_DEPS_2" >> $GITHUB_ENV
-
-          echo "PANDAS: Found (PANDAS_WHL_VER) = ${PANDAS_WHL_VER}, Expected (PANDAS_VER) = ${PANDAS_VER}"
-          echo "NUMPY: Found (NUMPY_WHL_VER) = ${NUMPY_WHL_VER}, Expected (NUMPY_VER) = ${NUMPY_VER}"
-          echo "CRYPTOGRAPHY: Found (CRYPTOGRAPHY_WHL_VER) = ${CRYPTOGRAPHY_WHL_VER}, Expected (CRYPTOGRAPHY_VER) = ${CRYPTOGRAPHY_VER}"
-          echo "UV: Found (UV_WHL_VER) = ${UV_WHL_VER}, Expected (UV_VER) = ${UV_VER}"
-          echo "AV: Found (AV_WHL_VER) = ${AV_WHL_VER}, Expected (AV_VER) = ${AV_VER}"
-          echo "PYNACL: Found (PYNACL_WHL_VER) = ${PYNACL_WHL_VER}, Expected (PYNACL_VER) = ${PYNACL_VER}"
-          echo "ZEROCONF: Found (ZEROCONF_WHL_VER) = ${ZEROCONF_WHL_VER}, Expected (ZEROCONF_VER) = ${ZEROCONF_VER}"
-          echo "ORJSON: Found (ORJSON_WHL_VER) = ${ORJSON_WHL_VER}, Expected (ORJSON_VER) = ${ORJSON_VER}"
-          echo "DEEBOT-CLIENT: Found (DEEBOT_WHL_VER) = ${DEEBOT_WHL_VER}, Expected (DEEBOT_VER) = ${DEEBOT_VER}"
-          echo "ANTHROPIC: Found (ANTHROPIC_WHL_VER) = ${ANTHROPIC_WHL_VER}, Expected (ANTHROPIC_VER) = ${ANTHROPIC_VER}"
-          echo "ELEVENLABS: Found (ELEVENLABS_WHL_VER) = ${ELEVENLABS_WHL_VER}, Expected (ELEVENLABS_VER) = ${ELEVENLABS_VER}"
-          echo "MATRIX-NIO: Found (MATRIX_WHL_VER) = ${MATRIX_WHL_VER}, Expected (MATRIX_VER) = ${MATRIX_VER}"
+          echo "PANDAS: Found (pandas_whl_ver) = ${pandas_whl_ver}, Expected (pandas_ver) = ${pandas_ver}"
+          echo "NUMPY: Found (numpy_whl_ver) = ${numpy_whl_ver}, Expected (numpy_ver) = ${numpy_ver}"
+          echo "CRYPTOGRAPHY: Found (cryptography_whl_ver) = ${cryptography_whl_ver}, Expected (cryptography_ver) = ${cryptography_ver}"
+          echo "UV: Found (uv_whl_ver) = ${uv_whl_ver}, Expected (uv_ver) = ${uv_ver}"
+          echo "AV: Found (av_whl_ver) = ${av_whl_ver}, Expected (av_ver) = ${av_ver}"
+          echo "PYNACL: Found (pynacl_whl_ver) = ${pynacl_whl_ver}, Expected (pynacl_ver) = ${pynacl_ver}"
+          echo "ZEROCONF: Found (zeroconf_whl_ver) = ${zeroconf_whl_ver}, Expected (zeroconf_ver) = ${zeroconf_ver}"
+          echo "ORJSON: Found (orjson_whl_ver) = ${orjson_whl_ver}, Expected (orjson_ver) = ${orjson_ver}"
+          echo "DEEBOT-CLIENT: Found (deebot_whl_ver) = ${deebot_whl_ver}, Expected (deebot_ver) = ${deebot_ver}"
+          echo "ANTHROPIC: Found (anthropic_whl_ver) = ${anthropic_whl_ver}, Expected (anthropic_ver) = ${anthropic_ver}"
+          echo "ELEVENLABS: Found (elevenlabs_whl_ver) = ${elevenlabs_whl_ver}, Expected (elevenlabs_ver) = ${elevenlabs_ver}"
+          echo "MATRIX-NIO: Found (matrix_whl_ver) = ${matrix_whl_ver}, Expected (matrix_ver) = ${matrix_ver}"
           echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
           echo "MATURIN: Found (MATURIN_BUILD_VER) = ${MATURIN_BUILD_VER}, Expected (MATURIN_VER) = ${MATURIN_VER}"
-      - name: Dispatch build of deps2
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS_2 == 1}}
-        run: |
-          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build deps2 for armv5-homeassistant"}'
-      - name: Dispatch build of deps
+
+      - name: Dispatch build of dependencies
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build deps for armv5-homeassistant"}'
+
       - name: Dispatch build of go2rtc
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_GO2RTC == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build go2rtc for armv5-homeassistant"}'
+
       - name: Dispatch build of maturin
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_MATURIN == 1}}
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build maturin for armv5-homeassistant"}'
+
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
         uses: docker/setup-buildx-action@v3
+
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_DEPS_2 == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
         run: |
           export DOCKER_BUILDKIT=0 
 
-          sudo apt update
-          sudo apt install -y binfmt-support=2.2.2-7 qemu-user-static=1:8.2.2+ds-0ubuntu1.5
+          sudo apt install -y binfmt-support qemu-user-static
 
           sudo update-binfmts --install armv5 /usr/bin/qemu-arm-static \
           --magic "\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00" \
@@ -234,7 +189,7 @@ jobs:
           uname -m
 
           docker buildx build --push --platform linux/arm/v5 \
-          --build-arg DEPS="deps.zip" \
+          --build-arg DEPS="./deps" \
           --build-arg GO2RTC="go2rtc/go2rtc_linux_armv5" \
           --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} \
           --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \

@@ -93,7 +93,7 @@ jobs:
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "numpy") | .archive_download_url' | head -n 1)
           mkdir numpy
-          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || echo 'Numpy download failed'
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o numpy.zip "$LINK" || echo 'Numpy download failed'
           7z e numpy.zip -o./numpy -y || echo 'Numpy extract failed'
 
           export CARGO_DEB="./cargo.deb"

@@ -10,26 +10,22 @@ RUN dpkg -i *.deb
 # Setup Python VENV
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install wheel
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
-ENV CARGO_BUILD_JOBS=2
-ENV RUSTFLAGS="-C codegen-units=1"
 
 # Install pre-built dependencies
 COPY $DEPS .
-RUN unzip -o -j deps.zip -d wheels && \
-    find wheels/ -type f -iname 'maturin*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'token*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'jiter*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'pydantic*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'numpy*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'cffi*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname 'patchelf*' -exec pip install {} --find-links ./wheels \; && \
-    find wheels/ -type f -iname '*.whl' -exec pip install {} --find-links ./wheels \;
+RUN find . -type f -iname 'maturin*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'token*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'jiter*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'pydantic*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'numpy*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'cffi*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname 'patchelf*' -exec pip install {} --find-links ./wheels \; && \
+    find . -type f -iname '*.whl' -exec pip install {} --find-links ./wheels \;
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core && \
