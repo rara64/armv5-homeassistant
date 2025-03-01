@@ -102,7 +102,7 @@ jobs:
           for wheel in "${WHEELS_LIST[@]}"; do 
             wh=${wheel}
             required_version=${wheel}_ver
-            matching_files=$(find ./deps/wheels -type f -iname "${wh}*" -print 2>/dev/null | tr -d '\0')
+            matching_files=$(find ./deps -type f -iname "${wh}*" -print 2>/dev/null | tr -d '\0')
 
             if [[ -z "$matching_files" ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
@@ -189,7 +189,7 @@ jobs:
           uname -m
 
           docker buildx build --push --platform linux/arm/v5 \
-          --build-arg DEPS="./deps/wheels" \
+          --build-arg DEPS="./deps" \
           --build-arg GO2RTC="go2rtc/go2rtc_linux_armv5" \
           --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} \
           --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
