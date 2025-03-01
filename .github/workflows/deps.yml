@@ -59,6 +59,7 @@ jobs:
           7z e ${{ matrix.dependency_name }}.zip -o./deps -y || echo 'Dependency extract failed'
 
           export WHL_VER=$(cat ./deps/${{ matrix.dependency_name }}_version.txt)
+          echo "Expected version: $VER"
 
           if [[ "$WHL_VER" == *"$VER"* ]]; then
             echo "WHEELS_NEEDED=0" >> "$GITHUB_ENV"
