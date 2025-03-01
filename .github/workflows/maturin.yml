@@ -30,6 +30,15 @@ jobs:
         VERSION=$(curl -s https://api.github.com/repos/PyO3/maturin/releases/latest | jq -r .tag_name | sed 's/^v//')
         echo "$VERSION"
         echo $VERSION > ./maturin_ver.txt
+
+        find ./maturin/wheels -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do
+          if [ -f "$file" ]; then
+            new_name=$(echo "$file" | sed 's/armv5tel/armv7l/g')
+            if [ "$file" != "$new_name" ]; then
+              mv -v "$file" "$new_name"
+            fi
+          fi
+        done
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
