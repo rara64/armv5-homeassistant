@@ -189,7 +189,7 @@ jobs:
           uname -m
 
           docker buildx build --push --platform linux/arm/v5 \
-          --build-arg DEPS="./deps" \
+          --build-arg DEPS="./deps/wheels" \
           --build-arg GO2RTC="go2rtc/go2rtc_linux_armv5" \
           --tag rara64/armv5-homeassistant:${{ env.HASS_RELEASE }} \
           --tag rara64/armv5-homeassistant:latest --label version="${{ env.HASS_RELEASE }}" \
