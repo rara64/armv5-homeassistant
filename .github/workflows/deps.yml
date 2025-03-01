@@ -115,7 +115,7 @@ jobs:
           fi
 
       - name: Upload wheels
-        if: ${{ env.WHEELS_NEEDED = 1 && env.WHEELS_CREATED == 1 }}
+        if: ${{ env.WHEELS_NEEDED == 1 && env.WHEELS_CREATED == 1 }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.dependency_name }}
