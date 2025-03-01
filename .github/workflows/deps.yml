@@ -91,7 +91,8 @@ jobs:
 
           7z e maturin.zip -o./maturin -y || echo 'Maturin extract failed' && exit 1
 
-          wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') -O cargo.deb || echo 'Cargo download failed' && exit 1
+          wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
+
 
           export CARGO="./cargo.deb"
           export MATURIN="./maturin"
