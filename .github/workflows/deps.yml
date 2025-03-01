@@ -87,9 +87,9 @@ jobs:
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
 
-          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || { echo 'Maturin download failed' && exit 1 }
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || { echo 'Maturin download failed'; && exit 1; }
 
-          7z e maturin.zip -o./maturin -y || { echo 'Maturin extract failed' && exit 1 }
+          7z e maturin.zip -o./maturin -y || { echo 'Maturin extract failed'; && exit 1; }
 
           wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
