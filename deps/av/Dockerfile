@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build av
-RUN pip install --find-links ./maturin av==$WHEEL_VER --no-binary av
+RUN pip install --find-links . av==$WHEEL_VER --no-binary av

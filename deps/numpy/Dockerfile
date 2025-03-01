@@ -17,5 +17,5 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build numpy
-RUN pip install --find-links ./maturin numpy==$WHEEL_VER \
+RUN pip install --find-links . numpy==$WHEEL_VER \
     --config-settings=setup-args="-Dallow-noblas=true"

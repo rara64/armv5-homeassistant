@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build elevenlabs
-RUN pip install --find-links ./maturin elevenlabs==$WHEEL_VER
+RUN pip install --find-links . elevenlabs==$WHEEL_VER

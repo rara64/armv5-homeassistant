@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build matrix-nio
-RUN pip install --find-links ./maturin matrix-nio==$WHEEL_VER
+RUN pip install --find-links . matrix-nio==$WHEEL_VER

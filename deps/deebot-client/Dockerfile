@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build deebot-client
-RUN pip install --find-links ./maturin deebot-client==$WHEEL_VER
+RUN pip install --find-links . deebot-client==$WHEEL_VER

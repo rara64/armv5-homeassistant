@@ -14,7 +14,7 @@ RUN MATURIN=$(find . -name "maturin*.whl" -print -quit) && pip install $MATURIN
 
 # Install cargo
 COPY $CARGO .
-RUN dpkg -i *.deb
+RUN dpkg -i *.deb && unset CARGO
 
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$WHEEL_VER.zip && \

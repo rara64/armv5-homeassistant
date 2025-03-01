@@ -17,6 +17,6 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build cryptography
-RUN pip install --find-links ./maturin \
+RUN pip install --find-links . \
     cryptography==$WHEEL_VER -v \
     --config-settings=setup-args="-Dallow-noblas=true"

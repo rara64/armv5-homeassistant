@@ -18,4 +18,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build anthropic
-RUN pip install --find-links ./maturin anthropic==$WHEEL_VER
+RUN pip install --find-links . anthropic==$WHEEL_VER

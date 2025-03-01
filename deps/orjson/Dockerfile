@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build orjson
-RUN pip install --find-links ./maturin orjson==$WHEEL_VER
+RUN pip install --find-links . orjson==$WHEEL_VER

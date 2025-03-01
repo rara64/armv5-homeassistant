@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build pynacl
-RUN pip install --find-links ./maturin pynacl==$WHEEL_VER
+RUN pip install --find-links . pynacl==$WHEEL_VER

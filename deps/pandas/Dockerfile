@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build pandas
-RUN pip install --find-links ./maturin pandas==$WHEEL_VER --no-deps 
+RUN pip install --find-links . pandas==$WHEEL_VER --no-deps 

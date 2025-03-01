@@ -17,4 +17,4 @@ COPY $CARGO .
 RUN dpkg -i *.deb
 
 # Build zeroconf
-RUN pip install --find-links ./maturin zeroconf==$WHEEL_VER
+RUN pip install --find-links . zeroconf==$WHEEL_VER
