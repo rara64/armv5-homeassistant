@@ -3,6 +3,7 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 ARG CARGO_DEB
 ARG MATURIN_WHL
 ARG WHEEL_VER
+ARG NUMPY_WHL
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"

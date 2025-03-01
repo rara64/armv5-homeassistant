@@ -86,17 +86,21 @@ jobs:
           uname -m
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
-
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || { echo 'Maturin download failed'; exit 1; }
-
           7z e maturin.zip -o./maturin -y || { echo 'Maturin extract failed'; exit 1; }
 
           wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "numpy") | .archive_download_url' | head -n 1)
+          mkdir numpy
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || echo 'Numpy download failed'
+          7z e numpy.zip -o./numpy -y || echo 'Numpy extract failed'
+
           export CARGO_DEB="./cargo.deb"
           export MATURIN_WHL="./maturin"
+          export NUMPY_WHL="./numpy"
 
-          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
+          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
 
       - name: Extract dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}

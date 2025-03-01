@@ -3,6 +3,7 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
 ARG CARGO_DEB
 ARG MATURIN_WHL
 ARG WHEEL_VER
+ARG NUMPY_WHL
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
@@ -14,6 +15,11 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install maturin
 COPY $MATURIN_WHL .
 RUN MATURIN=$(find . -name "maturin*.whl" -print -quit) && pip install $MATURIN
+
+# Install numpy if available
+COPY $NUMPY_WHL .
+RUN NUMPY=$(find . -name "numpy*.whl" -print -quit) && \
+    [ -n "$NUMPY" ] && pip install "$NUMPY" || echo "No numpy wheel found"
 
 # Install cargo
 COPY $CARGO_DEB .
