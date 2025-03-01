@@ -25,5 +25,8 @@ RUN NUMPY=$(find . -name "numpy*.whl" -print -quit) && \
 COPY $CARGO_DEB .
 RUN dpkg -i *.deb
 
+# Create wheels folder for maturin builds
+mkdir wheels
+
 # Build av
 RUN pip install --find-links . av==$WHEEL_VER --no-binary av

@@ -25,5 +25,8 @@ RUN NUMPY=$(find . -name "numpy*.whl" -print -quit) && \
 COPY $CARGO_DEB .
 RUN dpkg -i *.deb
 
+# Create wheels folder for maturin builds
+mkdir wheels
+
 # Build pandas
 RUN pip install --find-links . pandas==$WHEEL_VER --no-deps 

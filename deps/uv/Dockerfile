@@ -25,6 +25,9 @@ RUN NUMPY=$(find . -name "numpy*.whl" -print -quit) && \
 COPY $CARGO_DEB .
 RUN dpkg -i *.deb
 
+# Create wheels folder for maturin builds
+mkdir wheels
+
 # Replace atomic64 with atomic32 inside boxcar crate - UV patch to support armv5
 RUN wget -O uv.zip https://github.com/astral-sh/uv/archive/refs/tags/$WHEEL_VER.zip && \
     unzip uv.zip && \
@@ -38,7 +41,7 @@ RUN cd boxcar && \
     sed -i 's/AtomicU64/AtomicU32/g' src/raw.rs
 
 # Patch & build uv wheel
-RUN mkdir wheels && cd uv && \
+RUN cd uv && \
     sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml && \
     sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = false/" Cargo.toml
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels

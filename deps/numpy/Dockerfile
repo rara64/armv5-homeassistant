@@ -16,9 +16,17 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY $MATURIN_WHL .
 RUN MATURIN=$(find . -name "maturin*.whl" -print -quit) && pip install $MATURIN
 
+# Install numpy if available
+COPY $NUMPY_WHL .
+RUN NUMPY=$(find . -name "numpy*.whl" -print -quit) && \
+    [ -n "$NUMPY" ] && pip install "$NUMPY" || echo "No numpy wheel found"
+
 # Install cargo
 COPY $CARGO_DEB .
 RUN dpkg -i *.deb
+
+# Create wheels folder for maturin builds
+mkdir wheels
 
 # Build numpy
 RUN pip install --find-links . numpy==$WHEEL_VER \

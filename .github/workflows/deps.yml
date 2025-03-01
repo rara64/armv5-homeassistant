@@ -1,9 +1,9 @@
-name: Build deps for armv5-homeassistant - matrix
+name: Build deps for armv5-homeassistant
 
 on: 
   workflow_dispatch:
   repository_dispatch:
-    types: Build deps for armv5-homeassistant - matrix
+    types: Build deps for armv5-homeassistant
   
 jobs:
   build:
