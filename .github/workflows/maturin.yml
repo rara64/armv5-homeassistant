@@ -31,12 +31,10 @@ jobs:
         echo "$VERSION"
         echo $VERSION > ./maturin_ver.txt
 
-        find ./maturin/wheels -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do
-          if [ -f "$file" ]; then
-            new_name=$(echo "$file" | sed 's/armv5tel/armv7l/g')
-            if [ "$file" != "$new_name" ]; then
-              mv -v "$file" "$new_name"
-            fi
+        find ./wheels -name "*.whl" -print0 | while IFS= read -r -d '' file; do
+          new_name="${file/armv5tel/armv7l}"
+          if [ "$file" != "$new_name" ]; then
+            mv -v "$file" "$new_name"
           fi
         done
     - name: Upload artifact
