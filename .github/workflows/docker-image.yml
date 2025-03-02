@@ -174,6 +174,13 @@ jobs:
         run: |
           curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build maturin for armv5-homeassistant"}'
 
+      - name: Set up QEMU
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm
+          image: tonistiigi/binfmt:qemu-v8.1.5
+          
       - name: Set up Docker Buildx
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
         uses: docker/setup-buildx-action@v3
@@ -185,17 +192,6 @@ jobs:
       - name: Build and push the image
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0}}
         run: |
-          export DOCKER_BUILDKIT=0 
-
-          sudo apt install -y binfmt-support qemu-user-static
-
-          sudo update-binfmts --install armv5 /usr/bin/qemu-arm-static \
-          --magic "\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00" \
-          --mask "\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff" \
-          --fix-binary yes
-
-          uname -m
-
           docker buildx build --push --platform linux/arm/v5 \
           --build-arg DEPS="./deps" \
           --build-arg GO2RTC="go2rtc/go2rtc_linux_armv5" \
