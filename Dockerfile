@@ -16,15 +16,15 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 
 # Install pre-built dependencies
 COPY $DEPS .
-RUN find . -maxdepth 1 -type f -iname 'maturin*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'rpds_py*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'token*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'pyyaml*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'jiter*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'pydantic*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'numpy*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'cffi*' -exec pip install {} --find-links . \; && \
-    find . -maxdepth 1 -type f -iname 'patchelf*' -exec pip install {} --find-links . \; && \
+RUN find . -maxdepth 1 -type f -iname 'maturin*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'rpds_py*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'token*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'pyyaml*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'jiter*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'pydantic*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'numpy*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'cffi*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'patchelf*.whl' -exec pip install {} --find-links . \; && \
     find . -maxdepth 1 -type f -iname '*.whl' -exec pip install {} --find-links . \;
 
 # Clone latest release of HASS
