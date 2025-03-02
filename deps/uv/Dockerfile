@@ -17,8 +17,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY $MATURIN_WHL .
 COPY $NUMPY_WHL .
 COPY $ANTHROPIC_WHL .
-RUN ls
-RUN find . -name "*.whl" -print0 | while IFS= read -r -d $'\0' file; do pip install "$file"; done
+RUN find . -name "*.whl" -exec pip install {} \;
 
 # Install cargo
 COPY $CARGO_DEB .
