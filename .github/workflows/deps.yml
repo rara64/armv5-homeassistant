@@ -7,7 +7,7 @@ on:
   
 jobs:
   build:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: true
       matrix:
@@ -134,7 +134,7 @@ jobs:
     
   dispatch:
     needs: build
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-24.04
     steps:
       - name: Dispatch armv5-homeassistant
         if: success()
