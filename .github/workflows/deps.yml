@@ -32,6 +32,8 @@ jobs:
             dependency_name: orjson
           - dockerfile: deps/pynacl/Dockerfile
             dependency_name: pynacl
+          - dockerfile: deps/zeroconf/Dockerfile
+            dependency_name: zeroconf
           - dockerfile: deps/uv/Dockerfile
             dependency_name: uv
 
@@ -122,7 +124,7 @@ jobs:
           else
             echo "WHEELS_CREATED=0" >> "$GITHUB_ENV"
           fi
-          
+
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == 1 && env.WHEELS_CREATED == 1 }}
         uses: actions/upload-artifact@v4
