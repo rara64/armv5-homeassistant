@@ -100,11 +100,11 @@ jobs:
             if "${wheel}" == "uv"; then
               export uv_ver=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
             else
-              export ${wheel}_ver=$(cat reqs.txt | grep -m 1 -i "${{ matrix.dependency_name }}" | awk -F'=' '{print $NF}' | tr -d '\n')
+              export ${wheel}_ver=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
             fi
           done
           #
-          
+
 
 
           # REMOVE DUPLCATE/NOT MATCHING FILES FROM DEPS FOLDER
