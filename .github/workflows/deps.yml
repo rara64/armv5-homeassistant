@@ -111,8 +111,8 @@ jobs:
         run: |
           docker create --name wheels wheels
           mkdir wheels
-          docker cp wheels:./root/.cache/pip/wheels wheels
-          docker cp wheels:./wheels wheels
+          docker cp wheels:./root/.cache/pip/wheels wheels || echo "./root/.cache/pip/wheels - not found"
+          docker cp wheels:./wheels wheels || echo "./wheels - not found"
 
           find wheels/ -name "*.whl" -type f -exec mv {} wheels/ \;
           echo ${{ env.WHEEL_VER }} >> ${{ matrix.dependency_name }}_version.txt
@@ -122,7 +122,7 @@ jobs:
           else
             echo "WHEELS_CREATED=0" >> "$GITHUB_ENV"
           fi
-
+          
       - name: Upload wheels
         if: ${{ env.WHEELS_NEEDED == 1 && env.WHEELS_CREATED == 1 }}
         uses: actions/upload-artifact@v4
