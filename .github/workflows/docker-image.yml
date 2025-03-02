@@ -70,9 +70,9 @@ jobs:
           # DOWNLOAD ARTIFACTS FROM DEPS MATRIX BUILD
           export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot-client' 'elevenlabs' 'matrix-nio' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf')
           for wheel in "${WHEELS_LIST[@]}"; do
-            export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "${wheel}") | .archive_download_url' | head -n 1)
-            curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o ${wheel}.zip "$LINK" || echo '${wheel} download failed'
-            7z e ${wheel}.zip -o./deps -y || echo '${wheel} extract failed'
+            export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r ".artifacts[] | select(.name == \"${wheel}\") | .archive_download_url" | head -n 1)
+            curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o "${wheel}.zip" "$LINK" || echo "${wheel} download failed"
+            7z e ${wheel}.zip -o./deps -y || echo "${wheel} extract failed"
             export ${wheel}_whl_ver=$(cat ./deps/${wheel}_version.txt)
           done
           #
