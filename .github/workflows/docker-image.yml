@@ -76,9 +76,9 @@ jobs:
 
             7z e ${wheel}.zip -o./deps -y || echo "${wheel} extract failed"
 
-            if ["${wheel}" == "matrix"]; then
+            if [[ "${wheel}" == "matrix" ]]; then
               export ${wheel}_whl_ver=$(cat "./deps/${wheel}-nio_version.txt")
-            elif ["${wheel}" == "deebot"]; then
+            elif [[ "${wheel}" == "deebot" ]]; then
               export ${wheel}_whl_ver=$(cat "./deps/${wheel}-client_version.txt")
             else
               export ${wheel}_whl_ver=$(cat "./deps/${wheel}_version.txt")
@@ -97,7 +97,7 @@ jobs:
           mv filtered_reqs.txt reqs.txt
 
           for wheel in "${WHEELS_LIST[@]}"; do
-            if ["${wheel}" == "uv"]; then
+            if [[ "${wheel}" == "uv" ]]; then
               export uv_ver=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
             else
               export ${wheel}_ver=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
