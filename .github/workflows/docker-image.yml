@@ -105,6 +105,20 @@ jobs:
           done
           #
 
+          echo "PANDAS: Found (pandas_whl_ver) = ${pandas_whl_ver}, Expected (pandas_ver) = ${pandas_ver}"
+          echo "NUMPY: Found (numpy_whl_ver) = ${numpy_whl_ver}, Expected (numpy_ver) = ${numpy_ver}"
+          echo "CRYPTOGRAPHY: Found (cryptography_whl_ver) = ${cryptography_whl_ver}, Expected (cryptography_ver) = ${cryptography_ver}"
+          echo "UV: Found (uv_whl_ver) = ${uv_whl_ver}, Expected (uv_ver) = ${uv_ver}"
+          echo "AV: Found (av_whl_ver) = ${av_whl_ver}, Expected (av_ver) = ${av_ver}"
+          echo "PYNACL: Found (pynacl_whl_ver) = ${pynacl_whl_ver}, Expected (pynacl_ver) = ${pynacl_ver}"
+          echo "ZEROCONF: Found (zeroconf_whl_ver) = ${zeroconf_whl_ver}, Expected (zeroconf_ver) = ${zeroconf_ver}"
+          echo "ORJSON: Found (orjson_whl_ver) = ${orjson_whl_ver}, Expected (orjson_ver) = ${orjson_ver}"
+          echo "DEEBOT-CLIENT: Found (deebot_whl_ver) = ${deebot_whl_ver}, Expected (deebot_ver) = ${deebot_ver}"
+          echo "ANTHROPIC: Found (anthropic_whl_ver) = ${anthropic_whl_ver}, Expected (anthropic_ver) = ${anthropic_ver}"
+          echo "ELEVENLABS: Found (elevenlabs_whl_ver) = ${elevenlabs_whl_ver}, Expected (elevenlabs_ver) = ${elevenlabs_ver}"
+          echo "MATRIX-NIO: Found (matrix_whl_ver) = ${matrix_whl_ver}, Expected (matrix_ver) = ${matrix_ver}"
+          echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
+          echo "MATURIN: Found (MATURIN_BUILD_VER) = ${MATURIN_BUILD_VER}, Expected (MATURIN_VER) = ${MATURIN_VER}"
 
 
           # REMOVE DUPLCATE/NOT MATCHING FILES FROM DEPS FOLDER
