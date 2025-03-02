@@ -68,7 +68,7 @@ jobs:
 
 
           # DOWNLOAD ARTIFACTS FROM DEPS MATRIX BUILD
-          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf')
+          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml')
           for wheel in "${WHEELS_LIST[@]}"; do
             export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r ".artifacts[] | select(.name | test(\"${wheel}\")) | .archive_download_url" | head -n 1)
 
@@ -156,6 +156,7 @@ jobs:
           echo "ANTHROPIC: Found (anthropic_whl_ver) = ${anthropic_whl_ver}, Expected (anthropic_ver) = ${anthropic_ver}"
           echo "ELEVENLABS: Found (elevenlabs_whl_ver) = ${elevenlabs_whl_ver}, Expected (elevenlabs_ver) = ${elevenlabs_ver}"
           echo "MATRIX-NIO: Found (matrix_whl_ver) = ${matrix_whl_ver}, Expected (matrix_ver) = ${matrix_ver}"
+          echo "LXML: Found (lxml_whl_ver) = ${lxml_whl_ver}, Expected (lxml_ver) = ${lxml_ver}"
           echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
           echo "MATURIN: Found (MATURIN_BUILD_VER) = ${MATURIN_BUILD_VER}, Expected (MATURIN_VER) = ${MATURIN_VER}"
 
