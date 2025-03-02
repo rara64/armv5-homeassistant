@@ -16,23 +16,23 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 
 # Install pre-built dependencies
 COPY $DEPS .
-RUN find . -type f -iname 'maturin*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'rpds_py*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'token*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'pyyaml*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'jiter*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'pydantic*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'numpy*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'cffi*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname 'patchelf*' -exec pip install {} --find-links ./wheels \; && \
-    find . -type f -iname '*.whl' -exec pip install {} --find-links ./wheels \;
+RUN find . -maxdepth 1 -type f -iname 'maturin*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'rpds_py*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'token*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'pyyaml*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'jiter*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'pydantic*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'numpy*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'cffi*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'patchelf*' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname '*.whl' -exec pip install {} --find-links . \;
 
 # Clone latest release of HASS
 RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name') && git clone -b $TAG https://github.com/home-assistant/core && \
     sed -i '/uv==/d' core/requirements.txt
 
 # Install HASS dependencies
-RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple -r core/requirements_all.txt
+RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple --find-links . -r core/requirements_all.txt
 
 # Install HASS core package
 RUN pip install --no-deps homeassistant
