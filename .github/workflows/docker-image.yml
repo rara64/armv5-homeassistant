@@ -76,7 +76,13 @@ jobs:
 
             7z e ${wheel}.zip -o./deps -y || echo "${wheel} extract failed"
 
-            export ${wheel}_whl_ver=$(cat ./deps/${wheel}_version.txt)
+            if ${wheel} == "matrix"; then
+              export ${wheel}_whl_ver=$(cat ./deps/${wheel}-nio_version.txt)
+            elif ${wheel} == "deebot"; then
+              export ${wheel}_whl_ver=$(cat ./deps/${wheel}-client_version.txt)
+            else
+              export ${wheel}_whl_ver=$(cat ./deps/${wheel}_version.txt)
+            fi
           done
           #
 
@@ -105,7 +111,7 @@ jobs:
           for wheel in "${WHEELS_LIST[@]}"; do 
             wh=${wheel}
             required_version=${wheel}_ver
-            matching_files=$(find ./deps -type f -iname "${wh}*" -print 2>/dev/null | tr -d '\0')
+            matching_files=$(find ./deps -type f -iname "${wh}*.whl" -print 2>/dev/null | tr -d '\0')
 
             if [[ -z "$matching_files" ]]; then
               echo "No matching files found for $wheel. Expected version: ${!required_version}"
