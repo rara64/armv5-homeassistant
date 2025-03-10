@@ -24,9 +24,6 @@ RUN find /wheels -maxdepth 1 -name "*.whl" -exec pip install {} \;
 COPY $CARGO_DEB .
 RUN dpkg -i *.deb
 
-# Create wheels folder for maturin builds
-RUN mkdir wheels
-
 # Build anthropic
 RUN pip install --find-links . anthropic==$WHEEL_VER
 
