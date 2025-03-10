@@ -13,6 +13,8 @@ ENV CARGO_TERM_PROGRESS_WHEN="never"
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+RUN pip cache dir
+
 # Install maturin & other wheels
 COPY $MATURIN_WHL .
 COPY $NUMPY_WHL .
