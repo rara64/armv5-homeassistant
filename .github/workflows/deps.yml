@@ -45,7 +45,7 @@ jobs:
 
       - name: Check if newer version is needed
         run: |
-          export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
+          export TAG=$(curl --retry 5 --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
