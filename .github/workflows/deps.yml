@@ -45,7 +45,7 @@ jobs:
 
       - name: Check if newer version is needed
         run: |
-          export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | if . then .tag_name else "" end')
+          export TAG=$(curl --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
@@ -115,7 +115,7 @@ jobs:
         run: |
           docker create --name wheels wheels
           mkdir wheels
-          docker cp wheels:./root/.cache/pip wheels || echo "./root/.cache/pip - not found"
+          docker cp wheels:./root/.cache/pip/wheels wheels || echo "./root/.cache/pip/wheels - not found"
           docker cp wheels:./wheels wheels || echo "./wheels - not found"
 
           find wheels/ -name "*.whl" -type f -exec mv {} wheels/ \;

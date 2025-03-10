@@ -27,5 +27,5 @@ RUN dpkg -i *.deb
 # Build anthropic
 RUN pip install --find-links . anthropic==$WHEEL_VER
 
-# Copy old wheels if no new wheels
+# Remove old wheels if new wheels found
 RUN if test -d /root/.cache/pip/wheels; then rm -rf /wheels; fi
