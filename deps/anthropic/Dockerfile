@@ -16,8 +16,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install maturin & other wheels
 COPY $MATURIN_WHL .
 COPY $NUMPY_WHL .
-COPY $ANTHROPIC_WHL .
+COPY $ANTHROPIC_WHL /wheels
 RUN find . -maxdepth 1 -name "*.whl" -exec pip install {} \;
+RUN find /wheels -maxdepth 1 -name "*.whl" -exec pip install {} \;
 
 # Install cargo
 COPY $CARGO_DEB .
@@ -28,3 +29,8 @@ RUN mkdir wheels
 
 # Build anthropic
 RUN pip install --find-links . anthropic==$WHEEL_VER
+
+# Copy old wheels if no new wheels
+RUN if test -d /root/.cache/pip/wheels; then \
+    rm -rf /wheels \
+    fi
