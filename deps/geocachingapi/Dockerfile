@@ -26,17 +26,9 @@ RUN dpkg -i *.deb
 # Create wheels folder for maturin builds
 RUN mkdir wheels
 
-# Build geocachingapi (scipy)
-RUN git clone https://github.com/scipy/scipy/ --depth 1
+# Build patched geocachingapi
+RUN git clone https://github.com/rara64/reverse_geocode --depth 1
 
-RUN pip install setuptools
-
-RUN cd scipy && sed -i.bak \
-    -e '/^if blas_dep\.found() and lapack_dep\.found()/d' \
-    -e '/^else/d' \
-    -e '/^endif/d' \
-    scipy/meson.build
-
-RUN cd scipy && pip install . --config-settings=setup-args="-Dblas=none -Dlapack=none"
+RUN cd reverse_geocode && pip wheel . -w ../wheels
 
 RUN pip install --find-links . geocachingapi==$WHEEL_VER
