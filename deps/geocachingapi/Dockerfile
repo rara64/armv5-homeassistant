@@ -26,5 +26,5 @@ RUN dpkg -i *.deb
 # Create wheels folder for maturin builds
 RUN mkdir wheels
 
-# Build reverse-geocode (scipy)
-RUN pip install --find-links . reverse-geocode==$WHEEL_VER
+# Build geocachingapi (scipy)
+RUN pip install --find-links . geocachingapi==$WHEEL_VER

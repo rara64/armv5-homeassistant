@@ -68,7 +68,7 @@ jobs:
 
 
           # DOWNLOAD ARTIFACTS FROM DEPS MATRIX BUILD
-          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml' 'geocode')
+          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml' 'geocachingapi')
           for wheel in "${WHEELS_LIST[@]}"; do
             export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r ".artifacts[] | select(.name | test(\"${wheel}\")) | .archive_download_url" | head -n 1)
 

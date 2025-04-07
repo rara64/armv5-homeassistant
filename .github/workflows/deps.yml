@@ -38,8 +38,8 @@ jobs:
             dependency_name: lxml
           - dockerfile: deps/uv/Dockerfile
             dependency_name: uv
-          - dockerfile: deps/reverse-geocode/Dockerfile
-            dependency_name: reverse-geocode
+          - dockerfile: deps/geocachingapi/Dockerfile
+            dependency_name: geocachingapi
 
     steps:
       - name: Checkout code
