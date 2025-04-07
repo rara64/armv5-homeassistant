@@ -159,7 +159,7 @@ jobs:
           echo "LXML: Found (lxml_whl_ver) = ${lxml_whl_ver}, Expected (lxml_ver) = ${lxml_ver}"
           echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
           echo "MATURIN: Found (MATURIN_BUILD_VER) = ${MATURIN_BUILD_VER}, Expected (MATURIN_VER) = ${MATURIN_VER}"
-          echo "REVERSE-GEOCODE: Found (GEOCODE_BUILD_VER) = ${GEOCODE_BUILD_VER}, Expected (GEOCODE_VER) = ${GEOCODE_VER}"
+          echo "GEOCACHINGAPI: Found (GEOCACHINGAPI_BUILD_VER) = ${GEOCACHINGAPI_BUILD_VER}, Expected (GEOCACHINGAPI_VER) = ${GEOCACHINGAPI_VER}"
 
       - name: Dispatch build of dependencies
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
