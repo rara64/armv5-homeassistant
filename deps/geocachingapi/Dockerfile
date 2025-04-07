@@ -27,5 +27,5 @@ RUN dpkg -i *.deb
 RUN mkdir wheels
 
 # Build geocachingapi (scipy)
-RUN pip install --find-links . scipy==1.10.0 --config-settings=setup-args="-Dblas=none -Dlapack=none -DPYTHRAN_BLAS_NONE"
+RUN pip install --find-links . scipy==1.11.4 --config-settings=setup-args="-Dblas=none -Dlapack=none -DPYTHRAN_BLAS_NONE"
 RUN pip install --find-links . geocachingapi==$WHEEL_VER
