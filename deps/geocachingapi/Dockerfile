@@ -28,5 +28,6 @@ RUN mkdir wheels
 
 # Build geocachingapi (scipy)
 RUN git clone https://github.com/scipy/scipy/ --branch v0.19.1 --depth 1
+RUN pip install setuptools
 RUN cd scipy && python setup.py install
 RUN pip install --find-links . geocachingapi==$WHEEL_VER
