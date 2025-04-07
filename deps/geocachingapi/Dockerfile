@@ -27,7 +27,16 @@ RUN dpkg -i *.deb
 RUN mkdir wheels
 
 # Build geocachingapi (scipy)
-RUN git clone https://github.com/scipy/scipy/ --branch v0.19.1 --depth 1
-RUN pip install setuptools
-RUN cd scipy && python setup.py install
+RUN git clone https://github.com/scipy/scipy/ --depth 1
+
+RUN pip install setuptools mason
+
+RUN cd scipy && sed -i.bak \
+    -e '/^if blas_dep\.found() and lapack_dep\.found()/d' \
+    -e '/^else/d' \
+    -e '/^endif/d' \
+    scipy/meson.build
+
+RUN cd scipy && pip install . --config-settings=setup-args="-Dblas=none -Dlapack=none"
+
 RUN pip install --find-links . geocachingapi==$WHEEL_VER
