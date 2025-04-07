@@ -15,6 +15,6 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y \
     libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev meson nasm texinfo \
     yasm libdrm-dev python3 --no-install-recommends && apt clean && apt autoclean
 
-RUN apt install -y ffmpeg python-is-python3
+RUN apt install -y ffmpeg python-is-python3 gfortran
 
-RUN ldconfig && ffmpeg -version && python --version
+RUN ldconfig && ffmpeg -version && python --version && gfortran --version
