@@ -63,6 +63,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 ENV VIRTUAL_ENV="/opt/venv"
 
 # Fix psutil error
-RUN pip install --upgrade psutil 
+RUN pip install --force-reinstall psutil 
 
 CMD ["hass","-v","-c","/config"]
