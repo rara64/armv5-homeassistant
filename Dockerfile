@@ -25,6 +25,8 @@ RUN find . -maxdepth 1 -type f -iname 'maturin*.whl' -exec pip install {} --find
     find . -maxdepth 1 -type f -iname 'numpy*.whl' -exec pip install {} --find-links . \; && \
     find . -maxdepth 1 -type f -iname 'cffi*.whl' -exec pip install {} --find-links . \; && \
     find . -maxdepth 1 -type f -iname 'patchelf*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'pykdtree*.whl' -exec pip install {} --find-links . \; && \
+    find . -maxdepth 1 -type f -iname 'reverse_geocode*.whl' -exec pip install {} --find-links . \; && \
     find . -maxdepth 1 -type f -iname '*.whl' -exec pip install {} --find-links . \;
 
 # Clone latest release of HASS
