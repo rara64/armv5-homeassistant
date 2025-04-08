@@ -33,7 +33,7 @@ RUN pip download --no-deps $(cat reverse_geocode/requirements.txt | grep "pykdtr
     mkdir pykdtree && \
     unzip $(find . -maxdepth 1 -type f -iname "pykdtree*.tar.gz") -d pykdtree && \
     cd pykdtree && \
-    sed -i "/install_requires=/ s/'numpy'//g" setup.py && \
+    sed -i.bak "s/'numpy'//g" setup.py && \
     pip wheel . -w ../wheels && \
     pip install . --find-links /
 
