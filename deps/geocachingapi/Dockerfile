@@ -29,15 +29,6 @@ RUN mkdir wheels
 # Build patched geocachingapi
 RUN git clone https://github.com/rara64/reverse_geocode --depth 1
 
-RUN export PYKDTREE_VER=$(cat reverse_geocode/requirements.txt | awk -F'==' '/^pykdtree==/ {print $2}') && \
-    wget -O pykdtree.tar.gz $(curl -sL https://pypi.org/pypi/pykdtree/$PYKDTREE_VER/json | jq -r '.urls[] | select(.packagetype == "sdist" and (.filename | endswith(".tar.gz"))) | .url') && \
-    tar -xvzf pykdtree.tar.gz && \
-    cd pykdtree-$PYKDTREE_VER && \
-    sed -i "s/'numpy'//g" setup.py && \
-    sed -i '/np\./d' setup.py && \
-    sed -E -i 's/"numpy>=[^"]*"[,\s]*//' pyproject.toml && \
-    pip install . --find-links /
-
 RUN cd reverse_geocode && \
     pip wheel --no-deps . -w ../wheels && \
     pip install . --find-links / && \
