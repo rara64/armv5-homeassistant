@@ -34,6 +34,7 @@ RUN export PYKDTREE_VER=$(cat reverse_geocode/requirements.txt | awk -F'==' '/^p
     tar -xvzf pykdtree.tar.gz && \
     cd pykdtree-$PYKDTREE_VER && \
     sed -i "s/'numpy'//g" setup.py && \
+    sed -i '/np\./d' setup.py && \
     sed -E -i 's/"numpy>=[^"]*"[,\s]*//' pyproject.toml && \
     pip install . --find-links /
 
