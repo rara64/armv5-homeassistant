@@ -30,7 +30,7 @@ RUN mkdir wheels
 RUN git clone https://github.com/rara64/reverse_geocode --depth 1
 
 RUN cd reverse_geocode && \
-    pip wheel . --find-links / -w ../wheels && \
+    pip wheel --no-deps . -w ../wheels && \
     pip install . --find-links / && \
     py test_reverse_geocode.py
 
