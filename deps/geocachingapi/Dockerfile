@@ -31,7 +31,7 @@ RUN git clone https://github.com/rara64/reverse_geocode --depth 1
 
 RUN cd reverse_geocode && \
     pip wheel --no-deps . -w ../wheels && \
-    pip install -r requirements.txt --find-links / && \
+    pip install --no-build-isolation -r requirements.txt --find-links / && \
     pip install . --find-links / && \
     python test_reverse_geocode.py
 
