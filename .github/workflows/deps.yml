@@ -54,11 +54,7 @@ jobs:
           sed '/^#/d' reqs.txt > filtered_reqs.txt
           mv filtered_reqs.txt reqs.txt
 
-          if [[ "${{ matrix.dependency_name }}" == "uv" ]]; then
-            export VER=$(curl -s https://pypi.org/pypi/uv/json | jq -r '.info.version')
-          else
-            export VER=$(cat reqs.txt | grep -m 1 -i "${{ matrix.dependency_name }}" | awk -F'=' '{print $NF}' | tr -d '\n')
-          fi
+          export VER=$(cat reqs.txt | grep -m 1 -i "${{ matrix.dependency_name }}" | awk -F'=' '{print $NF}' | tr -d '\n')
 
           export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "${{ matrix.dependency_name }}") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o ${{ matrix.dependency_name }}.zip "$LINK" || echo 'Dependency download failed'

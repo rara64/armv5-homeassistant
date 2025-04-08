@@ -32,6 +32,6 @@ RUN git clone https://github.com/rara64/reverse_geocode --depth 1
 RUN cd reverse_geocode && \
     pip wheel --no-deps . -w ../wheels && \
     pip install . --find-links / && \
-    py test_reverse_geocode.py
+    python test_reverse_geocode.py
 
 RUN pip install --find-links . geocachingapi==$WHEEL_VER
