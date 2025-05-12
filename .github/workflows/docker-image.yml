@@ -27,7 +27,7 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         run: |
           # DOWNLOAD GO2RTC FOR ARMV5
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1 | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
           7z e go2rtc.zip -o./go2rtc -y || echo 'go2rtc extract failed'
 
@@ -47,7 +47,7 @@ jobs:
 
 
           # DOWNLOAD MATURIN FOR ARMV5
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1 | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || echo 'deps download failed'
           7z e maturin.zip -o./maturin -y || echo 'maturin extract failed'
 
