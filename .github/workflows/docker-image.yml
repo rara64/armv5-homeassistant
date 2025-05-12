@@ -51,7 +51,7 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || echo 'deps download failed'
           7z e maturin.zip -o./maturin -y || echo 'maturin extract failed'
 
-          export MATURIN_VER=$(curl -s https://pypi.org/pypi/maturin/json | jq -r '.info.version')
+          export MATURIN_VER=$(curl -s https://api.github.com/repos/PyO3/maturin/releases/latest | jq -r .tag_name | sed 's/^v//')
           export MATURIN_BUILD_VER=$(cat ./maturin/maturin_ver.txt)
 
           if [[ "${MATURIN_VER}" != "${MATURIN_BUILD_VER}" ]]; then
