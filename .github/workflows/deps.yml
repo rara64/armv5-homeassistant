@@ -56,7 +56,7 @@ jobs:
 
           export VER=$(cat reqs.txt | grep -m 1 -i "${{ matrix.dependency_name }}" | awk -F'=' '{print $NF}' | tr -d '\n')
 
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1 | jq -r '.artifacts[] | select(.name == "${{ matrix.dependency_name }}") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "${{ matrix.dependency_name }}") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o ${{ matrix.dependency_name }}.zip "$LINK" || echo 'Dependency download failed'
           7z e ${{ matrix.dependency_name }}.zip -o./deps -y || echo 'Dependency extract failed'
 
@@ -84,18 +84,18 @@ jobs:
       - name: Build dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
         run: |
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1 | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || { echo 'Maturin download failed'; exit 1; }
           7z e maturin.zip -o./maturin -y || { echo 'Maturin extract failed'; exit 1; }
 
           wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1 | jq -r '.artifacts[] | select(.name == "numpy") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "numpy") | .archive_download_url' | head -n 1)
           mkdir numpy
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o numpy.zip "$LINK" || echo 'Numpy download failed'
           7z e numpy.zip -o./numpy -y || echo 'Numpy extract failed'
 
-          export LINK=$(curl --silent https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1 | jq -r '.artifacts[] | select(.name == "anthropic") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "anthropic") | .archive_download_url' | head -n 1)
           mkdir anthropic
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o anthropic.zip "$LINK" || echo 'Anthropic download failed'
           7z e anthropic.zip -o./anthropic -y || echo 'Anthropic extract failed'
