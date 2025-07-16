@@ -3,7 +3,9 @@
 
 Image allows you to run Home Assistant on ARMv5 platform and is mainly build for NAS devices based on Kirkwood architecture.
 
-Everything that runs [bodhi's debian](https://forum.doozan.com/read.php?2,12096) for these boxes should run this image. All components from [requirements_all.txt file in the Home Assistant Core repo](https://github.com/home-assistant/core/blob/dev/requirements_all.txt) are preinstalled which greatly improves the experience on old Kirkwood boxes. In case I missed something, please open an issue and I'll do my best.
+Everything that runs [bodhi's debian](https://forum.doozan.com/read.php?2,12096) for these boxes should run this image. All components from [requirements_all.txt file in the Home Assistant Core repo](https://github.com/home-assistant/core/blob/dev/requirements_all.txt) are preinstalled which greatly improves the experience on old Kirkwood boxes.
+
+In case I missed something, please open an issue and I'll do my best.
 
 > [!NOTE]
 > Should you encounter any issues when running the image, try with a simple debian docker image first. In case this doesn't work, you'll have to recompile bodhi's kernel to include support for memory cgroup or update to the latest one if possible. Docker needs this kernel feature for Linux images.
