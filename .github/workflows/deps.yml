@@ -56,7 +56,7 @@ jobs:
 
           export VER=$(cat reqs.txt | grep -m 1 -i "${{ matrix.dependency_name }}" | awk -F'=' '{print $NF}' | tr -d '\n')
 
-          export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "${{ matrix.dependency_name }}") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "${{ matrix.dependency_name }}") | .archive_download_url' | head -n 1)
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o ${{ matrix.dependency_name }}.zip "$LINK" || echo 'Dependency download failed'
           7z e ${{ matrix.dependency_name }}.zip -o./deps -y || echo 'Dependency extract failed'
 
@@ -110,7 +110,10 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || { echo 'Maturin download failed'; exit 1; }
           7z e maturin.zip -o./maturin -y || { echo 'Maturin extract failed'; exit 1; }
 
-          wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
+          export CARGO_URL=$(curl --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | \
+          jq -r 'if .assets and (.assets | length > 0) then .assets[0].browser_download_url else empty end')
+
+          wget $CARGO_URL -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
           retry_fetch_link "numpy"
           mkdir numpy
