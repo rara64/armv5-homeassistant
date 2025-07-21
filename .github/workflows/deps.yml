@@ -92,7 +92,7 @@ jobs:
 
             for attempt in $(seq 1 $retries); do
               echo "[$artifact_name] Fetch attempt $attempt of $retries..."
-              LINK=$(curl --silent "$api_url" | jq -r ".artifacts[] | select(.name == \"$artifact_name\") | .archive_download_url" | head -n 1)
+              LINK=$(curl --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "$api_url" | jq -r ".artifacts[] | select(.name == \"$artifact_name\") | .archive_download_url" | head -n 1)
               if [ -n "$LINK" ] && [ "$LINK" != "null" ]; then
                 echo "[$artifact_name] Link found: $LINK"
                 export LINK
