@@ -122,14 +122,8 @@ jobs:
           find wheels/ -name "*.whl" -type f -exec mv {} wheels/ \;
           echo ${{ env.WHEEL_VER }} >> ${{ matrix.dependency_name }}_version.txt
 
-          if find wheels/ -name "*.whl" -type f -print -quit | grep -q .; then
-            echo "WHEELS_CREATED=1" >> "$GITHUB_ENV"
-          else
-            echo "WHEELS_CREATED=0" >> "$GITHUB_ENV"
-          fi
-
       - name: Upload wheels
-        if: ${{ env.WHEELS_NEEDED == 1 && env.WHEELS_CREATED == 1 }}
+        if: ${{ env.WHEELS_NEEDED == 1 }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.dependency_name }}
