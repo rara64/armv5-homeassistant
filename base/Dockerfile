@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM --platform=linux/arm/v5 debian:trixie
+FROM --platform=linux/arm/v5 debian:sid
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y \
     curl wget unzip jq rustc build-essential cmake autoconf pkg-config \
