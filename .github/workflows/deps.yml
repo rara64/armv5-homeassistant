@@ -40,6 +40,8 @@ jobs:
             dependency_name: uv
           - dockerfile: deps/geocachingapi/Dockerfile
             dependency_name: geocachingapi
+          - dockerfile: deps/slixmpp/Dockerfile
+            dependency_name: slixmpp
 
     steps:
       - name: Checkout code
