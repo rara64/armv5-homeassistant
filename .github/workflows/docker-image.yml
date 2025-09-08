@@ -68,7 +68,7 @@ jobs:
 
 
           # DOWNLOAD ARTIFACTS FROM DEPS MATRIX BUILD
-          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml' 'geocachingapi')
+          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml' 'geocachingapi' 'slixmpp')
           for wheel in "${WHEELS_LIST[@]}"; do
             export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r ".artifacts[] | select(.name | test(\"${wheel}\")) | .archive_download_url" | head -n 1)
 
@@ -156,6 +156,7 @@ jobs:
           echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
           echo "MATURIN: Found (MATURIN_BUILD_VER) = ${MATURIN_BUILD_VER}, Expected (MATURIN_VER) = ${MATURIN_VER}"
           echo "GEOCACHINGAPI: Found (geocachingapi_whl_ver) = ${geocachingapi_whl_ver}, Expected (geocachingapi_ver) = ${geocachingapi_ver}"
+          echo "SLIXMPP: Found (slixmpp_whl_ver) = ${slixmpp_whl_ver}, Expected (slixmpp_ver) = ${slixmpp_ver}"
 
       - name: Dispatch build of dependencies
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
