@@ -18,3 +18,6 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y \
 RUN apt install -y ffmpeg python-is-python3
 
 RUN ldconfig && ffmpeg -version && python --version
+
+ENV CC=arm-linux-gnueabi-gcc
+ENV CXX=arm-linux-gnueabi-g++
