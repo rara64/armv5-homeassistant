@@ -42,6 +42,8 @@ jobs:
             dependency_name: geocachingapi
           - dockerfile: deps/slixmpp/Dockerfile
             dependency_name: slixmpp
+          - dockerfile: deps/thinqconnect/Dockerfile
+            dependency_name: thinqconnect
 
     steps:
       - name: Checkout code
