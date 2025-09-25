@@ -29,4 +29,4 @@ RUN dpkg -i *.deb
 RUN mkdir wheels
 
 # Build thinqconnect
-RUN pip install --find-links . thinqconnect==$WHEEL_VER
+RUN AWS_CRT_BUILD_USE_SYSTEM_LIBCRYPTO=1 pip install --find-links . thinqconnect==$WHEEL_VER
