@@ -107,12 +107,18 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o anthropic.zip "$LINK" || echo 'Anthropic download failed'
           7z e anthropic.zip -o./anthropic -y || echo 'Anthropic extract failed'
 
+          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "cryptography") | .archive_download_url' | head -n 1)
+          mkdir cryptography
+          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o cryptography.zip "$LINK" || echo 'Cryptography download failed'
+          7z e cryptography.zip -o./cryptography -y || echo 'Cryptography extract failed'
+
           export CARGO_DEB="./cargo.deb"
           export MATURIN_WHL="./maturin"
           export NUMPY_WHL="./numpy"
           export ANTHROPIC_WHL="./anthropic"
+          export CRYPTOGRAPHY_WHL="./cryptography"
 
-          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --build-arg ANTHROPIC_WHL=$ANTHROPIC_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
+          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --build-arg ANTHROPIC_WHL=$ANTHROPIC_WHL --build-arg CRYPTOGRAPHY_WHL=$CRYPTOGRAPHY_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
 
       - name: Extract dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
