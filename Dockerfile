@@ -34,7 +34,7 @@ RUN TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/release
     sed -i '/uv==/d' core/requirements.txt
 
 # Install HASS dependencies
-RUN pip install --timeout=1000 --extra-index-url https://www.piwheels.org/simple --find-links . -r core/requirements_all.txt
+RUN pip install --timeout=1000 --find-links . -r core/requirements_all.txt
 
 # Install HASS core package
 RUN pip install --no-deps homeassistant
