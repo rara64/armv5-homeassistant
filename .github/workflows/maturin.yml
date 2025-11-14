@@ -25,7 +25,7 @@ jobs:
     - name: Build maturin for armv5te
       run: |
         cd maturin
-        RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --profile release --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
+        RUSTFLAGS="-C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --target armv5te-unknown-linux-gnueabi --manylinux off -o ./wheels
 
         VERSION=$(curl -s https://api.github.com/repos/PyO3/maturin/releases/latest | jq -r .tag_name | sed 's/^v//')
         echo "$VERSION"
