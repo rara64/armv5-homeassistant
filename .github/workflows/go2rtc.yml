@@ -19,7 +19,8 @@ jobs:
     - name: Build
       run: |
         export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
-        export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
+        export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP '(?<=--from=)ghcr\.io/alexxit/go2rtc[^ ]+')
+        export GO2RTC=$(docker image inspect $GO2RTC --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')
         echo $GO2RTC >> go2rtc_ver.txt
 
         git clone -b "v${GO2RTC}" https://github.com/AlexxIT/go2rtc/
