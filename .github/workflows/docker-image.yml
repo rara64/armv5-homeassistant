@@ -31,7 +31,9 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
           7z e go2rtc.zip -o./go2rtc -y || echo 'go2rtc extract failed'
 
-          export GO2RTC_VER=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/${{ env.HASS_RELEASE }}/Dockerfile | grep -oP 'curl -L https://github.com/AlexxIT/go2rtc/releases/download/v\K[0-9.]+')
+          export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP '(?<=--from=)ghcr\.io/alexxit/go2rtc[^ ]+')
+          docker pull $GO2RTC
+          export GO2RTC_VER=$(docker image inspect $GO2RTC --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')
           export GO2RTC_BUILD_VER=$(cat ./go2rtc/go2rtc_ver.txt)
 
           if [[ "${GO2RTC_VER}" != "${GO2RTC_BUILD_VER}" ]]; then
