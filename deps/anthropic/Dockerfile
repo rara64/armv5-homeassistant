@@ -16,9 +16,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install maturin & other wheels
 COPY $MATURIN_WHL .
 COPY $NUMPY_WHL .
-COPY $ANTHROPIC_WHL /wheels
+# COPY $ANTHROPIC_WHL /wheels
 RUN find . -maxdepth 1 -name "*.whl" -exec pip install {} \;
-RUN find /wheels -maxdepth 1 -name "*.whl" -exec pip install {} \;
+# RUN find /wheels -maxdepth 1 -name "*.whl" -exec pip install {} \;
 
 # Install cargo
 COPY $CARGO_DEB .
