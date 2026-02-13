@@ -44,6 +44,8 @@ jobs:
             dependency_name: slixmpp
           - dockerfile: deps/thinqconnect/Dockerfile
             dependency_name: thinqconnect
+          - dockerfile: deps/jiter/Dockerfile
+            dependency_name: jiter
 
     steps:
       - name: Checkout code
