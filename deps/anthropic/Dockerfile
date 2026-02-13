@@ -29,7 +29,7 @@ RUN git clone https://github.com/pydantic/jiter
 
 RUN cd jiter && \ 
     echo '[patch.crates-io]' >> Cargo.toml && \
-    echo 'pyo3 = { git = "https://github.com/rara64/pyo3" }' >> Cargo.toml
+    echo 'pyo3 = { git = "https://github.com/rara64/pyo3", branch = "main" }' >> Cargo.toml
 
 RUN cd jiter/crates/jiter-python && pip install .
 
