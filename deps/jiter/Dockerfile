@@ -29,7 +29,7 @@ RUN cd jiter && \
     echo '[patch.crates-io]' >> Cargo.toml && \
     echo 'pyo3 = { git = "https://github.com/rara64/pyo3" }' >> Cargo.toml
 
-RUN cd jiter && pip install .
+RUN cd jiter/crates/jiter-python && pip install .
 
 # Remove old wheels if new wheels found
 RUN if test -d /root/.cache/pip/wheels; then rm -rf /wheels; fi
