@@ -30,7 +30,9 @@ RUN git clone --branch main https://github.com/rara64/pyo3 /pyo3
 
 RUN cd jiter && \ 
     echo '[patch.crates-io]' >> Cargo.toml && \
-    echo 'pyo3 = { path = "/pyo3" }' >> Cargo.toml
+    echo 'pyo3 = { path = "/pyo3" }' >> Cargo.toml && \
+    echo 'pyo3-build-config = { path = "/pyo3/pyo3-build-config" }' >> Cargo.toml && \
+    echo 'pyo3-ffi = { path = "/pyo3/pyo3-ffi" }' >> Cargo.toml
 
 RUN cd jiter/crates/jiter-python && pip install .
 
