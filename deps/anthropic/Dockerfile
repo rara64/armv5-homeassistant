@@ -26,11 +26,12 @@ RUN dpkg -i *.deb
 
 # Build jiter with patched pyo3 (PR #5808)
 RUN git clone https://github.com/pydantic/jiter
+RUN git clone --branch main https://github.com/rara64/pyo3 /pyo3
 
 RUN cd jiter && \ 
     echo '[patch.crates-io]' >> Cargo.toml && \
-    echo 'pyo3 = { git = "https://github.com/rara64/pyo3", branch = "main" }' >> Cargo.toml && \
-    cargo update -p pyo3
+    echo 'pyo3 = { path = "/pyo3" }' >> Cargo.toml && \
+    rm Cargo.lock
 
 RUN cd jiter/crates/jiter-python && pip install .
 
