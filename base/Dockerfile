@@ -1,9 +1,11 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 debian:trixie-backports
 
+ARG PYTHON_VERSION
+
 RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y -t trixie-backports \
     curl wget unzip jq rustc build-essential cmake autoconf pkg-config \
-    python3.13-full python3.13-dev git bluez libffi-dev libssl-dev \
+    git bluez libffi-dev libssl-dev \
     libjpeg-dev zlib1g-dev libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata \
     libudev-dev libpcap-dev libyaml-dev libxml2 libxslt-dev automake doxygen \
     graphviz imagemagick libasound2-dev libass-dev libavcodec-dev libavdevice-dev \
@@ -12,12 +14,25 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y -t trixie-bac
     libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev \
     libsnappy-dev libsoxr-dev libssh-dev libtool libv4l-dev libva-dev libvdpau-dev \
     libvo-amrwbenc-dev libvorbis-dev libwebp-dev libx264-dev libx265-dev libxcb-shape0-dev \
-    libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev meson nasm texinfo \
-    yasm libdrm-dev python3 --no-install-recommends && apt clean && apt autoclean
-
-RUN apt install -y -t trixie-backports ffmpeg python-is-python3
-
-RUN ldconfig && ffmpeg -version && python --version
+    libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev nasm texinfo \
+    yasm libdrm-dev ca-certificates --no-install-recommends && apt clean && apt autoclean
 
 ENV CC=arm-linux-gnueabi-gcc
 ENV CXX=arm-linux-gnueabi-g++
+
+RUN mkdir build-temp && \
+    cd build-temp && \
+    wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz && \
+    tar -xvf Python-$PYTHON_VERSION.tar.xz && \
+    cd Python-$PYTHON_VERSION && \
+    ./configure --enable-optimizations --with-lto --with-ensurepip=install && \
+    make -j $(nproc) && \
+    make install && \
+    ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
+    ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
+    rm -rf /build-temp && \
+    rm -rf /usr/local/lib/python*/test/*
+
+RUN apt install -y -t trixie-backports meson ffmpeg && apt clean && apt autoclean
+
+RUN ldconfig && ffmpeg -version && python --version
