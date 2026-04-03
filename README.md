@@ -1,7 +1,7 @@
-# Home Assistant docker image for ARMv5TE <br> [ ![Docker Image Version](https://img.shields.io/docker/v/rara64/armv5-homeassistant?arch=arm&color=%234c1) ![Docker Pulls](https://img.shields.io/docker/pulls/rara64/armv5-homeassistant)](https://hub.docker.com/r/rara64/armv5-homeassistant)
+# Home Assistant docker image for ARMv5TE (armel) <br> [ ![Docker Image Version](https://img.shields.io/docker/v/rara64/armv5-homeassistant?arch=arm&color=%234c1) ![Docker Pulls](https://img.shields.io/docker/pulls/rara64/armv5-homeassistant)](https://hub.docker.com/r/rara64/armv5-homeassistant)
 #### This is not an official docker image of [Home Assistant](https://github.com/home-assistant) since `linux/arm/v5` platform is not supported.
 
-Image allows you to run Home Assistant on ARMv5 platform and is mainly build for NAS devices based on Kirkwood architecture.
+Image allows you to run Home Assistant on ARMv5 (armel) platform and is mainly build for NAS devices based on Kirkwood architecture.
 
 Everything that runs [bodhi's debian](https://forum.doozan.com/read.php?2,12096) for these boxes should run this image. All components from [requirements_all.txt file in the Home Assistant Core repo](https://github.com/home-assistant/core/blob/dev/requirements_all.txt) are preinstalled which greatly improves the experience on old Kirkwood boxes.
 
