@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Check if newer version is needed
         run: |
@@ -77,14 +77,14 @@ jobs:
           
       - name: Set up QEMU
         if: ${{ env.WHEELS_NEEDED == 1 }}
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: arm
           image: tonistiigi/binfmt:qemu-v8.1.5
           
       - name: Set up Docker Buildx
         if: ${{ env.WHEELS_NEEDED == 1 }}
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
