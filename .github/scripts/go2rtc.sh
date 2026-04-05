@@ -1,6 +1,8 @@
+#!/bin/bash
+
 LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
 
-curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'GO2RTC download failed!'
+curl -L -H "Authorization: token ${WHEELS_TOKEN}" -o go2rtc.zip "$LINK" || echo 'GO2RTC download failed!'
 7z e go2rtc.zip -o./go2rtc -y || echo 'GO2RTC extract failed!'
 
 HOMEASSISTANT_TAG=$1
