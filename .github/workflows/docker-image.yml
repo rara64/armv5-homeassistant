@@ -22,6 +22,8 @@ jobs:
       - name: Checkout code
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         uses: actions/checkout@v6
+        run: |
+          chmod +x ./.github/scripts/*.sh
 
       - name: Check version of go2rtc
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
