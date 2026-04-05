@@ -97,7 +97,7 @@ jobs:
           jq -r 'if .assets and (.assets | length > 0) then .assets[0].browser_download_url else empty end')
           wget $CARGO_URL -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
-          wget $(curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
+          curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
           | jq -r '.assets[].browser_download_url' \
           | xargs -n 1 wget -q )
 
