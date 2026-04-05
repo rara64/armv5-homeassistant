@@ -5,7 +5,7 @@ ARG DEPS
 
 # Install latest rustc from rara64/armv5te-rustc repo
 RUN curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
-    | jq -r '.assets.browser_download_url' \
+    | jq -r '.assets[].browser_download_url' \
     | xargs -n 1 wget -q
 RUN dpkg -i rust-std*.deb \
     && dpkg -i rustc-dev*.deb \
@@ -64,7 +64,7 @@ COPY $GO2RTC .
 RUN mv go2rtc_linux_armv5 /bin/go2rtc && chmod +x /bin/go2rtc
 
 RUN curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
-    | jq -r '.assets.browser_download_url' \
+    | jq -r '.assets[].browser_download_url' \
     | xargs -n 1 wget -q \
     && dpkg -i rust-std*.deb \
     && dpkg -i rustc-dev*.deb \
