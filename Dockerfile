@@ -3,6 +3,12 @@ FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest as hass-builder
 
 ARG DEPS
 
+# Install latest rustc from rara64/armv5te-rustc repo
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
+    | jq -r '.assets.browser_download_url' \
+    | xargs -n 1 wget -q )
+RUN dpkg -i *.deb
+
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
 RUN dpkg -i *.deb
@@ -53,6 +59,12 @@ RUN mkdir /config
 # Install go2rtc binary
 COPY $GO2RTC .
 RUN mv go2rtc_linux_armv5 /bin/go2rtc && chmod +x /bin/go2rtc
+
+RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
+    | jq -r '.assets.browser_download_url' \
+    | xargs -n 1 wget -q \
+    && dpkg -i *.deb \
+    && rm *.deb)
 
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && dpkg -i *.deb && rm *.deb
 
