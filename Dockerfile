@@ -7,11 +7,14 @@ ARG DEPS
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
     | jq -r '.assets.browser_download_url' \
     | xargs -n 1 wget -q )
-RUN dpkg -i *.deb
+RUN dpkg -i rust-std*.deb \
+    && dpkg -i rustc-dev*.deb \
+    && dpkg -i rustc*.deb \
+    && rm *.deb
 
 # Install latest cargo from rara64/armv5te-cargo repo
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url')
-RUN dpkg -i *.deb
+RUN dpkg -i *.deb && rm *.deb
 
 # Setup Python VENV
 RUN python -m venv /opt/venv
@@ -63,7 +66,9 @@ RUN mv go2rtc_linux_armv5 /bin/go2rtc && chmod +x /bin/go2rtc
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
     | jq -r '.assets.browser_download_url' \
     | xargs -n 1 wget -q \
-    && dpkg -i *.deb \
+    && dpkg -i rust-std*.deb \
+    && dpkg -i rustc-dev*.deb \
+    && dpkg -i rustc*.deb \
     && rm *.deb)
 
 RUN wget $(curl --silent https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | jq -r '.assets[0].browser_download_url') && dpkg -i *.deb && rm *.deb
