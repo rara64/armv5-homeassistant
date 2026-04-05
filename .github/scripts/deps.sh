@@ -50,7 +50,7 @@ done
 #
 
 for wheel in "${WHEELS_LIST[@]}"; do 
-  required_version=REQUIRED_VERSION[$wheel]
+  required_version=${REQUIRED_VERSION[$wheel]}
   matching_files=$(find ./deps -type f -iname "${wheel}*.whl" -print 2>/dev/null | tr -d '\0')
 
   if [[ -z "$matching_files" ]]; then
@@ -75,8 +75,8 @@ done
 OUTDATED=0
 
 for wheel in "${WHEELS_LIST[@]}"; do
-  wh=WHEEL_VERSION[$wheel]
-  r=REQUIRED_VERSION[$wheel]
+  wh=${WHEEL_VERSION[$wheel]}
+  r=${REQUIRED_VERSION[$wheel]}
   
   echo "${wheel}: Prebuilt version => ${wh}, Required version => ${r}"
   if [[ "${wh}" != "${r}" ]]; then
