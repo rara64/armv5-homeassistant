@@ -3,8 +3,8 @@ LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/ac
 curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'GO2RTC download failed!'
 7z e go2rtc.zip -o./go2rtc -y || echo 'GO2RTC extract failed!'
 
-TAG=$1
-GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP '(?<=--from=)ghcr\.io/alexxit/go2rtc[^ ]+')
+HOMEASSISTANT_TAG=$1
+GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$HOMEASSISTANT_TAG/Dockerfile | grep -oP '(?<=--from=)ghcr\.io/alexxit/go2rtc[^ ]+')
 
 export GO2RTC_VER=$(skopeo inspect docker://$GO2RTC | jq -r '.Labels["org.opencontainers.image.version"]')
 export GO2RTC_BUILD_VER=$(cat ./go2rtc/go2rtc_ver.txt)
