@@ -1,6 +1,5 @@
 # syntax = docker/dockerfile:experimental
 FROM --platform=linux/arm/v5 rara64/armv5-debian-base:latest
-ARG CARGO_DEB
 ARG MATURIN_WHL
 ARG WHEEL_VER
 ARG NUMPY_WHL
@@ -21,9 +20,12 @@ COPY $ANTHROPIC_WHL .
 COPY $CRYPTOGRAPHY_WHL .
 RUN find . -maxdepth 1 -name "*.whl" -exec pip install {} \;
 
-# Install cargo
-COPY $CARGO_DEB .
-RUN dpkg -i *.deb
+# Install rustc & cargo
+COPY ./*.deb .
+RUN dpkg -i rust-std*.deb \
+    && dpkg -i rustc-dev*.deb \
+    && dpkg -i rustc*.deb \
+    && dpkg -i cargo*.deb
 
 # Create wheels folder for maturin builds
 RUN mkdir wheels

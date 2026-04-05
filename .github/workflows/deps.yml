@@ -97,6 +97,10 @@ jobs:
           jq -r 'if .assets and (.assets | length > 0) then .assets[0].browser_download_url else empty end')
           wget $CARGO_URL -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
+          wget $(curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
+          | jq -r '.assets.browser_download_url' \
+          | xargs -n 1 wget -q )
+
           export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "numpy") | .archive_download_url' | head -n 1)
           mkdir numpy
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o numpy.zip "$LINK" || echo 'Numpy download failed'
@@ -112,13 +116,12 @@ jobs:
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o cryptography.zip "$LINK" || echo 'Cryptography download failed'
           7z e cryptography.zip -o./cryptography -y || echo 'Cryptography extract failed'
 
-          export CARGO_DEB="./cargo.deb"
           export MATURIN_WHL="./maturin"
           export NUMPY_WHL="./numpy"
           export ANTHROPIC_WHL="./anthropic"
           export CRYPTOGRAPHY_WHL="./cryptography"
 
-          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg CARGO_DEB=$CARGO_DEB --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --build-arg ANTHROPIC_WHL=$ANTHROPIC_WHL --build-arg CRYPTOGRAPHY_WHL=$CRYPTOGRAPHY_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
+          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --build-arg ANTHROPIC_WHL=$ANTHROPIC_WHL --build-arg CRYPTOGRAPHY_WHL=$CRYPTOGRAPHY_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
 
       - name: Extract dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
