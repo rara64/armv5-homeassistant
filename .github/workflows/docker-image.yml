@@ -23,197 +23,77 @@ jobs:
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
         uses: actions/checkout@v6
 
-      - name: Check for new version of dependencies
+      - name: Check version of go2rtc
         if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE }}
+        env:
+          WHEELS_TOKEN: ${{ secrets.WHEELS_TOKEN }}
         run: |
-  
-          # HASS TAG
-          export TAG=$(curl --silent https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
-        
-          # DOWNLOAD GO2RTC FOR ARMV5
-          export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "go2rtc") | .archive_download_url' | head -n 1)
-          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o go2rtc.zip "$LINK" || echo 'deps download failed'
-          7z e go2rtc.zip -o./go2rtc -y || echo 'go2rtc extract failed'
+          ./.github/scripts/go2rtc.sh ${{ env.HASS_RELEASE }}
+          EXIT_CODE=$?
 
-          export GO2RTC=$(curl -s https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/Dockerfile | grep -oP '(?<=--from=)ghcr\.io/alexxit/go2rtc[^ ]+')
-          docker pull $GO2RTC
-          export GO2RTC_VER=$(docker image inspect $GO2RTC --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')
-          export GO2RTC_BUILD_VER=$(cat ./go2rtc/go2rtc_ver.txt)
-
-          if [[ "${GO2RTC_VER}" != "${GO2RTC_BUILD_VER}" ]]; then
-            echo "OUTDATED_GO2RTC=1" >> $GITHUB_ENV
-            echo "OUTDATED_DEPS=0" >> $GITHUB_ENV
-            echo "OUTDATED_MATURIN=0" >> $GITHUB_ENV
-            echo "Outdated GO2RTC! Expected: ${GO2RTC_VER} Got: ${GO2RTC_BUILD_VER}"
-            exit 0
+          if [ $EXIT_CODE -eq 3 ]; then
+            curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build go2rtc for armv5-homeassistant"}'
+            echo "OUTDATED=1" >> $GITHUB_ENV
           fi
-          echo "OUTDATED_GO2RTC=0" >> $GITHUB_ENV
-          #
+          echo "OUTDATED=0" >> $GITHUB_ENV
 
+      - name: Check version of python
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED == '0' }}
+        run: |
+          ./.github/scripts/python.sh ${{ env.HASS_RELEASE }}
+          EXIT_CODE=$?
 
-
-          # DOWNLOAD MATURIN FOR ARMV5
-          export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
-          curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || echo 'deps download failed'
-          7z e maturin.zip -o./maturin -y || echo 'maturin extract failed'
-
-          export MATURIN_VER=$(curl -s https://api.github.com/repos/PyO3/maturin/releases/latest | jq -r .tag_name | sed 's/^v//')
-          export MATURIN_BUILD_VER=$(cat ./maturin/maturin_ver.txt)
-
-          if [[ "${MATURIN_VER}" != "${MATURIN_BUILD_VER}" ]]; then
-            echo "OUTDATED_GO2RTC=0" >> $GITHUB_ENV
-            echo "OUTDATED_DEPS=0" >> $GITHUB_ENV
-            echo "OUTDATED_MATURIN=1" >> $GITHUB_ENV
-            echo "Outdated Maturin! Expected: ${MATURIN_VER} Got: ${MATURIN_BUILD_VER}"
-            exit 0
+          if [ $EXIT_CODE -eq 3 ]; then
+            curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build base image for armv5-homeassistant"}'
+            echo "OUTDATED=1" >> $GITHUB_ENV
           fi
-          echo "OUTDATED_MATURIN=0" >> $GITHUB_ENV
-          mv ./maturin/*.whl ./deps     
-          #
+          echo "OUTDATED=0" >> $GITHUB_ENV
 
+      - name: Check version of maturin
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED == '0' }}
+        env:
+          WHEELS_TOKEN: ${{ secrets.WHEELS_TOKEN }}
+        run: |
+          ./.github/scripts/maturin.sh
+          EXIT_CODE=$?
 
-
-          # DOWNLOAD ARTIFACTS FROM DEPS MATRIX BUILD
-          export WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml' 'geocachingapi' 'slixmpp' 'thinqconnect')
-          for wheel in "${WHEELS_LIST[@]}"; do
-            export LINK=$(curl --silent "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r ".artifacts[] | select(.name | test(\"${wheel}\")) | .archive_download_url" | head -n 1)
-
-            curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o "${wheel}.zip" "$LINK" || echo "${wheel} download failed"
-
-            7z e ${wheel}.zip -o./deps -y || echo "${wheel} extract failed"
-
-            if [[ "${wheel}" == "matrix" ]]; then
-              export ${wheel}_whl_ver=$(cat "./deps/${wheel}-nio_version.txt")
-            elif [[ "${wheel}" == "deebot" ]]; then
-              export ${wheel}_whl_ver=$(cat "./deps/${wheel}-client_version.txt")
-            else
-              export ${wheel}_whl_ver=$(cat "./deps/${wheel}_version.txt")
-            fi
-          done
-          #
-
-
-
-          # GET CURRENT VERSION OF HASS DEPENDENCIES
-          wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
-          wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
-          cat *.txt >> reqs.txt
-          sed '/^#/d' reqs.txt > filtered_reqs.txt
-          mv filtered_reqs.txt reqs.txt
-
-          for wheel in "${WHEELS_LIST[@]}"; do
-            export ${wheel}_ver=$(cat reqs.txt | grep -m 1 -i "${wheel}" | awk -F'=' '{print $NF}' | tr -d '\n')
-          done
-          #
-
-
-
-          # REMOVE DUPLCATE/NOT MATCHING FILES FROM DEPS FOLDER
-          for wheel in "${WHEELS_LIST[@]}"; do 
-            wh=${wheel}
-            required_version=${wheel}_ver
-            matching_files=$(find ./deps -type f -iname "${wh}*.whl" -print 2>/dev/null | tr -d '\0')
-
-            if [[ -z "$matching_files" ]]; then
-              echo "No matching files found for $wheel. Expected version: ${!required_version}"
-            else
-              for file in $matching_files; do
-                if [[ "$file" == *"${!required_version}"* ]]; then
-                  echo "Keeping $file (matches version ${!required_version})"
-                  export ${wheel}_whl_ver="${!required_version}"
-                else
-                  echo "Removing $file (does not match version ${!required_version})"
-                  rm -f "$file"
-                fi
-              done
-            fi
-          done    
-          #
-
-
-
-          # COMPARE VERSIONS OF DEPENDENCIES
-          export OUTDATED_DEPS=0
-          for wheel in "${WHEELS_LIST[@]}"; do
-            wh=${wheel}_whl_ver
-            w=${wheel}_ver
-            if [[ "${!wh}" != "${!w}" ]]; then
-              export OUTDATED_DEPS=1
-              break
-            fi
-          done
-          echo "OUTDATED_DEPS=$OUTDATED_DEPS" >> $GITHUB_ENV   
-          #
-
-
-          # CHECK BASE IMAGE PYTHON VERSION
-          export OUTDATED_PYTHON=0
-          export BASE_PYTHON_VERSION=$(skopeo inspect --override-arch arm docker://rara64/armv5-debian-base | jq -r '.Labels.python_version')
-          export REQ_PYTHON=$(curl -s https://pypi.org/pypi/homeassistant/$HASS_RELEASE/json | jq -r '.info.requires_python | match("3\\.[0-9]+(\\.[0-9]+)?") | .string')
-          if [[ "${BASE_PYTHON_VERSION}" != "${REQ_PYTHON}" ]]; then
-            export OUTDATED_PYTHON=1
-            break
+          if [ $EXIT_CODE -eq 3 ]; then
+            curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build maturin for armv5-homeassistant"}'
+            echo "OUTDATED=1" >> $GITHUB_ENV
           fi
-          echo "OUTDATED_PYTHON=$OUTDATED_PYTHON" >> $GITHUB_ENV
-          #
+          echo "OUTDATED=0" >> $GITHUB_ENV
 
-          echo "PYTHON: Found (BASE_PYTHON_VERSION) = ${BASE_PYTHON_VERSION}, Expected (REQ_PYTHON) = ${REQ_PYTHON}"
-          echo "PANDAS: Found (pandas_whl_ver) = ${pandas_whl_ver}, Expected (pandas_ver) = ${pandas_ver}"
-          echo "NUMPY: Found (numpy_whl_ver) = ${numpy_whl_ver}, Expected (numpy_ver) = ${numpy_ver}"
-          echo "CRYPTOGRAPHY: Found (cryptography_whl_ver) = ${cryptography_whl_ver}, Expected (cryptography_ver) = ${cryptography_ver}"
-          echo "UV: Found (uv_whl_ver) = ${uv_whl_ver}, Expected (uv_ver) = ${uv_ver}"
-          echo "AV: Found (av_whl_ver) = ${av_whl_ver}, Expected (av_ver) = ${av_ver}"
-          echo "PYNACL: Found (pynacl_whl_ver) = ${pynacl_whl_ver}, Expected (pynacl_ver) = ${pynacl_ver}"
-          echo "ZEROCONF: Found (zeroconf_whl_ver) = ${zeroconf_whl_ver}, Expected (zeroconf_ver) = ${zeroconf_ver}"
-          echo "ORJSON: Found (orjson_whl_ver) = ${orjson_whl_ver}, Expected (orjson_ver) = ${orjson_ver}"
-          echo "DEEBOT-CLIENT: Found (deebot_whl_ver) = ${deebot_whl_ver}, Expected (deebot_ver) = ${deebot_ver}"
-          echo "ANTHROPIC: Found (anthropic_whl_ver) = ${anthropic_whl_ver}, Expected (anthropic_ver) = ${anthropic_ver}"
-          echo "ELEVENLABS: Found (elevenlabs_whl_ver) = ${elevenlabs_whl_ver}, Expected (elevenlabs_ver) = ${elevenlabs_ver}"
-          echo "MATRIX-NIO: Found (matrix_whl_ver) = ${matrix_whl_ver}, Expected (matrix_ver) = ${matrix_ver}"
-          echo "LXML: Found (lxml_whl_ver) = ${lxml_whl_ver}, Expected (lxml_ver) = ${lxml_ver}"
-          echo "GO2RTC: Found (GO2RTC_BUILD_VER) = ${GO2RTC_BUILD_VER}, Expected (GO2RTC_VER) = ${GO2RTC_VER}"
-          echo "MATURIN: Found (MATURIN_BUILD_VER) = ${MATURIN_BUILD_VER}, Expected (MATURIN_VER) = ${MATURIN_VER}"
-          echo "GEOCACHINGAPI: Found (geocachingapi_whl_ver) = ${geocachingapi_whl_ver}, Expected (geocachingapi_ver) = ${geocachingapi_ver}"
-          echo "SLIXMPP: Found (slixmpp_whl_ver) = ${slixmpp_whl_ver}, Expected (slixmpp_ver) = ${slixmpp_ver}"
-          echo "THINQCONNECT: Found (thinqconnect_whl_ver) = ${thinqconnect_whl_ver}, Expected (thinqconnect_ver) = ${thinqconnect_ver}"
-
-      - name: Dispatch build of dependencies
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 1}}
+      - name: Check version of dependencies
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED == '0' }}
+        env:
+          WHEELS_TOKEN: ${{ secrets.WHEELS_TOKEN }}
         run: |
-          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build deps for armv5-homeassistant"}'
+          ./.github/scripts/deps.sh ${{ env.HASS_RELEASE }}
+          EXIT_CODE=$?
 
-      - name: Dispatch build of go2rtc
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_GO2RTC == 1}}
-        run: |
-          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build go2rtc for armv5-homeassistant"}'
-
-      - name: Dispatch build of maturin
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_MATURIN == 1}}
-        run: |
-          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build maturin for armv5-homeassistant"}'
-
-      - name: Dispatch build of base image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_PYTHON == 1}}
-        run: |
-          curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build base image for armv5-homeassistant"}'
+          if [ $EXIT_CODE -eq 3 ]; then
+            curl -XPOST -u "${{ secrets.DOCKER_USERNAME }}:${{ secrets.WHEELS_TOKEN }}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/rara64/armv5-homeassistant/dispatches --data '{"event_type": "Build deps for armv5-homeassistant"}'
+            echo "OUTDATED=1" >> $GITHUB_ENV
+          fi
+          echo "OUTDATED=0" >> $GITHUB_ENV
 
       - name: Set up QEMU
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0 && env.OUTDATED_PYTHON == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED == '0' }}
         uses: docker/setup-qemu-action@v4
         with:
           platforms: arm
           image: tonistiigi/binfmt:qemu-v8.1.5
           
       - name: Set up Docker Buildx
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0 && env.OUTDATED_PYTHON == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED == '0' }}
         uses: docker/setup-buildx-action@v4
 
       - name: Login to Docker Hub
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0 && env.OUTDATED_PYTHON == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED == '0' }}
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build and push the image
-        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED_DEPS == 0 && env.OUTDATED_GO2RTC == 0 && env.OUTDATED_MATURIN == 0 && env.OUTDATED_PYTHON == 0 }}
+        if: ${{ env.HASS_RELEASE != env.ARMV5_RELEASE && env.OUTDATED == '0' }}
         run: |
           docker buildx build --push --platform linux/arm/v5 \
           --build-arg DEPS="./deps" \
