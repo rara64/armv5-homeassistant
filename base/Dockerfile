@@ -15,6 +15,10 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y -t trixie-bac
     libsnappy-dev libsoxr-dev libssh-dev libtool libv4l-dev libva-dev libvdpau-dev \
     libvo-amrwbenc-dev libvorbis-dev libwebp-dev libx264-dev libx265-dev libxcb-shape0-dev \
     libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev nasm texinfo \
+    # python build deps
+    libssl-dev libffi-dev zlib1g-dev libbz2-dev liblzma-dev libsqlite3-dev \
+    libreadline-dev libncurses-dev libnsl-dev libexpat1-dev media-types netbase tzdata libbluetooth-dev \
+    #
     yasm libdrm-dev ca-certificates --no-install-recommends && apt clean && apt autoclean
 
 ENV CC=arm-linux-gnueabi-gcc
@@ -31,7 +35,9 @@ RUN mkdir build-temp && \
     ln -sf /usr/local/bin/python3 /usr/local/bin/python && \
     ln -sf /usr/local/bin/pip3 /usr/local/bin/pip && \
     rm -rf /build-temp && \
-    rm -rf /usr/local/lib/python*/test/*
+    rm -rf /usr/local/lib/python*/test/* && \
+    apt clean && \
+    apt autoclean
 
 RUN apt install -y -t trixie-backports meson ffmpeg && apt clean && apt autoclean
 
