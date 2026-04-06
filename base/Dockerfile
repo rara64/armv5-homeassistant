@@ -16,7 +16,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive && apt install -y -t trixie-bac
     libvo-amrwbenc-dev libvorbis-dev libwebp-dev libx264-dev libx265-dev libxcb-shape0-dev \
     libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev nasm texinfo \
     # python build deps
-    libssl-dev libffi-dev zlib1g-dev libbz2-dev liblzma-dev libsqlite3-dev \
+    libssl-dev libffi-dev zlib1g-dev libbz2-dev liblzma-dev libsqlite3-dev libmpdec-dev \
     libreadline-dev libncurses-dev libnsl-dev libexpat1-dev media-types netbase tzdata libbluetooth-dev \
     #
     yasm libdrm-dev ca-certificates --no-install-recommends && apt clean && apt autoclean
