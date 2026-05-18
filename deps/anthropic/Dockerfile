@@ -21,10 +21,7 @@ RUN find . -maxdepth 1 -name "*.whl" -exec pip install {} \;
 
 # Install rustc & cargo
 COPY ./*.deb .
-RUN dpkg -i rust-std*.deb \
-    && dpkg -i rustc-dev*.deb \
-    && dpkg -i rustc*.deb \
-    && dpkg -i cargo*.deb
+RUN apt install -y ./*.deb && rm ./*.deb
 
 # Build jiter with patched pyo3 (PR #5808)
 RUN git clone https://github.com/pydantic/jiter
