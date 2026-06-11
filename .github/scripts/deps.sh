@@ -30,7 +30,7 @@ done
 declare -A WHEEL_VERSION
 
 for wheel in "${WHEELS_LIST[@]}"; do
-  LINK=$(curl --silent -H "Authorization: token ${WHEELS_TOKEN}" \ 
+  LINK=$(curl --silent -H "Authorization: token ${WHEELS_TOKEN}" \
     "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" \
     | jq -r "first(.artifacts[] | select(.name | test(\"${wheel}\")) | .archive_download_url)")
 
