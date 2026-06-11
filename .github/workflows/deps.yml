@@ -51,7 +51,9 @@ jobs:
 
       - name: Check if newer version is needed
         run: |
-          export TAG=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" https://api.github.com/repos/home-assistant/core/releases | jq -r 'map(select(.prerelease==false)) | first | .tag_name')
+          export TAG=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" \
+            https://api.github.com/repos/home-assistant/core/releases | jq -r 'first(map(select(.prerelease==false)) | first | .tag_name)')
+          
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
@@ -89,29 +91,39 @@ jobs:
       - name: Build dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}
         run: |
-          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "maturin") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" \
+            "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r 'first(.artifacts[] | select(.name == "maturin") | .archive_download_url)')
+          
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o maturin.zip "$LINK" || { echo 'Maturin download failed'; exit 1; }
           7z e maturin.zip -o./maturin -y || { echo 'Maturin extract failed'; exit 1; }
 
-          export CARGO_URL=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | \
-          jq -r 'if .assets and (.assets | length > 0) then .assets[0].browser_download_url else empty end')
+          export CARGO_URL=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" \
+            https://api.github.com/repos/rara64/armv5te-cargo/releases/latest | \
+            jq -r 'if .assets and (.assets | length > 0) then .assets[0].browser_download_url else empty end')
+          
           wget $CARGO_URL -O cargo.deb || { echo 'Cargo download failed'; exit 1; }
 
           curl --silent https://api.github.com/repos/rara64/armv5te-rustc/releases/latest \
           | jq -r '.assets[].browser_download_url' \
           | xargs -n 1 wget -q
 
-          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "numpy") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" \
+            "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" \
+            | jq -r 'first(.artifacts[] | select(.name == "numpy") | .archive_download_url)')
+          
           mkdir numpy
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o numpy.zip "$LINK" || echo 'Numpy download failed'
           7z e numpy.zip -o./numpy -y || echo 'Numpy extract failed'
 
-          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "anthropic") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" \
+            "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r 'first(.artifacts[] | select(.name == "anthropic") | .archive_download_url)')
           mkdir anthropic
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o anthropic.zip "$LINK" || echo 'Anthropic download failed'
           7z e anthropic.zip -o./anthropic -y || echo 'Anthropic extract failed'
 
-          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r '.artifacts[] | select(.name == "cryptography") | .archive_download_url' | head -n 1)
+          export LINK=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" \
+            "https://api.github.com/repos/rara64/armv5-homeassistant/actions/artifacts?per_page=1000&page=1" | jq -r 'first(.artifacts[] | select(.name == "cryptography") | .archive_download_url)')
+          
           mkdir cryptography
           curl -L -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" -o cryptography.zip "$LINK" || echo 'Cryptography download failed'
           7z e cryptography.zip -o./cryptography -y || echo 'Cryptography extract failed'
