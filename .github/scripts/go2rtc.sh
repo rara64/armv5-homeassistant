@@ -14,7 +14,8 @@ GO2RTC=$(curl --silent \
   https://raw.githubusercontent.com/home-assistant/core/refs/tags/$HOMEASSISTANT_TAG/Dockerfile \
   | grep -oP '(?<=--from=)ghcr\.io/alexxit/go2rtc[^ ]+')
 
-GO2RTC_REQUIRED_VER=$(skopeo inspect docker://$GO2RTC | jq -r '.Labels["org.opencontainers.image.version"]')
+GO2RTC_DIGEST=$(echo "$GO2RTC" | sed 's/:[^@]*@/@/')
+GO2RTC_REQUIRED_VER=$(skopeo inspect docker://$GO2RTC_DIGEST | jq -r '.Labels["org.opencontainers.image.version"]')
 GO2RTC_BUILD_VER=$(cat ./go2rtc/go2rtc_ver.txt)
 
 if [ "$GO2RTC_REQUIRED_VER" = "$GO2RTC_BUILD_VER" ]; then
