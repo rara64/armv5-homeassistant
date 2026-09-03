@@ -7,15 +7,13 @@ RUN apt update && apt install -y -t trixie-backports \
     curl wget unzip jq rustc build-essential cmake autoconf pkg-config \
     git bluez libffi-dev libssl-dev \
     libjpeg-dev zlib1g-dev libopenjp2-7 libtiff6 libturbojpeg0-dev tzdata \
-    libudev-dev libpcap-dev libyaml-dev libxml2 libxslt-dev automake doxygen \
-    graphviz imagemagick libfreetype6-dev libgmp-dev \
-    libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-net-dev libsdl2-ttf-dev \
+    libudev-dev libpcap-dev libyaml-dev libxml2 libxslt-dev automake \
+    imagemagick libfreetype6-dev libgmp-dev \
     libssh-dev libtool \
-    libwebp-dev libxcb-shape0-dev \
-    libxcb-shm0-dev libxcb-xfixes0-dev libxcb1-dev libxml2-dev nasm texinfo \
+    libwebp-dev libxml2-dev \
     libbz2-dev liblzma-dev libsqlite3-dev libmpdec-dev \
     libreadline-dev libncurses-dev libnsl-dev libexpat1-dev media-types netbase libbluetooth-dev \
-    yasm ca-certificates meson ninja-build --no-install-recommends
+    ca-certificates meson ninja-build --no-install-recommends
 
 RUN wget https://github.com/rara64/armv5-ffmpeg/releases/download/8.1.2/ffmpeg_8.1.2_armel.deb && \
     apt install -y --no-install-recommends ./ffmpeg_8.1.2_armel.deb && \
