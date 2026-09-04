@@ -15,12 +15,9 @@ RUN apt update && apt install -y -t trixie-backports \
     libreadline-dev libncurses-dev libnsl-dev libexpat1-dev media-types netbase libbluetooth-dev \
     ca-certificates meson ninja-build --no-install-recommends
 
-RUN wget https://github.com/rara64/armv5-ffmpeg/releases/download/8.1.2/ffmpeg_8.1.2_armel.deb && \
-    apt install -y --no-install-recommends ./ffmpeg_8.1.2_armel.deb && \
-    rm ffmpeg_8.1.2_armel.deb
-
-ENV CC=arm-linux-gnueabi-gcc
-ENV CXX=arm-linux-gnueabi-g++
+RUN wget https://github.com/rara64/armv5-ffmpeg/releases/download/8.1.2/ffmpeg_8.1.2_armel_optimized.deb && \
+    apt install -y --no-install-recommends ./ffmpeg_8.1.2_armel_optimized.deb && \
+    rm ffmpeg_8.1.2_armel_optimized.deb
 
 RUN mkdir build-temp && \
     cd build-temp && \
