@@ -29,4 +29,18 @@ RUN dpkg -i rust-std*.deb \
 RUN mkdir wheels
 
 # Build av
-RUN pip install --find-links . av==$WHEEL_VER --no-binary av
+
+#RUN pip install --find-links . av==$WHEEL_VER --no-binary av
+
+# av 17.0.1 & 17.1.0 build workaround
+RUN if [ "$WHEEL_VER" ==  "17.0.1" ] || [ "$WHEEL_VER" ==  "17.1.0" ]; then \
+        pip download --no-binary :all: av==$WHEEL_VER \
+        && tar -xzf av-$WHEEL_VER.tar.gz \
+        && cd av-$WHEEL_VER \
+        && sed -i 's/seek_func: seek_func_t = pyio_seek/seek_func = pyio_seek/' av-$WHEEL_VER/av/container/pyio.py \
+        && sed -i 's/opaque_container: OpaqueContainer = OpaqueContainer()/opaque_container = OpaqueContainer()/' av-$WHEEL_VER/av/opaque.py \
+        && pip install ./av-$WHEEL_VER \
+        && rm -rf av-$WHEEL_VER; \
+    else \
+        pip install --find-links . av==$WHEEL_VER --no-binary av; \
+    fi
