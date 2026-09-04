@@ -34,7 +34,9 @@ RUN mkdir wheels
 
 # av 17.0.1 & 17.1.0 build workaround
 RUN if [ "$WHEEL_VER" =  "17.0.1" ] || [ "$WHEEL_VER" =  "17.1.0" ]; then \
-        pip download --no-binary :all: av==$WHEEL_VER \
+        wget $(curl -s https://pypi.org/pypi/av/$WHEEL_VER/json | jq -r '.urls[] | select (.packagetype == "sdist") | .url') \
+        && curl -s https://pypi.org/pypi/av/$WHEEL_VER/json | jq -r '.urls[] | select (.packagetype == "sdist") | "\(.md5_digest) \(.
+filename)"' | md5sum -c - \
         && tar -xzf av-$WHEEL_VER.tar.gz \
         && sed -i 's/seek_func: seek_func_t = pyio_seek/seek_func = pyio_seek/' av-$WHEEL_VER/av/container/pyio.py \
         && sed -i 's/opaque_container: OpaqueContainer = OpaqueContainer()/opaque_container = OpaqueContainer()/' av-$WHEEL_VER/av/opaque.py \
