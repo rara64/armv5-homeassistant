@@ -50,6 +50,6 @@ RUN cd uv && \
     sed -i "/boxcar\s*=/c\boxcar = { path = \"../boxcar\" }" Cargo.toml && \
     sed -i "/\[profile.release\]/,/^\[/ s/lto\s*=.*/lto = false/" Cargo.toml && \
     echo '[patch.crates-io]' >> Cargo.toml && \
-    echo 'mea = { path = "../mea/mea" }' >> Cargo.toml
+    echo 'mea = { path = "../mea-main/mea" }' >> Cargo.toml
     
 RUN --security=insecure mkdir -p /root/.cargo && chmod 777 /root/.cargo && mount -t tmpfs none /root/.cargo && cd uv && RUSTFLAGS="-C opt-level=0 -C linker=arm-linux-gnueabi-gcc" maturin build --release --strip --target armv5te-unknown-linux-gnueabi --manylinux off -o /wheels
