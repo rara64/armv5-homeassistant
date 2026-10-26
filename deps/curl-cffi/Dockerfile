@@ -34,4 +34,4 @@ RUN git clone -b v${WHEEL_VER} https://github.com/lexiforest/curl_cffi && \
     sed -i "s/{arch\['arch'\]}/arm-linux/g" scripts/build.py && \
     sed -i 's/{sysname}/gnueabi/g' scripts/build.py && \
     sed -i 's#lexiforest/curl-impersonate#rara64/curl-impersonate#g' scripts/build.py && \
-    pip install --find-links ../ .
+    pip wheel --wheel-dir=../wheels --find-links ../ .
