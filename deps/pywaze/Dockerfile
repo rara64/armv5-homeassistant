@@ -34,6 +34,7 @@ RUN LATEST_TAG=$(curl -s https://api.github.com/repos/lexiforest/curl_cffi/relea
     cd curl_cffi && \
     sed -i "s/{arch\['arch'\]}/arm-linux/g" scripts/build.py && \
     sed -i 's/{sysname}/gnueabi/g' scripts/build.py && \
+    sed -i 's/__version__ = "2.3.1"/__version__ = "2.3.2"/g' scripts/build.py && \
     pip wheel --wheel-dir=../wheels --find-links ../ .
 
 # Clone pywaze
