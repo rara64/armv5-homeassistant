@@ -40,4 +40,5 @@ RUN LATEST_TAG=$(curl -s https://api.github.com/repos/lexiforest/curl_cffi/relea
 # Clone pywaze
 RUN git clone -b v${WHEEL_VER} https://github.com/eifinger/pywaze && \
     cd pywaze && \
+    sed -i "s/1.0+versionplaceholder.1/${WHEEL_VER}/g" pyproject.toml && \
     pip wheel --wheel-dir=../wheels --find-links ../wheels .
