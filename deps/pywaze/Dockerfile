@@ -29,6 +29,14 @@ RUN dpkg -i rust-std*.deb \
 RUN mkdir wheels
 
 # Clone lexiforest/curl_cffi
-RUN git clone -b v${WHEEL_VER} https://github.com/lexiforest/curl_cffi && \
+RUN LATEST_TAG=$(curl -s https://api.github.com/repos/lexiforest/curl_cffi/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') && \
+    git clone -b ${LATEST_TAG} https://github.com/lexiforest/curl_cffi && \
     cd curl_cffi && \
+    sed -i "s/{arch\['arch'\]}/arm-linux/g" scripts/build.py && \
+    sed -i 's/{sysname}/gnueabi/g' scripts/build.py && \
     pip wheel --wheel-dir=../wheels --find-links ../ .
+
+# Clone pywaze
+RUN git clone -b v${WHEEL_VER} https://github.com/eifinger/pywaze && \
+    cd pywaze && \
+    pip wheel --wheel-dir=../wheels --find-links ../wheels .

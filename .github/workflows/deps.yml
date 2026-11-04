@@ -44,8 +44,8 @@ jobs:
             dependency_name: slixmpp
           - dockerfile: deps/thinqconnect/Dockerfile
             dependency_name: thinqconnect
-          - dockerfile: deps/curl-cffi/Dockerfile
-            dependency_name: curl-cffi
+          - dockerfile: deps/pywaze/Dockerfile
+            dependency_name: pywaze
 
     steps:
       - name: Checkout code
@@ -61,9 +61,6 @@ jobs:
           cat *.txt >> reqs.txt
           sed '/^#/d' reqs.txt > filtered_reqs.txt
           mv filtered_reqs.txt reqs.txt
-
-          # Temporary patch
-          echo "curl-cffi==0.17.0" >> reqs.txt
 
           export VER=$(cat reqs.txt | grep -m 1 -i "${{ matrix.dependency_name }}" | awk -F'=' '{print $NF}' | tr -d '\n')
 
