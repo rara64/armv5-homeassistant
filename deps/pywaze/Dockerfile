@@ -38,8 +38,8 @@ RUN CFFI_VER=$(curl -s https://raw.githubusercontent.com/home-assistant/core/${H
     sed -i 's/{sysname}/gnueabi/g' scripts/build.py && \
     sed -i 's/__version__ = "2.3.1"/__version__ = "2.3.2"/g' scripts/build.py && \
     if [ -n "${CFFI_VER}" ]; then \
-        sed -i -E "s/\"cffi[^\"]*\"/\"cffi==${CFFI_VER}\"/" pyproject.toml
-    fi; \
+        sed -i -E "s/\"cffi[^\"]*\"/\"cffi==${CFFI_VER}\"/" pyproject.toml; \
+    fi && \
     pip wheel --wheel-dir=../wheels --find-links ../ .
 
 # Clone pywaze
