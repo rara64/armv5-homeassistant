@@ -1,7 +1,7 @@
 #!/bin/bash
 
 HOMEASSISTANT_TAG=$1
-WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml' 'geocachingapi' 'slixmpp' 'thinqconnect')
+WHEELS_LIST=('anthropic' 'av' 'cryptography' 'deebot' 'elevenlabs' 'matrix' 'numpy' 'orjson' 'pandas' 'pynacl' 'uv' 'zeroconf' 'lxml' 'geocachingapi' 'slixmpp' 'thinqconnect' 'pywaze')
 
 #
 # Get package constraints for given homeassistant tag
