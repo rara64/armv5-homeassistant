@@ -56,6 +56,8 @@ jobs:
           export TAG=$(curl --retry 5 --retry-delay 5 --retry-connrefused --max-time 30 --silent -H "Authorization: token ${{ secrets.WHEELS_TOKEN }}" \
             https://api.github.com/repos/home-assistant/core/releases | jq -r 'first(map(select(.prerelease==false)) | first | .tag_name)')
           
+          echo "HASS_TAG=$TAG" >> "$GITHUB_ENV"
+
           wget https://raw.githubusercontent.com/home-assistant/core/$TAG/homeassistant/package_constraints.txt
           wget https://raw.githubusercontent.com/home-assistant/core/refs/tags/$TAG/requirements_all.txt
           cat *.txt >> reqs.txt
@@ -136,7 +138,7 @@ jobs:
           export ANTHROPIC_WHL="./anthropic"
           export CRYPTOGRAPHY_WHL="./cryptography"
 
-          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --build-arg ANTHROPIC_WHL=$ANTHROPIC_WHL --build-arg CRYPTOGRAPHY_WHL=$CRYPTOGRAPHY_WHL --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
+          docker buildx build --load --tag wheels --build-arg MATURIN_WHL=$MATURIN_WHL --build-arg WHEEL_VER=${{ env.WHEEL_VER }} --build-arg NUMPY_WHL=$NUMPY_WHL --build-arg ANTHROPIC_WHL=$ANTHROPIC_WHL --build-arg CRYPTOGRAPHY_WHL=$CRYPTOGRAPHY_WHL --build-arg HASS_TAG=${{ env.HASS_TAG }} --platform linux/arm/v5 --allow security.insecure --no-cache -f ${{ matrix.dockerfile }} .
 
       - name: Extract dependency
         if: ${{ env.WHEELS_NEEDED == 1 }}

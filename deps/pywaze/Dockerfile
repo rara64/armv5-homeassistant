@@ -4,6 +4,7 @@ ARG MATURIN_WHL
 ARG WHEEL_VER
 ARG NUMPY_WHL
 ARG ANTHROPIC_WHL
+ARG HASS_TAG
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
 ENV CARGO_TERM_PROGRESS_WHEN="never"
@@ -28,13 +29,17 @@ RUN dpkg -i rust-std*.deb \
 # Create wheels folder for maturin builds
 RUN mkdir wheels
 
-# Clone lexiforest/curl_cffi
-RUN LATEST_TAG=$(curl -s https://api.github.com/repos/lexiforest/curl_cffi/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') && \
+# Clone lexiforest/curl_cffi and resolve possible cffi conflict
+RUN CFFI_VER=$(curl -s https://raw.githubusercontent.com/home-assistant/core/${HASS_TAG}/homeassistant/package_constraints.txt | grep -oP '^cffi==\K[^\s#]+' || true) && \
+    LATEST_TAG=$(curl -s https://api.github.com/repos/lexiforest/curl_cffi/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') && \
     git clone -b ${LATEST_TAG} https://github.com/lexiforest/curl_cffi && \
     cd curl_cffi && \
     sed -i "s/{arch\['arch'\]}/arm-linux/g" scripts/build.py && \
     sed -i 's/{sysname}/gnueabi/g' scripts/build.py && \
     sed -i 's/__version__ = "2.3.1"/__version__ = "2.3.2"/g' scripts/build.py && \
+    if [ -n "${CFFI_VER}" ]; then \
+        sed -i -E "s/\"cffi[^\"]*\"/\"cffi==${CFFI_VER}\"/" pyproject.toml
+    fi; \
     pip wheel --wheel-dir=../wheels --find-links ../ .
 
 # Clone pywaze
