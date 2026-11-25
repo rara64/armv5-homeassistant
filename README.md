@@ -11,10 +11,14 @@ In case I missed something, please open an issue and I'll do my best.
 > Should you encounter any issues when running the image, try with a simple debian docker image first. In case this doesn't work, you'll have to recompile bodhi's kernel to include support for memory cgroup or update to the latest one if possible. Docker needs this kernel feature for Linux images.
 
 Use a similar command as the one provided in Home Assistant install guide to run the image:
-> docker run -d --name homeassistant --privileged --restart unless-stopped -e TZ MY_TIME_ZONE -v PATH_TO_YOUR_CONFIG:/config --network host rara64/armv5-homeassistant
+```bash
+docker run -d --name homeassistant --privileged --restart unless-stopped -e TZ MY_TIME_ZONE -v PATH_TO_YOUR_CONFIG:/config --network host rara64/armv5-homeassistant
+```
 
 A new image should be automatically built and pushed to Docker Hub every week if there is a new release of Home Assistant available. Nevertheless, you can use `local/Dockerfile` from this repo and build the image on your machine (just not on the NAS) using the following command:
-> docker buildx build --platform=linux/arm/v5 --load --allow security.insecure .
+```bash
+docker buildx build --platform=linux/arm/v5 --load --allow security.insecure .
+```
 
 ## My use case
 
